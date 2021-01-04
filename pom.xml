@@ -364,12 +364,11 @@
 
 
         <!-- https://mvnrepository.com/artifact/org.apache.phoenix/phoenix-core -->
-        <!--        <dependency>
-                    <groupId>org.apache.phoenix</groupId>
-                    <artifactId>phoenix-core</artifactId>
-                    <version>4.14.0-cdh5.13.2</version>
-                </dependency>-->
-
+<!--         <dependency>-->
+<!--                    <groupId>org.apache.phoenix</groupId>-->
+<!--                    <artifactId>phoenix-core</artifactId>-->
+<!--                    <version>4.14.0-cdh5.13.2</version>-->
+<!--                </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>org.apache.phoenix</groupId>-->
 <!--            <artifactId>phoenix-core</artifactId>-->
