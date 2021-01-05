@@ -1,4 +1,4 @@
-package root.inv;
+package root.inv.org;
 
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.web.bind.annotation.RequestBody;

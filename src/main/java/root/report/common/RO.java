@@ -6,7 +6,9 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.dom4j.Document;
 import org.dom4j.Element;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RO {
 	
@@ -24,6 +26,16 @@ public class RO {
 		jsonObject.put("data", data);
 		return JSON.toJSONString(jsonObject,features);
 	}
+
+	public  String SuccessMsg(List<Map<String, Object>> data,long total)
+	{
+		Map<String, Object> map3 = new HashMap<String, Object>();
+		map3.put("list", data);
+		map3.put("total", total);
+		return SuccessMsg("查询成功",map3);
+	}
+
+
 	public  String ErrorMsg(String resultCode,String message)
 	{
 		JSONObject jsonObject=new JSONObject();

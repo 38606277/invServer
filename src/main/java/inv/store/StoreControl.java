@@ -37,7 +37,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 @RestController
-@RequestMapping("/reportServer/dict")
+@RequestMapping("/reportServer/aa")
 public class StoreControl extends RO {
 
 
