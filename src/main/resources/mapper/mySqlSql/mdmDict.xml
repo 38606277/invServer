@@ -23,7 +23,7 @@
 
 	<!-- 修改 func_dict 表的信息 -->
 	<update id="updateMdmDictValue" parameterType="Map">
-		update mdm_dict_value set value_name='${value_name}',value_code='${value_code}',
+		update mdm_dict_value set value_name='${value_name}',value_code='${value_code}'
 		 where value_id=#{value_id,jdbcType=INTEGER}
 	</update>
 
@@ -35,20 +35,23 @@
         SELECT (MAX(value_id) +1)as value_id from mdm_dict_value
     </select>
 
-	<select id="getDictById" parameterType="java.lang.String" resultType="map">
+	<select id="getDictById" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_dict u where u.dict_id = #{dict_id}
     </select>
 
-	<select id="getDictValueByPId" parameterType="java.lang.String" resultType="map">
+	<select id="getDictValueByPId" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_dict_value u where u.dict_id = #{dict_id}
     </select>
 
-	<select id="getDictValueById" parameterType="java.lang.String" resultType="map">
+	<select id="getDictValueById" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_dict_value u where u.value_id = #{value_id}
     </select>
 
     <select id="getAllPage" resultType="Map" parameterType="Map">
         SELECT u.*  FROM mdm_dict u  where  1=1
+		<if  test="dict_code != null and dict_code!='' ">
+			and  u.dict_code like '%${dict_code}%'
+		</if>
 		<if  test="dict_name != null and dict_name!='' ">
 			and  u.dict_name like '%${dict_name}%'
 		</if>
