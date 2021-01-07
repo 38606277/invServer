@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/reportServer/mdnDict")
+@RequestMapping("/reportServer/mdmDict")
 public class DictController extends RO {
 
     private static Logger log = Logger.getLogger(DictController.class);
@@ -48,13 +48,14 @@ public class DictController extends RO {
     }
 
     @RequestMapping(value = "/getAllPage", produces = "text/plain;charset=UTF-8")
-    public String getAllQueryNamePage(@RequestBody String pJson) {
+    public String getAllPage(@RequestBody String pJson) {
         try {
             JSONObject jsonFunc = JSONObject.parseObject(pJson);
             Map<String,String> map=new HashMap();
             map.put("startIndex",jsonFunc.getString("startIndex"));
             map.put("perPage",jsonFunc.getString("perPage"));
-            map.put("dict_name",jsonFunc.get("searchKeyword")==null?"":jsonFunc.get("searchKeyword").toString());
+            map.put("dict_code",jsonFunc.getString("dict_code"));
+            map.put("dict_name",jsonFunc.getString("dict_name"));
             Map<String,Object> map1 = mdmDictService.getAllPage(map);
             return SuccessMsg("", map1);
         } catch (Exception ex){
@@ -65,7 +66,7 @@ public class DictController extends RO {
 
      //返回数据
     @RequestMapping(value = "/getDictByID", produces = "text/plain;charset=UTF-8")
-    public String getMenuByID(@RequestBody String pjson) {
+    public String getDictByID(@RequestBody String pjson) {
         JSONObject obj=JSON.parseObject(pjson);
         try{
             Map map = new HashMap();
@@ -73,8 +74,8 @@ public class DictController extends RO {
             Map jsonObject = this.mdmDictService.getDictByID(map);
             List<Map> list = this.mdmDictService.getDictValueByDictId(map);
             Map mmm=new HashMap();
-            map.put("mainForm",jsonObject);
-            map.put("lineForm",list);
+            mmm.put("mainForm",jsonObject);
+            mmm.put("lineForm",list);
             return SuccessMsg("查询成功",mmm);
         }catch (Exception ex){
             ex.printStackTrace();
@@ -84,17 +85,17 @@ public class DictController extends RO {
 
 
     // 从json数据当中解析 ，批量删除
-    @RequestMapping(value = "/deleteMenuById", produces = "text/plain;charset=UTF-8")
-    public String deleteMenuById(@RequestBody String pJson) throws SQLException {
+    @RequestMapping(value = "/deleteDictById", produces = "text/plain;charset=UTF-8")
+    public String deleteDictById(@RequestBody String pJson) throws SQLException {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         try{
             sqlSession.getConnection().setAutoCommit(false);
-            JSONArray jsonArray =  JSONObject.parseArray(pJson);
-            for(int i = 0; i < jsonArray.size(); i++){
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                int func_id=jsonObject.getInteger("func_id");
+            JSONObject obj=JSON.parseObject(pJson);
+            String ids = obj.getString("dict_id");
+            String[] arrId=ids.split(",");
+            for(int i = 0; i < arrId.length; i++){
                 //删除
-                this.mdmDictService.deleteDictById(sqlSession,func_id);
+                this.mdmDictService.deleteDictById(sqlSession,arrId[0]);
             }
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功",null);

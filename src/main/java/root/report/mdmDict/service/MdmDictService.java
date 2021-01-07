@@ -64,19 +64,20 @@ public class MdmDictService {
         map.put("dict_name",jsonObject.getString("dict_name"));
         map.put("dict_type",jsonObject.getString("dict_type"));
         map.put("dict_code",jsonObject.getString("dict_code"));
-        JSONArray jsonArray = jsonObject.getJSONArray("lineForm");
-        Integer newId= sqlSession.selectOne("mdmDict.getMaxId");
+        JSONArray addLine = jsonObject.getJSONArray("lineForm");
+        JSONArray delLine = jsonObject.getJSONArray("lineDelete");
         if(null==jsonObject.getString("dict_id")|| "".equals(jsonObject.getString("dict_id"))){
+            Integer newId= sqlSession.selectOne("mdmDict.getMaxId");
+            newId = newId==null?1:newId;
             map.put("dict_id",newId);
             sqlSession.insert("mdmDict.createMdnDict",map);
             id=String.valueOf(map.get("id"));
-
-            for(int i = 0; i < jsonArray.size(); i++){
+            for(int i = 0; i < addLine.size(); i++){
                 Map<String,Object> mapVal  = new HashMap<>();
-                JSONObject jsonObjectVal = jsonArray.getJSONObject(i);
+                JSONObject jsonObjectVal = addLine.getJSONObject(i);
                 Integer newVId= sqlSession.selectOne("mdmDict.getMaxValueId");
                 mapVal.put("dict_id",newId);
-                mapVal.put("value_id",newVId);
+                mapVal.put("value_id",newVId==null?1:newVId);
                 mapVal.put("value_name",jsonObjectVal.getString("value_name"));
                 mapVal.put("value_code",jsonObjectVal.getString("value_code"));
                 mapVal.put("value_pid",jsonObjectVal.getString("value_pid").equals("")?null:jsonObjectVal.getString("value_pid"));
@@ -86,13 +87,13 @@ public class MdmDictService {
             map.put("dict_id",jsonObject.getString("dict_id"));
             sqlSession.update("mdmDict.updateMdmDict",map);
             id=jsonObject.getString("dict_id");
-            for(int i = 0; i < jsonArray.size(); i++){
+            for(int i = 0; i < addLine.size(); i++){
                 Map<String,Object> mapVal  = new HashMap<>();
-                JSONObject jsonObjectVal = jsonArray.getJSONObject(i);
+                JSONObject jsonObjectVal = addLine.getJSONObject(i);
                 if(jsonObjectVal.getString("value_id").contains("NEW")) {
                     Integer newVId = sqlSession.selectOne("mdmDict.getMaxValueId");
                     mapVal.put("dict_id", id);
-                    mapVal.put("value_id", newVId);
+                    mapVal.put("value_id", newVId==null?1:newVId);
                     mapVal.put("value_name", jsonObjectVal.getString("value_name"));
                     mapVal.put("value_code", jsonObjectVal.getString("value_code"));
                     mapVal.put("value_pid", jsonObjectVal.getString("value_pid").equals("") ? null : jsonObjectVal.getString("value_pid"));
@@ -105,16 +106,26 @@ public class MdmDictService {
                 }
             }
         }
-
+        if(delLine.size()>0) {
+            for (int i = 0; i < delLine.size(); i++) {
+                Map<String, Object> dmap = new HashMap<>();
+                JSONObject jsonObjectVal = addLine.getJSONObject(i);
+                if(!jsonObjectVal.getString("value_id").contains("NEW")) {
+                    dmap.put("value_id", jsonObjectVal.getString("value_id"));
+                    sqlSession.delete("mdmDict.deleteDictValueByID", dmap);
+                }
+            }
+        }
         return id;
     }
 
 
     // 功能描述: 根据 dict_id 和 out_id 批量删除 func_dict的信息
-    public void deleteDictById(SqlSession sqlSession,int dict_id){
-            Map<String,Object> map=new HashMap();
-            map.put("dict_id",dict_id);
-            sqlSession.delete("mdmDict.deleteMenuByID",map);
+    public void deleteDictById(SqlSession sqlSession,String dict_id){
+        Map<String,Object> map=new HashMap();
+        map.put("dict_id",dict_id);
+        sqlSession.delete("mdmDict.deleteDictByID",map);
+        sqlSession.delete("mdmDict.deleteDictValueByPID",map);
     }
 
     public Map getDictByID(Map m) {
