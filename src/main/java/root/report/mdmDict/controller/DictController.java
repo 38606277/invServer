@@ -37,7 +37,12 @@ public class DictController extends RO {
         try{
             sqlSession.getConnection().setAutoCommit(false);
             JSONObject jsonObject = JSON.parseObject(pJson);
-            String id  = this.mdmDictService.saveOrUpdateDict(sqlSession,jsonObject);
+            String id =null;
+            if(jsonObject.getString("dict_type").equals("list")) {
+                id = this.mdmDictService.saveOrUpdateDict(sqlSession, jsonObject);
+            }else if(jsonObject.getString("dict_type").equals("tree")) {
+                id = this.mdmDictService.saveOrUpdateDictTree(sqlSession, jsonObject);
+            }
             sqlSession.getConnection().commit();
             return SuccessMsg("保存成功",id);
         }catch (Exception ex){

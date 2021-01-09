@@ -40,14 +40,19 @@
     </select>
 
 	<select id="getDictValueByPId" parameterType="map" resultType="map">
-        SELECT u.* FROM mdm_dict_value u where u.dict_id = #{dict_id}
+        SELECT u.* FROM mdm_dict_value u where u.dict_id = #{dict_id} and (u.value_pid is null or u.value_pid='')
     </select>
 
 	<select id="getDictValueById" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_dict_value u where u.value_id = #{value_id}
     </select>
 
-    <select id="getAllPage" resultType="Map" parameterType="Map">
+	<select id="getDictValueByValuePId" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_dict_value u where u.value_pid = #{value_id}
+    </select>
+
+
+	<select id="getAllPage" resultType="Map" parameterType="Map">
         SELECT u.*  FROM mdm_dict u  where  1=1
 		<if  test="dict_code != null and dict_code!='' ">
 			and  u.dict_code like '%${dict_code}%'
