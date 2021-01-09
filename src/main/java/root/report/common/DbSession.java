@@ -83,6 +83,16 @@ public  class DbSession {
        }
    }
 
+    public static  int insertAll(String mapperId, List<Map<String, Object>> param) {
+        SqlSession sqlSession = null;
+        try {
+            sqlSession = DbFactory.Open(DbFactory.FORM);
+            return  sqlSession.insert(mapperId, param);
+        } catch (Exception ex) {
+            throw ex;
+        }
+    }
+
    public static int update(String mapperId, Map param) {
        SqlSession sqlSession = null;
        try {

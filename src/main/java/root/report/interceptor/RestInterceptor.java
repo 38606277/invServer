@@ -40,8 +40,8 @@ public class RestInterceptor extends HandlerInterceptorAdapter {
 		} else {
 			obj = JSON.parseObject(credentials);
 		}
-		String userCode = obj.getString("UserCode");
-		String pwd = obj.getString("Pwd");
+		String userCode = obj.getString("userCode");
+		String pwd = obj.getString("pwd");
 		int isAdmin = 0;
 		if (obj.containsKey("isAdmin")) {
 			isAdmin = obj.getIntValue("isAdmin");

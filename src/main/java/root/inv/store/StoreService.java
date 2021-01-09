@@ -5,9 +5,9 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import root.report.common.DbSession;
 import root.report.db.DbFactory;
-import root.report.db.DbManager;
 import root.report.service.DictService;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +34,17 @@ public class StoreService {
     }
 
 
+    public Map<String,Object> getStoreById(Map<String,Object> params){
+        return DbSession.selectOne("inv_store.getStoreById",params);
+    }
+
+
+
     public long createStore(Map<String,Object> params){
         DbSession.insert("inv_store.createStore",params);
-        if(params.containsKey("transaction_id")){
-            return (long) params.get("transaction_id");
+        if(params.containsKey("bill_id")){
+            BigInteger bigInteger = new BigInteger("20");
+            return  Long.parseLong(params.get("bill_id").toString());
         }
         return  -1;
     }

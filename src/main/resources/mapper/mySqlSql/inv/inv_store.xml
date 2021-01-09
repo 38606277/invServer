@@ -4,25 +4,27 @@
 <mapper namespace="inv_store">
 
     <select id="getStoreListByPageCount" resultType="int" parameterType="Map">
-        SELECT count(1) FROM inv_item_transaction_header
+        SELECT count(1) FROM inv_bill_header
         where 1=1
-        <if test="transaction_type != null and transaction_type!=''">  and transaction_type=#{transaction_type} </if>
+        <if test="bill_type != null and bill_type!=''">  and bill_type=#{bill_type} </if>
     </select>
 
     <select id="getStoreListByPage" resultType="Map" parameterType="Map">
-        SELECT * FROM inv_item_transaction_header
+        SELECT ibh.*,fo.org_name as `inv_org_name` FROM inv_bill_header ibh LEFT JOIN fnd_org fo on inv_org_id = org_id
         where 1=1
-        <if test="transaction_type != null and transaction_type!=''">  and transaction_type=#{transaction_type} </if>
+        <if test="bill_type != null and bill_type!=''">  and bill_type=#{bill_type} </if>
         ORDER BY create_date desc
         limit #{startIndex},#{perPage}
     </select>
 
-    <select id="getStoreListByType" resultType="Map" parameterType="Map">
-        SELECT * FROM inv_item_transaction_header where transaction_type =#{transaction_type}
+    <select id="getStoreById" resultType="Map" parameterType="Map">
+        SELECT ibh.*,fo.org_name as `inv_org_name` FROM inv_bill_header ibh LEFT JOIN fnd_org fo on inv_org_id = org_id
+        where bill_id=#{bill_id}
     </select>
 
-    <insert id="createStore"  parameterType="Map" keyColumn="transaction_id" keyProperty="transaction_id" useGeneratedKeys="true">
-        INSERT INTO `erp`.`inv_item_transaction_header`(`transaction_id`, `transaction_type`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `out_subInvCode`, `in_subInvCode`) VALUES (#{transaction_id}, #{transaction_type}, #{create_by}, #{create_date}, #{source_system}, #{source_voucher}, #{source_id}, #{out_subInvCode}, #{in_subInvCode});
+    <insert id="createStore"  parameterType="Map" keyColumn="bill_id" keyProperty="bill_id" useGeneratedKeys="true">
+        INSERT INTO inv_bill_header( `bill_type`, `inv_org_id`, `target_inv_org_id`, `bill_date`, `remark`, `create_by`, `bill_status`, `source_system`, `source_bill`, `source_id`)
+        VALUES (#{bill_type}, #{inv_org_id}, #{target_inv_org_id}, #{bill_date}, #{remark}, #{create_by}, #{bill_status}, #{source_system}, #{source_bill}, #{source_id});
     </insert>
 
 </mapper>
