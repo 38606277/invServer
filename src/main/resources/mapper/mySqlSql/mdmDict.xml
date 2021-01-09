@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mdmDict">
+
+	<!--  创建func_dict信息  -->
+	<insert id="createMdnDict" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into mdm_dict(dict_id,dict_name,dict_type,dict_code)
+		values ('${dict_id}','${dict_name}','${dict_type}','${dict_code}'
+		)
+	</insert>
+	<insert id="createMdnDictValue" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into mdm_dict_value(value_id,value_name,value_pid,value_code,dict_id)
+		values ('${value_id}','${value_name}',<if  test="value_pid == null">NULL</if>
+		<if  test="value_pid != null">'${value_pid}'</if>,'${value_code}','${dict_id}'
+		)
+	</insert>
+	<!-- 修改 func_dict 表的信息 -->
+	<update id="updateMdmDict" parameterType="Map">
+		update mdm_dict set dict_name='${dict_name}',dict_type='${dict_type}',
+		dict_code='${dict_code}' where dict_id=#{dict_id,jdbcType=INTEGER}
+	</update>
+
+	<!-- 修改 func_dict 表的信息 -->
+	<update id="updateMdmDictValue" parameterType="Map">
+		update mdm_dict_value set value_name='${value_name}',value_code='${value_code}'
+		 where value_id=#{value_id,jdbcType=INTEGER}
+	</update>
+
+	<select id="getMaxId" resultType="java.lang.Integer">
+        SELECT (MAX(dict_id) +1)as dict_id from mdm_dict
+    </select>
+
+	<select id="getMaxValueId" resultType="java.lang.Integer">
+        SELECT (MAX(value_id) +1)as value_id from mdm_dict_value
+    </select>
+
+	<select id="getDictById" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_dict u where u.dict_id = #{dict_id}
+    </select>
+
+	<select id="getDictValueByPId" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_dict_value u where u.dict_id = #{dict_id}
+    </select>
+
+	<select id="getDictValueById" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_dict_value u where u.value_id = #{value_id}
+    </select>
+
+    <select id="getAllPage" resultType="Map" parameterType="Map">
+        SELECT u.*  FROM mdm_dict u  where  1=1
+		<if  test="dict_code != null and dict_code!='' ">
+			and  u.dict_code like '%${dict_code}%'
+		</if>
+		<if  test="dict_name != null and dict_name!='' ">
+			and  u.dict_name like '%${dict_name}%'
+		</if>
+    </select>
+
+	<select id="getAllDictValuePage" resultType="Map" parameterType="Map">
+		SELECT u.*  FROM mdm_dict_value u  where  1=1 and dict_id=#{dict_id}
+		<if  test="value_name != null and value_name!='' ">
+			and  u.value_name like '%${value_name}%'
+		</if>
+	</select>
+
+	<!-- 根据dict_id 跟 dict_out_id 删除func_dict_out 表相关信息  -->
+	<delete id="deleteDictByID" parameterType="Map">
+        delete from mdm_dict where dict_id=#{dict_id}
+    </delete>
+	<delete id="deleteDictValueByID" parameterType="Map">
+        delete from mdm_dict_value where value_id=#{value_id}
+    </delete>
+	<delete id="deleteDictValueByPID" parameterType="Map">
+        delete from mdm_dict_value where dict_id=#{dict_id}
+    </delete>
+</mapper>
