@@ -26,6 +26,12 @@ public class SysContext {
     {
         return map.get().getUserName();
     }
+    public static String getUserId()
+    {
+        return map.get().getUserId();
+    }
+
+
 	@RequestMapping(value = "/getLambdaUrl", produces = "text/plain;charset=UTF-8")
 	public String getLambdaUrl() {
 		return AppConstants.getLambdaUrl();

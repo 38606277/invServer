@@ -1,14 +1,15 @@
 package root.inv.store;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import root.report.common.DbSession;
-import root.report.db.DbFactory;
 import root.report.service.DictService;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,19 +35,36 @@ public class StoreService {
     }
 
 
-    public Map<String,Object> getStoreById(Map<String,Object> params){
+    public Map<String,Object> getStoreById(JSONObject params){
         return DbSession.selectOne("inv_store.getStoreById",params);
     }
 
-
-
-    public long createStore(Map<String,Object> params){
-        DbSession.insert("inv_store.createStore",params);
+    public long createStore(SqlSession sqlSession,Map<String,Object> params){
+        sqlSession.insert("inv_store.createStore",params);
         if(params.containsKey("bill_id")){
-            BigInteger bigInteger = new BigInteger("20");
             return  Long.parseLong(params.get("bill_id").toString());
         }
         return  -1;
     }
+
+    public boolean updateStoreById(SqlSession sqlSession,JSONObject params){
+       int number =  sqlSession.update("inv_store.updateStoreById",params);
+        return  0 < number;
+    }
+
+
+    public void deleteStoreByIds(SqlSession sqlSession,String ids){
+        Map<String,String> map = new HashMap<>();
+        map.put("ids",ids);
+        sqlSession.update("inv_store.deleteStoreByIds",map);
+    }
+
+    public void updateStoreStatusByIds(SqlSession sqlSession,String ids,String status){
+        Map<String,String> map = new HashMap<>();
+        map.put("ids",ids);
+        map.put("bill_status",status);
+        sqlSession.update("inv_store.updateStoreStatusByIds",map);
+    }
+
 
 }

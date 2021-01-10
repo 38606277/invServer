@@ -51,6 +51,12 @@ public class RestInterceptor extends HandlerInterceptorAdapter {
 		userModel.setUserName(userCode);
 		userModel.setEncryptPwd(pwd);
 		userModel.setIsAdmin(isAdmin);
+
+		if (obj.containsKey("id")) {
+			userModel.setUserId(obj.getString("id"));
+		}
+
+
 		SysContext.setRequestUser(userModel);
 		this.generateApiInfo(request,handler);
 		return true;

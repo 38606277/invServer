@@ -27,4 +27,30 @@
         VALUES (#{bill_type}, #{inv_org_id}, #{target_inv_org_id}, #{bill_date}, #{remark}, #{create_by}, #{bill_status}, #{source_system}, #{source_bill}, #{source_id});
     </insert>
 
+    <update id="updateStoreById" parameterType="Map">
+        update inv_bill_header
+        <trim prefix="set" suffixOverrides=",">
+            <if test="inv_org_id!=null">inv_org_id=#{inv_org_id},</if>
+            <if test="target_inv_org_id!=null">target_inv_org_id=#{target_inv_org_id},</if>
+            <if test="bill_date!=null">bill_date=#{bill_date},</if>
+            <if test="remark!=null">remark=#{remark},</if>
+            <if test="bill_status!=null">bill_status=#{bill_status},</if>
+            <if test="source_system!=null">source_system=#{source_system},</if>
+            <if test="source_bill!=null">source_bill=#{source_bill},</if>
+            <if test="source_id!=null">source_id=#{source_id},</if>
+        </trim>
+        where bill_id=#{bill_id}
+    </update>
+
+
+    <delete id="deleteStoreByIds" parameterType="Map">
+        delete from inv_bill_header where bill_id in (${ids})
+    </delete>
+
+
+    <delete id="updateStoreStatusByIds" parameterType="Map">
+        update inv_bill_header set bill_status=#{bill_status} where bill_id in (${ids})
+    </delete>
+
 </mapper>
+

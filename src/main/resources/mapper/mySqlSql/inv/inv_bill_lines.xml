@@ -3,7 +3,11 @@
         "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="inv_bill_lines">
 
-    <insert id="saveBillLines" parameterType="java.util.List">
+    <insert id="saveBillLines" parameterType="Map">
+        INSERT INTO inv_bill_lines(`header_id`, `line_number`, `item_id`, `remark`, `quantity`, `uom`, `price`, `amount`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`) VALUES (#{header_id}, #{line_number}, #{item_id}, #{remark}, #{quantity}, #{uom}, #{price}, #{amount}, #{create_by}, #{create_date}, #{source_system}, #{source_voucher}, #{source_id}, #{source_line_number})
+    </insert>
+
+    <insert id="saveBillLinesAll" parameterType="java.util.List">
         INSERT INTO inv_bill_lines(`header_id`, `line_number`, `item_id`, `remark`, `quantity`, `uom`, `price`, `amount`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`) VALUES
         <foreach collection="list" index="index" item="item" separator="," >
             (#{item.header_id}, #{item.line_number}, #{item.item_id}, #{item.remark}, #{item.quantity}, #{item.uom}, #{item.price}, #{item.amount}, #{item.create_by}, #{item.create_date}, #{item.source_system}, #{item.source_voucher}, #{item.source_id}, #{item.source_line_number})
@@ -13,6 +17,31 @@
     <select id="getBillLinesById" resultType="Map" parameterType="Map">
         SELECT * FROM inv_bill_lines where header_id=#{bill_id} order by line_number asc
     </select>
-    
+
+    <delete id="deleteByIds" parameterType="Map">
+        delete from inv_bill_lines where line_id in (${ids})
+    </delete>
+
+    <update id="updateBillLinesById" parameterType="Map">
+        update inv_bill_lines
+        <trim prefix="set" suffixOverrides=",">
+            <if test="header_id!=null">header_id=#{header_id},</if>
+            <if test="line_number!=null">line_number=#{line_number},</if>
+            <if test="item_id!=null">item_id=#{item_id},</if>
+            <if test="remark!=null">remark=#{remark},</if>
+            <if test="quantity!=null">quantity=#{quantity},</if>
+            <if test="uom!=null">uom=#{uom},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="amount!=null">amount=#{amount},</if>
+            <if test="create_by!=null">create_by=#{create_by},</if>
+            <if test="create_date!=null">create_date=#{create_date},</if>
+            <if test="source_system!=null">source_system=#{source_system},</if>
+            <if test="source_voucher!=null">source_voucher=#{source_voucher},</if>
+            <if test="source_id!=null">source_id=#{source_id},</if>
+            <if test="source_line_number!=null">source_line_number=#{source_line_number},</if>
+        </trim>
+        where line_id=#{line_id}
+
+    </update>
 
 </mapper>
