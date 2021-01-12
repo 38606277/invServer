@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="inv_item_transaction">
+
+    <insert id="saveItemTransaction"  parameterType="Map" keyColumn="transaction_id" keyProperty="transaction_id" useGeneratedKeys="true">
+        INSERT INTO inv_item_transaction (`transaction_type_id`, `header_id`, `line_number`, `inv_org_id`, `item_id`, `subinv_code`, `locator_id`, `remark`, `transaction_quantity`, `primary_quantity`, `transaction_uom`, `price`, `amount`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`, `transaction_action_id`)
+        VALUES (#{transaction_type_id}, #{header_id}, #{line_number}, #{inv_org_id}, #{item_id}, #{subinv_code}, #{locator_id}, #{remark}, #{transaction_quantity}, #{primary_quantity}, #{transaction_uom}, #{price}, #{amount}, #{create_by}, #{create_date}, #{source_system}, #{source_voucher}, #{source_id}, #{source_line_number}, #{transaction_action_id})
+    </insert>
+
+
+    <insert id="saveItemTransactionAll" parameterType="java.util.List">
+        INSERT INTO inv_item_transaction (`transaction_type_id`, `header_id`, `line_number`, `inv_org_id`, `item_id`, `subinv_code`, `locator_id`, `remark`, `transaction_quantity`, `primary_quantity`, `transaction_uom`, `price`, `amount`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`, `transaction_action_id`) VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.transaction_type_id}, #{item.header_id}, #{item.line_number}, #{item.inv_org_id}, #{item.item_id}, #{item.subinv_code}, #{item.locator_id}, #{item.remark}, #{item.transaction_quantity}, #{item.primary_quantity}, #{item.transaction_uom}, #{item.price}, #{item.amount}, #{item.create_by}, #{item.create_date}, #{item.source_system}, #{item.source_voucher}, #{item.source_id}, #{item.source_line_number}, #{item.transaction_action_id})
+        </foreach>
+    </insert>
+
+</mapper>

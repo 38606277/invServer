@@ -1,6 +1,5 @@
 package root.inv.store;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
@@ -8,13 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import root.report.common.DbSession;
 import root.report.common.RO;
 import root.report.db.DbFactory;
-import root.report.service.DictService;
 import root.report.sys.SysContext;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +31,10 @@ public class StoreControl extends RO {
     @Autowired
     InvBillLineService invBillLineService;
 
+    @Autowired
+    InvItemTransactionService invItemTransactionService;
+
+
     //查询所有事物
     @RequestMapping(value = "/getStoreListByPage", produces = "text/plain;charset=UTF-8")
     public String getStoreListByPage(@RequestBody JSONObject pJson) {
@@ -44,11 +46,12 @@ public class StoreControl extends RO {
         } else {
             currentPage = (currentPage - 1) * perPage;
         }
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("startIndex", currentPage);
-        map.put("perPage", perPage);
-        List<Map<String, Object>> list = storeService.getStoreListByPage(map);
-        int total = storeService.getStoreListByPageCount(map);
+
+        pJson.put("startIndex",currentPage);
+        pJson.put("perPage",perPage);
+
+        List<Map<String, Object>> list = storeService.getStoreListByPage(pJson);
+        int total = storeService.getStoreListByPageCount(pJson);
         return SuccessMsg(list, total);
     }
 
@@ -186,12 +189,12 @@ public class StoreControl extends RO {
     @RequestMapping(value = "/updateStoreStatusByIds", produces = "text/plain;charset=UTF-8")
     public String updateStoreStatusByIds(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
-
         String deleteIds  = pJson.getString("ids");
         String status = pJson.getString("bill_status");
         if(deleteIds ==null || deleteIds.isEmpty()){
             return ErrorMsg("过账失败","请选择过账项");
         }
+        String userId = SysContext.getUserId();
 
         try {
             sqlSession.getConnection().setAutoCommit(false);
@@ -199,12 +202,45 @@ public class StoreControl extends RO {
             storeService.updateStoreStatusByIds(sqlSession,deleteIds,status);
 
             //过账成功 插入事物记录
+            List<Map<String,Object>> transactionList = new ArrayList<>();
+
             String[] billIdArr =  deleteIds.split(",");
             for(String billId : billIdArr){
+                //获取主信息
+                Map<String,Object> billParams = new HashMap<>();
+                billParams.put("bill_id",billId);
+                Map<String,Object> mainObj = storeService.getStoreById(billParams);
+                String billType =  String.valueOf(mainObj.get("bill_type"));
+                String invOrgId =  String.valueOf(mainObj.get("inv_org_id"));
 
+                //获取子信息
+                List<Map<String,Object>> billLines = invBillLineService.getBillLinesById(billParams);
 
+                for(Map<String,Object> billLine : billLines){
+                    Map<String,Object> transaction = new HashMap<>();
+                    transaction.put("transaction_type_id",billType);
+                    transaction.put("header_id",String.valueOf(billLine.get("header_id")));
+                    transaction.put("line_number",String.valueOf(billLine.get("line_number")));
+                    transaction.put("inv_org_id",invOrgId);
+                    transaction.put("item_id",String.valueOf(billLine.get("item_id")));
 
+                    if("store".equals(billType)){ //入库
+                        transaction.put("remark","入库" +billLine.get("quantity") +billLine.get("uom")+ "衬衫");
+                    }else if("deliver".equals(billType)){//出库
+                        transaction.put("remark","出库" +billLine.get("quantity")+ billLine.get("uom")+ "衬衫");
+                    }else{
+                        transaction.put("remark","入库" +billLine.get("quantity") +billLine.get("uom")+ "衬衫");
+                    }
+
+                    transaction.put("transaction_quantity",String.valueOf(billLine.get("quantity")));
+                    transaction.put("transaction_uom",String.valueOf(billLine.get("uom")));
+                    transaction.put("price",String.valueOf(billLine.get("price")));
+                    transaction.put("amount",String.valueOf(billLine.get("amount")));
+                    transaction.put("create_by",userId);
+                    transactionList.add(transaction);
+                }
             }
+            invItemTransactionService.insertBillLinesAll(sqlSession,transactionList);
 
             sqlSession.getConnection().commit();
             return SuccessMsg("过账成功","");

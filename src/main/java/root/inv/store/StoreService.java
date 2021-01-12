@@ -35,7 +35,7 @@ public class StoreService {
     }
 
 
-    public Map<String,Object> getStoreById(JSONObject params){
+    public Map<String,Object> getStoreById(Map<String,Object> params){
         return DbSession.selectOne("inv_store.getStoreById",params);
     }
 
