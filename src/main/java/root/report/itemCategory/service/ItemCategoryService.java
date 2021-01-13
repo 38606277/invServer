@@ -104,9 +104,21 @@ public class ItemCategoryService {
                     mapVal.put("category_id", jsonObjectVal.getString("category_id"));
                     mapVal.put("row_number",jsonObjectVal.getString("row_number"));
                     Map m= sqlSession.selectOne("itemCategory.getItemCategorySegmentById",mapVal);
-                    m.put("segment_name", jsonObjectVal.getString("segment_name"));
-                    m.put("segment", jsonObjectVal.getString("segment"));
-                    sqlSession.update("itemCategory.updateMdmItemCategorySegment",m);
+                    if(null!=m) {
+                        m.put("segment_name", jsonObjectVal.getString("segment_name"));
+                        m.put("segment", jsonObjectVal.getString("segment"));
+                        sqlSession.update("itemCategory.updateMdmItemCategorySegment", m);
+                    }else{
+                        Integer newVId = sqlSession.selectOne("itemCategory.getMaxValueId",id);
+                        mapVal.put("category_id", id);
+                        mapVal.put("row_number", jsonObjectVal.getString("row_number"));
+                        mapVal.put("segment_name", jsonObjectVal.getString("segment_name"));
+                        mapVal.put("segment", jsonObjectVal.getString("segment"));
+                        mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                        mapVal.put("valid",1);
+                        mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
+                        sqlSession.insert("itemCategory.createMdmItemCategorySegment", mapVal);
+                    }
                 }
             }
         }
