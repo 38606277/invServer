@@ -20,13 +20,6 @@ import java.util.Map;
 @RequestMapping(value = "/reportServer/invOrg")
 public class InvOrgController extends RO {
 
-//    address: "南昌"
-//    contacts: "欧阳嗷嗷"
-//    org_name: "省公司"
-//    org_pid: 5
-//    org_type: "2"
-
-
     /**
      * 添加信息
      * @param pJson

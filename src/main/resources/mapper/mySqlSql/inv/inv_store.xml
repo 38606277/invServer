@@ -10,7 +10,8 @@
     </select>
 
     <select id="getStoreListByPage" resultType="Map" parameterType="Map">
-        SELECT ibh.*,fo.org_name as `inv_org_name` FROM inv_bill_header ibh LEFT JOIN fnd_org fo on inv_org_id = org_id
+        SELECT ibh.*,fo.org_name as `inv_org_name`,fo2.org_name as `target_inv_org_name` FROM inv_bill_header ibh LEFT JOIN fnd_org fo on ibh.inv_org_id = fo.org_id
+        LEFT JOIN fnd_org fo2 on ibh.target_inv_org_id = fo2.org_id
         where 1=1
         <if test="bill_type != null and bill_type!=''">  and bill_type=#{bill_type} </if>
         ORDER BY create_date desc

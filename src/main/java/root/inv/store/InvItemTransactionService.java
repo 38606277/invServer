@@ -20,7 +20,7 @@ public class InvItemTransactionService {
      * @param lines
      * @return
      */
-    public boolean insertBillLinesAll(SqlSession sqlSession ,List lines){
+    public boolean insertBillLinesAll(SqlSession sqlSession ,List<Map<String,Object>> lines){
         if(lines == null || lines.isEmpty()){
             return true;
         }

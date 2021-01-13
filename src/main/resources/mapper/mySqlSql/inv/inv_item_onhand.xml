@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="inv_item_on_hand">
+
+    <insert id="saveItemOnHandAll" parameterType="java.util.List">
+        INSERT INTO inv_item_onhand(`item_id`, `org_id`, `location_id`, `on_hand_quantity`, `price`, `amount`, `min`, `max`) VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.item_id}, #{item.org_id}, #{item.location_id}, #{item.on_hand_quantity}, #{item.price}, #{item.amount}, #{item.min}, #{item.max})
+        </foreach>
+    </insert>
+
+    <insert id="saveItemOnHand" parameterType="Map">
+        INSERT INTO inv_item_onhand(`item_id`, `org_id`, `location_id`, `on_hand_quantity`, `price`, `amount`, `min`, `max`) VALUES (#{item_id}, #{org_id}, #{location_id}, #{on_hand_quantity}, #{price}, #{amount}, #{min}, #{max})
+    </insert>
+
+    <update id="updateItemOnHand" parameterType="Map">
+        update inv_item_onhand
+        <trim prefix="set" suffixOverrides=",">
+            <if test="org_id!=null">org_id=#{org_id},</if>
+            <if test="location_id!=null">location_id=#{location_id},</if>
+            <if test="on_hand_quantity!=null">on_hand_quantity=#{on_hand_quantity},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="amount!=null">amount=#{amount},</if>
+            <if test="min!=null">min=#{min},</if>
+            <if test="max!=null">max=#{max},</if>
+        </trim>
+        where item_id=#{item_id}
+    </update>
+
+
+    <select id="getBillLinesByItemId" resultType="Map" parameterType="Map">
+        SELECT * FROM inv_item_onhand where item_id=#{item_id}
+    </select>
+
+</mapper>
