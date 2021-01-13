@@ -37,7 +37,7 @@ public class ItemCategoryService {
                 }
                 bounds = new PageRowBounds(startIndex, perPage);
             }
-            List<Map<String, Object>> resultList = sqlSession.selectList("mdmDict.getAllPage", map, bounds);
+            List<Map<String, Object>> resultList = sqlSession.selectList("itemCategory.getAllPage", map, bounds);
             Long totalSize = 0L;
             if (map != null && map.size() != 0) {
                 totalSize = ((PageRowBounds) bounds).getTotal();
@@ -56,52 +56,57 @@ public class ItemCategoryService {
     /**
      * 功能描述: 根据JSON数据解析 对应数据，生成func_dict记录
      */
-    public String saveOrUpdateDict(SqlSession sqlSession,JSONObject jsonObject){
+    public String saveOrUpdateCategory(SqlSession sqlSession,JSONObject jsonObject){
         Map<String,Object> map  = new HashMap<>();
         String id="";
-
-        map.put("dict_name",jsonObject.getString("dict_name"));
-        map.put("dict_type",jsonObject.getString("dict_type"));
-        map.put("dict_code",jsonObject.getString("dict_code"));
+        map.put("category_name",jsonObject.getString("category_name"));
+        map.put("category_pid",jsonObject.getString("category_pid"));
+        map.put("category_code",jsonObject.getString("category_code"));
         JSONArray addLine = jsonObject.getJSONArray("lineForm");
         JSONArray delLine = jsonObject.getJSONArray("lineDelete");
-        if(null==jsonObject.getString("dict_id")|| "".equals(jsonObject.getString("dict_id"))){
-            Integer newId= sqlSession.selectOne("mdmDict.getMaxId");
+        if(null==jsonObject.getString("category_id")|| "".equals(jsonObject.getString("category_id"))){
+            Integer newId= sqlSession.selectOne("itemCategory.getMaxId");
             newId = newId==null?1:newId;
-            map.put("dict_id",newId);
-            sqlSession.insert("mdmDict.createMdnDict",map);
-            id=String.valueOf(map.get("id"));
+            map.put("category_id",newId);
+            sqlSession.insert("itemCategory.createMdmItemCategory",map);
+            id=String.valueOf(map.get("category_id"));
             for(int i = 0; i < addLine.size(); i++){
                 Map<String,Object> mapVal  = new HashMap<>();
                 JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                Integer newVId= sqlSession.selectOne("mdmDict.getMaxValueId");
-                mapVal.put("dict_id",newId);
-                mapVal.put("value_id",newVId==null?1:newVId);
-                mapVal.put("value_name",jsonObjectVal.getString("value_name"));
-                mapVal.put("value_code",jsonObjectVal.getString("value_code"));
-                mapVal.put("value_pid",jsonObjectVal.getString("value_pid").equals("")?null:jsonObjectVal.getString("value_pid"));
-                sqlSession.insert("mdmDict.createMdnDictValue",mapVal);
+                Integer newVId= sqlSession.selectOne("itemCategory.getMaxValueId",newId);
+                mapVal.put("category_id",newId);
+                mapVal.put("row_number",newVId==null?1:newVId);
+                mapVal.put("segment_name",jsonObjectVal.getString("segment_name"));
+                mapVal.put("segment",jsonObjectVal.getString("segment"));
+                mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                mapVal.put("valid",1);
+                mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
+                sqlSession.insert("itemCategory.createMdmItemCategorySegment",mapVal);
             }
         }else{
-            map.put("dict_id",jsonObject.getString("dict_id"));
-            sqlSession.update("mdmDict.updateMdmDict",map);
-            id=jsonObject.getString("dict_id");
+            map.put("category_id",jsonObject.getString("category_id"));
+            sqlSession.update("itemCategory.updateMdmItemCategory",map);
+            id=jsonObject.getString("category_id");
             for(int i = 0; i < addLine.size(); i++){
                 Map<String,Object> mapVal  = new HashMap<>();
                 JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                if(jsonObjectVal.getString("value_id").contains("NEW")) {
-                    Integer newVId = sqlSession.selectOne("mdmDict.getMaxValueId");
-                    mapVal.put("dict_id", id);
-                    mapVal.put("value_id", newVId==null?1:newVId);
-                    mapVal.put("value_name", jsonObjectVal.getString("value_name"));
-                    mapVal.put("value_code", jsonObjectVal.getString("value_code"));
-                    mapVal.put("value_pid", jsonObjectVal.getString("value_pid").equals("") ? null : jsonObjectVal.getString("value_pid"));
-                    sqlSession.insert("mdmDict.createMdnDictValue", mapVal);
+                if(jsonObjectVal.getString("row_number").contains("NEW")) {
+                    Integer newVId = sqlSession.selectOne("itemCategory.getMaxValueId",id);
+                    mapVal.put("category_id", id);
+                    mapVal.put("row_number", newVId==null?1:newVId);
+                    mapVal.put("segment_name", jsonObjectVal.getString("segment_name"));
+                    mapVal.put("segment", jsonObjectVal.getString("segment"));
+                    mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                    mapVal.put("valid",1);
+                    mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
+                    sqlSession.insert("itemCategory.createMdmItemCategorySegment", mapVal);
                 }else{
-                    Map m= sqlSession.selectOne("mdmDict.getDictValueById",jsonObjectVal.getString("value_id"));
-                    m.put("value_name", jsonObjectVal.getString("value_name"));
-                    m.put("value_code", jsonObjectVal.getString("value_code"));
-                    sqlSession.update("mdmDict.updateMdmDictValue",m);
+                    mapVal.put("category_id", jsonObjectVal.getString("category_id"));
+                    mapVal.put("row_number",jsonObjectVal.getString("row_number"));
+                    Map m= sqlSession.selectOne("itemCategory.getItemCategorySegmentById",mapVal);
+                    m.put("segment_name", jsonObjectVal.getString("segment_name"));
+                    m.put("segment", jsonObjectVal.getString("segment"));
+                    sqlSession.update("itemCategory.updateMdmItemCategorySegment",m);
                 }
             }
         }
@@ -109,179 +114,39 @@ public class ItemCategoryService {
             for (int i = 0; i < delLine.size(); i++) {
                 Map<String, Object> dmap = new HashMap<>();
                 JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                if(!jsonObjectVal.getString("value_id").contains("NEW")) {
-                    dmap.put("value_id", jsonObjectVal.getString("value_id"));
-                    sqlSession.delete("mdmDict.deleteDictValueByID", dmap);
+                if(!jsonObjectVal.getString("row_number").contains("NEW")) {
+                    dmap.put("category_id", jsonObjectVal.getString("category_id"));
+                    dmap.put("row_number", jsonObjectVal.getString("row_number"));
+                    sqlSession.delete("itemCategory.deleteItemCategorySegmentByID", dmap);
                 }
             }
         }
         return id;
     }
-
-    public String saveOrUpdateDictTree(SqlSession sqlSession,JSONObject jsonObject){
-        Map<String,Object> map  = new HashMap<>();
-        String dict_id="";
-        map.put("dict_name",jsonObject.getString("dict_name"));
-        map.put("dict_type",jsonObject.getString("dict_type"));
-        map.put("dict_code",jsonObject.getString("dict_code"));
-        JSONArray addLine = jsonObject.getJSONArray("lineForm");
-        JSONArray delLine = jsonObject.getJSONArray("lineDelete");
-        Integer dictId=null;
-        Map mapKeyId=new HashMap();
-        if(null==jsonObject.getString("dict_id")|| "".equals(jsonObject.getString("dict_id"))){
-            dictId= sqlSession.selectOne("mdmDict.getMaxId");
-            dictId = dictId==null?1:dictId;
-            map.put("dict_id",dictId);
-            sqlSession.insert("mdmDict.createMdnDict",map);
-          //  dict_id=String.valueOf(map.get("dict_id"));
-            Integer newVId=null;
-            newVId= sqlSession.selectOne("mdmDict.getMaxValueId");
-            newVId = newVId==null?0:newVId;
-            for(int i = 0; i < addLine.size(); i++){
-                Map<String,Object> mapVal  = new HashMap<>();
-                JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                newVId++;
-                mapVal.put("dict_id",dictId);
-                mapVal.put("value_id",newVId==null?1:newVId);
-                mapKeyId.put(jsonObjectVal.getString("value_id"),newVId);
-                mapVal.put("value_name",jsonObjectVal.getString("value_name"));
-                mapVal.put("value_code",jsonObjectVal.getString("value_code"));
-                mapVal.put("value_pid",jsonObjectVal.getString("value_pid").equals("")?null:jsonObjectVal.getString("value_pid"));
-                sqlSession.insert("mdmDict.createMdnDictValue",mapVal);
-                if(null!=jsonObjectVal.getJSONArray("children")) {
-                    JSONArray objChildren = jsonObjectVal.getJSONArray("children");
-                    newVId = insertDictValueListItem(sqlSession,objChildren,mapKeyId,newVId,dictId);
-                }
-            }
-        }else{
-            map.put("dict_id",jsonObject.getString("dict_id"));
-            sqlSession.update("mdmDict.updateMdmDict",map);
-            dictId=Integer.parseInt(jsonObject.getString("dict_id"));
-            for(int i = 0; i < addLine.size(); i++){
-                Map<String,Object> mapVal  = new HashMap<>();
-                JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                if(jsonObjectVal.getString("value_id").contains("NEW")) {
-                    Integer newVId = sqlSession.selectOne("mdmDict.getMaxValueId");
-                    newVId = newVId==null?0:newVId;
-                    newVId++;
-                    mapVal.put("dict_id", dictId);
-                    mapVal.put("value_id", newVId);
-                    mapKeyId.put(jsonObjectVal.getString("value_id"),newVId);
-                    mapVal.put("value_name", jsonObjectVal.getString("value_name"));
-                    mapVal.put("value_code", jsonObjectVal.getString("value_code"));
-                    mapVal.put("value_pid", jsonObjectVal.getString("value_pid").equals("") ? null : jsonObjectVal.getString("value_pid"));
-                    mapKeyId.put(jsonObjectVal.getString("value_id"),newVId);
-                    sqlSession.insert("mdmDict.createMdnDictValue", mapVal);
-                    if(null!=jsonObjectVal.getJSONArray("children")) {
-                        JSONArray objChildren = jsonObjectVal.getJSONArray("children");
-                         insertDictValueListItem(sqlSession,objChildren,mapKeyId,newVId,dictId);
-                    }
-
-                }else{
-                    Map m= sqlSession.selectOne("mdmDict.getDictValueById",jsonObjectVal.getString("value_id"));
-                    m.put("value_name", jsonObjectVal.getString("value_name"));
-                    m.put("value_code", jsonObjectVal.getString("value_code"));
-                    sqlSession.update("mdmDict.updateMdmDictValue",m);
-                    mapKeyId.put(jsonObjectVal.getString("value_id"),jsonObjectVal.getString("value_id"));
-                    if(null!=jsonObjectVal.getJSONArray("children")) {
-                        JSONArray objChildren = jsonObjectVal.getJSONArray("children");
-                        updateDictValueListItem(sqlSession,objChildren,mapKeyId,Integer.parseInt(m.get("value_id").toString()),dictId);
-                    }
-                }
-            }
-        }
-        if(delLine.size()>0) {
-            for (int i = 0; i < delLine.size(); i++) {
-                Map<String, Object> dmap = new HashMap<>();
-                String jsonObjectVal = delLine.get(i).toString();
-                if(!jsonObjectVal.contains("NEW")) {
-                    dmap.put("value_id", jsonObjectVal);
-                    sqlSession.delete("mdmDict.deleteDictValueByID", dmap);
-                }
-            }
-        }
-        return dict_id;
+    public List<Map> getItemCategorySegmentByPid(Map m) {
+        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentByPId", m);
+        return list;
     }
-
-    public Integer insertDictValueListItem (SqlSession sqlSession,JSONArray childrenList,Map mapKeyId,Integer newVId,Integer dictId) {
-        if (childrenList.isEmpty()) {
-            return newVId;
-        }
-        for (int i = 0; i < childrenList.size(); i++) {
-            newVId++;
-            JSONObject obj = childrenList.getJSONObject(i);
-            Map mapVal=new HashMap();
-            mapVal.put("dict_id",dictId);
-            mapVal.put("value_id",newVId);
-            mapVal.put("value_name",obj.getString("value_name"));
-            mapVal.put("value_code",obj.getString("value_code"));
-            mapVal.put("value_pid",mapKeyId.get(obj.getString("value_pid")));
-            mapKeyId.put(obj.getString("value_id"),newVId);
-            sqlSession.insert("mdmDict.createMdnDictValue",mapVal);
-            if(null!=obj.getJSONArray("children")) {
-                JSONArray objChildren = obj.getJSONArray("children");
-                newVId= insertDictValueListItem(sqlSession,objChildren,mapKeyId,newVId,dictId);
-            }
-        }
-        return newVId;
-    }
-
-    public Integer updateDictValueListItem (SqlSession sqlSession,JSONArray childrenList,Map mapKeyId,Integer newVId,Integer dictId) {
-        if (!childrenList.isEmpty()) {
-            for (int i = 0; i < childrenList.size(); i++) {
-                JSONObject obj = childrenList.getJSONObject(i);
-                if (obj.getString("value_id").contains("NEW")) {
-                    Map<String, Object> mapVal = new HashMap<>();
-                    Integer newVVId = sqlSession.selectOne("mdmDict.getMaxValueId");
-                    newVVId = newVVId == null ? 0 : newVVId;
-                    newVVId++;
-                    mapVal.put("dict_id", dictId);
-                    mapVal.put("value_id", newVVId);
-                    mapKeyId.put(obj.getString("value_id"), newVVId);
-                    mapVal.put("value_name", obj.getString("value_name"));
-                    mapVal.put("value_code", obj.getString("value_code"));
-                    mapVal.put("value_pid", mapKeyId.get(obj.get("value_pid").toString()));
-                    sqlSession.insert("mdmDict.createMdnDictValue", mapVal);
-                    if (null != obj.getJSONArray("children")) {
-                        JSONArray objChildren = obj.getJSONArray("children");
-                        insertDictValueListItem(sqlSession, objChildren, mapKeyId, newVVId, dictId);
-                    }
-                } else {
-                    Map m = sqlSession.selectOne("mdmDict.getDictValueById", obj.getString("value_id"));
-                    m.put("value_name", obj.getString("value_name"));
-                    m.put("value_code", obj.getString("value_code"));
-                    mapKeyId.put(obj.getString("value_id"), obj.getString("value_id"));
-                    sqlSession.update("mdmDict.updateMdmDictValue", m);
-                    if (null != obj.getJSONArray("children")) {
-                        JSONArray objChildren = obj.getJSONArray("children");
-                        updateDictValueListItem(sqlSession, objChildren, mapKeyId, Integer.parseInt(m.get("value_id").toString()), dictId);
-                    }
-                }
-            }
-        }
-        return newVId;
-    }
-
 
     // 功能描述: 根据 dict_id 和 out_id 批量删除 func_dict的信息
-    public void deleteDictById(SqlSession sqlSession,String dict_id){
+    public void deleteItemCategoryByID(SqlSession sqlSession,String category_id){
         Map<String,Object> map=new HashMap();
-        map.put("dict_id",dict_id);
-        sqlSession.delete("mdmDict.deleteDictByID",map);
-        sqlSession.delete("mdmDict.deleteDictValueByPID",map);
+        map.put("category_id",category_id);
+        sqlSession.delete("itemCategory.deleteItemCategoryByID",map);
+        sqlSession.delete("itemCategory.deleteItemCategorySegmentByPID",map);
     }
 
-    public Map getDictByID(Map m) {
-        return DbFactory.Open(DbFactory.FORM).selectOne("mdmDict.getDictById",m);
+    public Map getItemCategoryById(Map m) {
+        return DbFactory.Open(DbFactory.FORM).selectOne("itemCategory.getItemCategoryById",m);
     }
 
-    public List<Map> getDictValueByDictId(Map m) {
+    public List<Map> getItemCategoryByPid(Map m) {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
-        List<Map> list= sqlSession.selectList("mdmDict.getDictValueByPId",m);
+        List<Map> list= sqlSession.selectList("itemCategory.getItemCategory",m);
         for(int i=0;i<list.size();i++){
             Map map=new HashMap();
-            map.put("value_id",list.get(i).get("value_id"));
-            List<Map> chilerenlist= sqlSession.selectList("mdmDict.getDictValueByValuePId",map);
+            map.put("category_id",list.get(i).get("category_id"));
+            List<Map> chilerenlist= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
             }
@@ -295,8 +160,8 @@ public class ItemCategoryService {
         }
         for(int i=0;i<list.size();i++){
             Map map=new HashMap();
-            map.put("value_id",list.get(i).get("value_id"));
-            List<Map> chilerenlist= sqlSession.selectList("mdmDict.getDictValueByValuePId",map);
+            map.put("category_id",list.get(i).get("category_id"));
+            List<Map> chilerenlist= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
             }

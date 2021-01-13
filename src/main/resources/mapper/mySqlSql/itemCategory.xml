@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="itemCategory">
+
+	<!--  创建func_dict信息  -->
+	<insert id="createMdmItemCategory" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into mdm_item_category(category_id,category_name,category_pid,category_code)
+		values (#{category_id},'${category_name}',
+		<if  test="category_pid == null">NULL</if>
+		<if  test="category_pid != null">#{category_pid}</if>,'${category_code}'
+		)
+	</insert>
+	<insert id="createMdmItemCategorySegment" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into mdm_item_category_segment(category_id,row_number,segment,segment_name,dict_id,valid,row_or_column)
+		values (#{category_id},'${row_number}',
+		<if  test="segment == null">NULL</if>
+		<if  test="segment != null">'${segment}'</if>,
+		'${segment_name}',
+		<if  test="dict_id == null">NULL</if>
+		<if  test="dict_id != null">#{dict_id}</if>,
+		<if  test="valid == null">NULL</if>
+		<if  test="valid != null">#{valid}</if>,'${row_or_column}'
+		)
+	</insert>
+	<!-- 修改 func_dict 表的信息 -->
+	<update id="updateMdmItemCategory" parameterType="Map">
+		update mdm_item_category set category_name='${category_name}',category_code='${category_code}'
+		 where category_id=#{category_id,jdbcType=INTEGER}
+	</update>
+
+	<!-- 修改 func_dict 表的信息 -->
+	<update id="updateMdmItemCategorySegment" parameterType="Map">
+		update mdm_item_category_segment set segment='${segment}',segment_name='${segment_name}',
+		<if  test="dict_id == null">dict_id=NULL</if>
+		<if  test="dict_id != null">dict_id=#{dict_id}</if>,row_or_column='${row_or_column}'
+		 where category_id=#{category_id,jdbcType=INTEGER} and row_number=#{row_number,jdbcType=INTEGER}
+	</update>
+
+	<select id="getMaxId" resultType="java.lang.Integer" >
+        SELECT (MAX(category_id) +1)as category_id from mdm_item_category
+    </select>
+
+	<select id="getMaxValueId" resultType="java.lang.Integer" parameterType="map">
+        SELECT (MAX(row_number) +1)as row_number from mdm_item_category_segment  where category_id=#{category_id}
+    </select>
+
+	<select id="getItemCategoryById" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category u where u.category_id = #{category_id}
+    </select>
+
+	<select id="getItemCategorySegmentByPId" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category_segment u where u.category_id = #{category_id}
+    </select>
+
+	<select id="getItemCategorySegmentById" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category_segment u where u.category_id = #{category_id} and u.row_number='${row_number}'
+    </select>
+	<select id="getItemCategory" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category u where u.category_pid is null or u.category_pid=''
+    </select>
+
+	<select id="getItemCategoryByPid" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category u where u.category_pid =#{category_id}
+    </select>
+
+	<select id="getAllPage" resultType="Map" parameterType="Map">
+        SELECT u.*  FROM mdm_item_category u  where  1=1
+		<if  test="category_code != null and category_code!='' ">
+			and  u.category_code like '%${category_code}%'
+		</if>
+		<if  test="dict_name != null and dict_name!='' ">
+			and  u.category_name like '%${category_name}%'
+		</if>
+    </select>
+
+	<select id="getAllItemCategorySegmentPage" resultType="Map" parameterType="Map">
+		SELECT u.*  FROM mdm_item_category_segment u  where  1=1 and category_id=#{category_id}
+		<if  test="segment_name != null and segment_name!='' ">
+			and  u.segment_name like '%${segment_name}%'
+		</if>
+	</select>
+
+	<!-- 根据dict_id 跟 dict_out_id 删除func_dict_out 表相关信息  -->
+	<delete id="deleteItemCategoryByID" parameterType="Map">
+        delete from mdm_item_category where category_id=#{category_id}
+    </delete>
+	<delete id="deleteItemCategorySegmentByID" parameterType="Map">
+        delete from mdm_item_category_segment where category_id=#{category_id} and row_number=#{row_number}
+    </delete>
+	<delete id="deleteItemCategorySegmentByPID" parameterType="Map">
+        delete from mdm_item_category_segment where category_id=#{category_id}
+    </delete>
+</mapper>
