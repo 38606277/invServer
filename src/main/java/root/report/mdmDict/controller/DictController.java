@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import root.report.common.RO;
 import root.report.db.DbFactory;
@@ -67,7 +68,16 @@ public class DictController extends RO {
             return ExceptionMsg(ex.getMessage());
         }
     }
-
+    @RequestMapping(value = "/getAll", produces = "text/plain;charset=UTF-8")
+    public String getAll(@RequestParam(required = false) String pJson) {
+        try {
+            JSONObject jsonFunc = JSONObject.parseObject(pJson);
+            List<Map> map1 = mdmDictService.getAll(jsonFunc);
+            return SuccessMsg("", map1);
+        } catch (Exception ex){
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
 
      //返回数据
     @RequestMapping(value = "/getDictByID", produces = "text/plain;charset=UTF-8")

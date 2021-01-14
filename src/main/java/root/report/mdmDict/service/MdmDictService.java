@@ -307,4 +307,9 @@ public class MdmDictService {
     }
 
 
+    public List<Map> getAll(JSONObject map) {
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        List<Map> chilerenlist= sqlSession.selectList("mdmDict.getAllPage",map);
+        return chilerenlist;
+    }
 }

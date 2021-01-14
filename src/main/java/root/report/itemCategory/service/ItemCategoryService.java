@@ -107,6 +107,8 @@ public class ItemCategoryService {
                     if(null!=m) {
                         m.put("segment_name", jsonObjectVal.getString("segment_name"));
                         m.put("segment", jsonObjectVal.getString("segment"));
+                        m.put("dict_id", jsonObjectVal.getString("dict_id"));
+                        m.put("row_or_column", jsonObjectVal.getString("row_or_column"));
                         sqlSession.update("itemCategory.updateMdmItemCategorySegment", m);
                     }else{
                         Integer newVId = sqlSession.selectOne("itemCategory.getMaxValueId",id);
@@ -136,7 +138,7 @@ public class ItemCategoryService {
         return id;
     }
     public List<Map> getItemCategorySegmentByPid(Map m) {
-        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentByPId", m);
+        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentDictByPId", m);
         return list;
     }
 
