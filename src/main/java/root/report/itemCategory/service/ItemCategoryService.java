@@ -154,9 +154,9 @@ public class ItemCategoryService {
         return DbFactory.Open(DbFactory.FORM).selectOne("itemCategory.getItemCategoryById",m);
     }
 
-    public List<Map> getItemCategoryByPid(Map m) {
+    public List<Map> getItemCategoryByPid() {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
-        List<Map> list= sqlSession.selectList("itemCategory.getItemCategory",m);
+        List<Map> list= sqlSession.selectList("itemCategory.getItemCategory");
         for(int i=0;i<list.size();i++){
             Map map=new HashMap();
             map.put("category_id",list.get(i).get("category_id"));
@@ -182,6 +182,5 @@ public class ItemCategoryService {
         }
         return list;
     }
-
 
 }

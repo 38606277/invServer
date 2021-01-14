@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import root.report.common.RO;
 import root.report.db.DbFactory;
@@ -37,8 +38,7 @@ public class ItemCategoryController extends RO {
         try{
             sqlSession.getConnection().setAutoCommit(false);
             JSONObject jsonObject = JSON.parseObject(pJson);
-            String id =null;
-                id = this.itemCategoryService.saveOrUpdateCategory(sqlSession, jsonObject);
+            String id = this.itemCategoryService.saveOrUpdateCategory(sqlSession, jsonObject);
 
             sqlSession.getConnection().commit();
             return SuccessMsg("保存成功",id);
@@ -58,7 +58,19 @@ public class ItemCategoryController extends RO {
             map.put("perPage",jsonFunc.getString("perPage"));
             map.put("category_code",jsonFunc.getString("category_code"));
             map.put("category_name",jsonFunc.getString("category_name"));
+            map.put("category_pid",jsonFunc.getString("category_pid"));
             Map<String,Object> map1 = itemCategoryService.getAllPage(map);
+            return SuccessMsg("", map1);
+        } catch (Exception ex){
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "/getAllList", produces = "text/plain;charset=UTF-8")
+    public String getAllList() {
+        try {
+
+            List<Map> map1 = itemCategoryService.getItemCategoryByPid();
             return SuccessMsg("", map1);
         } catch (Exception ex){
             return ExceptionMsg(ex.getMessage());

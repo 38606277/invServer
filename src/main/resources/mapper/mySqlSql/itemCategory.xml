@@ -68,10 +68,19 @@
         SELECT u.* FROM mdm_item_category u where u.category_pid =#{category_id}
     </select>
 
+
+
+	<select id="getItemCategoryPidNull" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category u where u.category_pid is null or u.category_pid=""
+    </select>
+
 	<select id="getAllPage" resultType="Map" parameterType="Map">
         SELECT u.*  FROM mdm_item_category u  where  1=1
 		<if  test="category_code != null and category_code!='' ">
 			and  u.category_code like '%${category_code}%'
+		</if>
+		<if  test="category_pid != null and category_pid!='' ">
+			and  u.category_pid='${category_pid}'
 		</if>
 		<if  test="dict_name != null and dict_name!='' ">
 			and  u.category_name like '%${category_name}%'
