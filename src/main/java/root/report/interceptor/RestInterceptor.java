@@ -53,7 +53,7 @@ public class RestInterceptor extends HandlerInterceptorAdapter {
 		userModel.setIsAdmin(isAdmin);
 
 		if (obj.containsKey("id")) {
-			userModel.setUserId(obj.getString("id"));
+			userModel.setId(obj.getIntValue("id"));
 		}
 
 

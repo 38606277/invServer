@@ -520,9 +520,9 @@ public class AuthController extends RO {
         return SuccessMsg("",dataList);
     }
 
-    //获取菜单 最新版
+    //获取菜单 最新版 递归查询
     @RequestMapping(value="/getMenuLisToAntdPro",produces = "text/plain;charset=UTF-8")
-    public String getMenuLisToAntdPro(@RequestBody String pJson) throws UnsupportedEncodingException, SAXException, DocumentException {
+    public String getMenuLisToAntdPro(@RequestBody String pJson){
         JSONObject obj = JSONObject.parseObject(pJson);
         Map m=new HashMap<>();
         int userId=obj.getInteger("userId");
@@ -530,24 +530,44 @@ public class AuthController extends RO {
         if(userId==1){
             m.put("pid", 0);
             dataList = DbFactory.Open(DbFactory.FORM).selectList("auth.getMenuAll", m);
-            for (int i = 0; i < dataList.size(); i++) {
-                m.put("pid", dataList.get(i).get("func_id"));
-                List<Map<String, Object>> subList = DbFactory.Open(DbFactory.FORM).selectList("auth.getMenuAll", m);
-                dataList.get(i).put("children", subList);
+            if(dataList!=null && 0 <dataList.size()){
+                for(Map<String,Object> child : dataList){
+                    recursionMenu(child,userId,"auth.getMenuAll");
+                }
             }
-
         }else {
             m.put("userId", userId);
             m.put("pid", 0);
             dataList = DbFactory.Open(DbFactory.FORM).selectList("auth.getMenuByUserId", m);
-            for (int i = 0; i < dataList.size(); i++) {
-                m.put("pid", dataList.get(i).get("func_id"));
-                List<Map<String, Object>> subList = DbFactory.Open(DbFactory.FORM).selectList("auth.getMenuByUserId", m);
-                dataList.get(i).put("children", subList);
+            if(dataList!=null && 0 <dataList.size()){
+                for(Map<String,Object> child : dataList){
+                    recursionMenu(child,userId,"auth.getMenuByUserId");
+                }
             }
         }
         return SuccessMsg("",dataList);
     }
+
+
+
+    /**
+     * 递归 - 层级形式
+     * @param parentMap
+     */
+    private void recursionMenu(Map<String,Object> parentMap,int userId,String statement){
+        HashMap<String,Object> tempMap = new HashMap<>();
+        tempMap.put("pid",parentMap.get("func_id"));
+        tempMap.put("userId", userId);
+        List<Map<String,Object>>  dateList =  DbFactory.Open(DbFactory.FORM).selectList(statement, tempMap);
+        if(dateList != null && 0 < dateList.size()){
+            parentMap.put("children",dateList);
+            for(Map<String,Object> child : dateList){
+                recursionMenu(child,userId,statement);
+            }
+        }
+    }
+
+
 
 
     //根据数据查询获取数据classId

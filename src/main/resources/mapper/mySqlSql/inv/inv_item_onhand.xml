@@ -28,9 +28,57 @@
         where item_id=#{item_id}
     </update>
 
+    <select id="getItemOnHandByOrgId" resultType="Map" parameterType="Map">
+        SELECT * FROM inv_item_onhand where org_id=#{org_id}
+    </select>
 
-    <select id="getBillLinesByItemId" resultType="Map" parameterType="Map">
-        SELECT * FROM inv_item_onhand where item_id=#{item_id}
+
+    <select id="getItemOnHandOrgByPageCount" resultType="Long" parameterType="Map">
+        select count(1) from (SELECT count(1) as mCount FROM inv_item_onhand iio
+        GROUP BY iio.org_id) temp
+        limit #{startIndex},#{perPage}
+    </select>
+
+    <select id="getItemOnHandOrgByPage" resultType="Map" parameterType="Map">
+        SELECT iio.org_id,fo.org_name,sum(iio.amount) as item_count,sum(iio.price*iio.amount) as item_price  FROM inv_item_onhand iio
+        LEFT JOIN fnd_org fo on fo.org_id = iio.org_id
+        GROUP BY iio.org_id
+        ORDER BY iio.org_id asc
+        limit #{startIndex},#{perPage}
+    </select>
+
+
+    <select id="getItemOnHandByPageCount" resultType="Long" parameterType="Map">
+        SELECT count(1) FROM inv_item_onhand iio
+        LEFT JOIN fnd_org fo on fo.org_id = iio.org_id
+        LEFT JOIN mdm_item mi on mi.item_id = iio.item_id
+        where 1=1
+        <if test="item_id != null and item_id!=''">  and item_id=#{item_id} </if>
+        <if test="org_id != null and org_id!=''">  and org_id=#{org_id} </if>
+        <if test="location_id != null and location_id!=''">  and location_id=#{location_id} </if>
+        <if test="on_hand_quantity != null and on_hand_quantity!=''">  and on_hand_quantity=#{on_hand_quantity} </if>
+        <if test="price != null and price!=''">  and price=#{price} </if>
+        <if test="amount != null and amount!=''">  and amount=#{amount} </if>
+        <if test="min != null and min!=''">  and min=#{min} </if>
+        <if test="max != null and max!=''">  and max=#{max} </if>
+        limit #{startIndex},#{perPage}
+    </select>
+
+    <select id="getItemOnHandByPage" resultType="Map" parameterType="Map">
+        SELECT iio.*, fo.org_name , mi.segment1 FROM inv_item_onhand iio
+        LEFT JOIN fnd_org fo on fo.org_id = iio.org_id
+        LEFT JOIN mdm_item mi on mi.item_id = iio.item_id
+        where 1=1
+        <if test="item_id != null and item_id!=''">  and item_id=#{item_id} </if>
+        <if test="org_id != null and org_id!=''">  and org_id=#{org_id} </if>
+        <if test="location_id != null and location_id!=''">  and location_id=#{location_id} </if>
+        <if test="on_hand_quantity != null and on_hand_quantity!=''">  and on_hand_quantity=#{on_hand_quantity} </if>
+        <if test="price != null and price!=''">  and price=#{price} </if>
+        <if test="amount != null and amount!=''">  and amount=#{amount} </if>
+        <if test="min != null and min!=''">  and min=#{min} </if>
+        <if test="max != null and max!=''">  and max=#{max} </if>
+        ORDER BY iio.item_id desc
+        limit #{startIndex},#{perPage}
     </select>
 
 </mapper>

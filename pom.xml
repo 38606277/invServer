@@ -132,12 +132,20 @@
             <artifactId>druid</artifactId>
             <version>1.0.25</version>
         </dependency>
+
         <!-- 导入oracle数据库链接jar包 -->
+        <!--        <dependency>-->
+        <!--            <groupId>com.oracle</groupId>-->
+        <!--            <artifactId>oracle-ojdbc</artifactId>-->
+        <!--            <version>11.1.0.7.0</version>-->
+        <!--        </dependency>-->
+
         <dependency>
             <groupId>com.oracle</groupId>
-            <artifactId>oracle-ojdbc</artifactId>
-            <version>11.1.0.7.0</version>
+            <artifactId>ojdbc6</artifactId>
+            <version>11.2.0.3</version>
         </dependency>
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>

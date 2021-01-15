@@ -2,11 +2,13 @@ package root.inv.store;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import root.report.common.DbSession;
-import root.report.sys.SysContext;
+import root.report.common.RO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,8 +64,6 @@ public class InvBillLineService {
         map.put("ids",ids);
         sqlSession.update("inv_bill_lines.deleteByIds",map);
     }
-
-
 
 
 }

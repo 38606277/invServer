@@ -74,7 +74,7 @@ public class StoreControl extends RO {
     @RequestMapping(value = "/updateStoreById", produces = "text/plain;charset=UTF-8")
     public String updateStoreById(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
-        String userId = SysContext.getUserId();
+        int userId = SysContext.getId();
         try {
             sqlSession.getConnection().setAutoCommit(false);
 
@@ -119,7 +119,7 @@ public class StoreControl extends RO {
      */
     @RequestMapping(value = "/createStore", produces = "text/plain; charset=utf-8")
     public String createStore(@RequestBody JSONObject pJson) throws SQLException{
-        String userId = SysContext.getUserId();
+        int userId = SysContext.getId();
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         try {
 
@@ -194,7 +194,7 @@ public class StoreControl extends RO {
         if(deleteIds ==null || deleteIds.isEmpty()){
             return ErrorMsg("过账失败","请选择过账项");
         }
-        String userId = SysContext.getUserId();
+        int userId = SysContext.getId();
 
         try {
             sqlSession.getConnection().setAutoCommit(false);

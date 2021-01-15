@@ -30,9 +30,7 @@ public class InvItemOnHandService {
         return  0 < number;
     }
 
-    public List<Map<String,Object>> getBillLinesByItemId(Map<String,Object> jsonObject){
-       return  DbSession.selectList("inv_item_on_hand.getBillLinesByItemId",jsonObject);
-    }
+
 
     /**
      * 批量保存或更新 存量表
@@ -52,4 +50,45 @@ public class InvItemOnHandService {
             }
         }
     }
+
+    /**
+     *  查询列表
+     * @param map
+     * @return
+     */
+    public List<Map<String,Object>> getItemOnHandByPage(Map<String,Object> map){
+        return  DbSession.selectList("inv_item_on_hand.getItemOnHandByPage",map);
+    }
+
+    /**
+     * 查询数量
+     * @param map
+     * @return
+     */
+    public long getItemOnHandByPageCount(Map<String,Object> map){
+        return  DbSession.selectOne("inv_item_on_hand.getItemOnHandByPageCount",map);
+    }
+
+
+
+    /**
+     *  查下存量，并按仓库分组
+     * @param map
+     * @return
+     */
+    public List<Map<String,Object>> getItemOnHandOrgByPage(Map<String,Object> map){
+        return  DbSession.selectList("inv_item_on_hand.getItemOnHandOrgByPage",map);
+    }
+
+    /**
+     * 查询存量数量，并按仓库分组
+     * @param map
+     * @return
+     */
+    public long getItemOnHandOrgByPageCount(Map<String,Object> map){
+        return  DbSession.selectOne("inv_item_on_hand.getItemOnHandOrgByPageCount",map);
+    }
+
+
+
 }
