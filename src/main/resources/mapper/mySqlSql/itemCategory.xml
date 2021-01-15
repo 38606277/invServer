@@ -60,18 +60,13 @@
 	<select id="getItemCategorySegmentById" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_item_category_segment u where u.category_id = #{category_id} and u.row_number='${row_number}'
     </select>
-	<select id="getItemCategory" parameterType="map" resultType="map">
-        SELECT u.* FROM mdm_item_category u where u.category_pid is null or u.category_pid=''
-    </select>
 
 	<select id="getItemCategoryByPid" parameterType="map" resultType="map">
-        SELECT u.* FROM mdm_item_category u where u.category_pid =#{category_id}
+        SELECT u.*,u.category_id as 'key',u.category_name as 'title' FROM mdm_item_category u where u.category_pid =#{category_pid}
     </select>
 
-
-
-	<select id="getItemCategoryPidNull" parameterType="map" resultType="map">
-        SELECT u.* FROM mdm_item_category u where u.category_pid is null or u.category_pid=""
+	<select id="countChildren" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT count(1) FROM mdm_item_category u where u.category_pid =#{category_pid}
     </select>
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">

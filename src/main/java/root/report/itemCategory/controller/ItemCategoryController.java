@@ -15,6 +15,7 @@ import root.report.itemCategory.service.ItemCategoryService;
 import root.report.mdmDict.service.MdmDictService;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +68,20 @@ public class ItemCategoryController extends RO {
     }
 
     @RequestMapping(value = "/getAllList", produces = "text/plain;charset=UTF-8")
-    public String getAllList() {
+    public String getAllList(@RequestBody String pjson) {
         try {
-
-            List<Map> map1 = itemCategoryService.getItemCategoryByPid();
-            return SuccessMsg("", map1);
+            Map map = new HashMap();
+            JSONObject obj=JSON.parseObject(pjson);
+            map.put("category_pid",obj.get("category_pid"));
+            List<Map> map1 = itemCategoryService.getItemCategoryByPid(map);
+            map.put("category_id","-1");
+            map.put("category_name","全部");
+            map.put("key","-1");
+            map.put("title","全部");
+            map.put("children",map1);
+            List<Map> newamp = new ArrayList<>();
+            newamp.add(map);
+            return SuccessMsg("", newamp);
         } catch (Exception ex){
             return ExceptionMsg(ex.getMessage());
         }
@@ -109,12 +119,18 @@ public class ItemCategoryController extends RO {
             String[] arrId=ids.split(",");
             for(int i = 0; i < arrId.length; i++){
                 //删除
-                this.itemCategoryService.deleteItemCategoryByID(sqlSession,arrId[0]);
+                Integer count=itemCategoryService.countChildren(sqlSession,arrId[0]);
+                if(count==0) {
+                    this.itemCategoryService.deleteItemCategoryByID(sqlSession, arrId[0]);
+                }else{
+                    sqlSession.getConnection().rollback();
+                    return ExceptionMsg("包含子类不可以删除");
+                }
             }
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功",null);
         }catch (Exception ex){
-            sqlSession.getConnection().rollback();
+
             ex.printStackTrace();
             return ExceptionMsg(ex.getMessage());
         }finally {

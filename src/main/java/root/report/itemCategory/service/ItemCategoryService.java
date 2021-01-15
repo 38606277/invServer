@@ -154,12 +154,11 @@ public class ItemCategoryService {
         return DbFactory.Open(DbFactory.FORM).selectOne("itemCategory.getItemCategoryById",m);
     }
 
-    public List<Map> getItemCategoryByPid() {
+    public List<Map> getItemCategoryByPid(Map map) {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
-        List<Map> list= sqlSession.selectList("itemCategory.getItemCategory");
+        List<Map> list= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);
         for(int i=0;i<list.size();i++){
-            Map map=new HashMap();
-            map.put("category_id",list.get(i).get("category_id"));
+            map.put("category_pid",list.get(i).get("category_id"));
             List<Map> chilerenlist= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
@@ -172,9 +171,9 @@ public class ItemCategoryService {
         if (list.isEmpty()) {
             return list;
         }
+        Map map=new HashMap();
         for(int i=0;i<list.size();i++){
-            Map map=new HashMap();
-            map.put("category_id",list.get(i).get("category_id"));
+            map.put("category_pid",list.get(i).get("category_id"));
             List<Map> chilerenlist= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
@@ -183,4 +182,7 @@ public class ItemCategoryService {
         return list;
     }
 
+    public Integer countChildren(SqlSession sqlSession, String category_id) {
+       return sqlSession.selectOne("itemCategory.countChildren",category_id);
+    }
 }
