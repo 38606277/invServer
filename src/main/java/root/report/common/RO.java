@@ -2,6 +2,7 @@ package root.report.common;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -16,7 +17,9 @@ public class RO {
 	public static SerializerFeature[] features = { SerializerFeature.WriteNullNumberAsZero,
 			SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue,
 			SerializerFeature.PrettyFormat, SerializerFeature.UseISO8601DateFormat,
-			SerializerFeature.WriteDateUseDateFormat, SerializerFeature.WriteNullListAsEmpty };
+			SerializerFeature.WriteDateUseDateFormat, SerializerFeature.WriteNullListAsEmpty,
+			SerializerFeature.DisableCircularReferenceDetect
+	};
 	
 	public  String SuccessMsg(String message,Object data)
 	{

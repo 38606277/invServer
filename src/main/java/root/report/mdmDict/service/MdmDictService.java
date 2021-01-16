@@ -277,6 +277,10 @@ public class MdmDictService {
         return DbFactory.Open(DbFactory.FORM).selectOne("mdmDict.getDictById",m);
     }
 
+    public List<Map> getDictValueListByDictId(String dictId) {
+        return DbFactory.Open(DbFactory.FORM).selectList("mdmDict.getDictValueListByDictId",dictId);
+    }
+
     public List<Map> getDictValueByDictId(Map m) {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         List<Map> list= sqlSession.selectList("mdmDict.getDictValueByPId",m);

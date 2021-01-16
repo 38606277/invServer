@@ -47,6 +47,10 @@
         SELECT u.* FROM mdm_dict_value u where u.value_id = #{value_id}
     </select>
 
+	<select id="getDictValueListByDictId" parameterType="java.lang.String" resultType="map">
+        SELECT u.* FROM mdm_dict_value u where u.dict_id = #{dict_id}
+    </select>
+
 	<select id="getDictValueByValuePId" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_dict_value u where u.value_pid = #{value_id}
     </select>

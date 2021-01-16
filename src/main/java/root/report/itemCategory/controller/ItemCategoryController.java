@@ -1,6 +1,7 @@
 package root.report.itemCategory.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
@@ -61,6 +62,33 @@ public class ItemCategoryController extends RO {
             map.put("category_name",jsonFunc.getString("category_name"));
             map.put("category_pid",jsonFunc.getString("category_pid"));
             Map<String,Object> map1 = itemCategoryService.getAllPage(map);
+            return SuccessMsg("", map1);
+        } catch (Exception ex){
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "/getAllPageById", produces = "text/plain;charset=UTF-8")
+    public String getAllPageByPid(@RequestBody String pJson) {
+        try {
+            JSONObject jsonFunc = JSONObject.parseObject(pJson);
+            Map<String,String> map=new HashMap();
+            map.put("category_id",jsonFunc.getString("category_id"));
+           List<Map> map1 = itemCategoryService.getItemCategorySegmentByPid(map);
+            return SuccessMsg("", map1);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "/getAllPageByIdForLine", produces = "text/plain;charset=UTF-8")
+    public String getAllPageByIdForLine(@RequestBody String pJson) {
+        try {
+            JSONObject jsonFunc = JSONObject.parseObject(pJson);
+            Map<String,String> map=new HashMap();
+            map.put("category_id",jsonFunc.getString("category_id"));
+            List<Map> map1 = itemCategoryService.getItemCategorySegmentListByPid(map);
             return SuccessMsg("", map1);
         } catch (Exception ex){
             return ExceptionMsg(ex.getMessage());

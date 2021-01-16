@@ -6,9 +6,12 @@ import com.github.pagehelper.PageRowBounds;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import root.report.db.DbFactory;
+import root.report.mdmDict.service.MdmDictService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +21,8 @@ public class ItemCategoryService {
 
     private static Logger log = Logger.getLogger(ItemCategoryService.class);
 
+    @Autowired
+    private MdmDictService mdmDictService;
 
     public Map<String,Object> getAllPage(Map<String,String> map) {
         Map<String,Object> map1=new HashMap<>();
@@ -139,6 +144,23 @@ public class ItemCategoryService {
     }
     public List<Map> getItemCategorySegmentByPid(Map m) {
         List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentDictByPId", m);
+        for(int i=0;i<list.size();i++){
+            Map mapp=list.get(i);
+            List dictlist =new ArrayList();
+            if(null!=mapp.get("dict_id") && !"".equalsIgnoreCase(mapp.get("dict_id")==null?"":mapp.get("dict_id").toString())) {
+                dictlist=  mdmDictService.getDictValueListByDictId(mapp.get("dict_id").toString());
+            }
+            mapp.put("dictList",dictlist);
+        }
+        return list;
+    }
+    public List<Map> getItemCategorySegmentListByPid(Map m) {
+        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentDictByPId", m);
+        for(int i=0;i<list.size();i++){
+            Map mapp=list.get(i);
+            List dictlist= mdmDictService.getDictValueListByDictId(mapp.get("dict_id").toString());
+            mapp.put("dictList",dictlist);
+        }
         return list;
     }
 
@@ -185,4 +207,6 @@ public class ItemCategoryService {
     public Integer countChildren(SqlSession sqlSession, String category_id) {
        return sqlSession.selectOne("itemCategory.countChildren",category_id);
     }
+
+
 }
