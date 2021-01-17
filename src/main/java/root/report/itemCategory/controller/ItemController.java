@@ -79,4 +79,27 @@ public class ItemController extends RO {
         }
     }
 
+    @RequestMapping(value = "/deleteItemById", produces = "text/plain;charset=UTF-8")
+    public String deleteItemById(@RequestBody String pJson) throws SQLException {
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        try{
+            sqlSession.getConnection().setAutoCommit(false);
+            JSONObject obj=JSON.parseObject(pJson);
+            String ids = obj.getString("item_id");
+            String[] arrId=ids.split(",");
+            for(int i = 0; i < arrId.length; i++){
+                //删除
+                this.itemService.deleteItemByID(sqlSession, arrId[0]);
+            }
+            sqlSession.getConnection().commit();
+            return SuccessMsg("删除成功",null);
+        }catch (Exception ex){
+
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }finally {
+            sqlSession.getConnection().setAutoCommit(true);
+        }
+    }
+
 }

@@ -164,15 +164,14 @@ public class ItemService {
             }
         }
         if(delLine.size()>0) {
-            /*for (int i = 0; i < delLine.size(); i++) {
+            for (int i = 0; i < delLine.size(); i++) {
                 Map<String, Object> dmap = new HashMap<>();
                 JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                if(!jsonObjectVal.getString("row_number").contains("NEW")) {
-                    dmap.put("category_id", jsonObjectVal.getString("category_id"));
-                    dmap.put("row_number", jsonObjectVal.getString("row_number"));
-                    sqlSession.delete("mdmItem.deleteItemCategorySegmentByID", dmap);
+                if(!jsonObjectVal.getString("item_id").contains("NEW")) {
+                   // dmap.put("item_id", jsonObjectVal.getString("item_id"));
+                    sqlSession.delete("mdmItem.deleteItemByID", jsonObjectVal.getString("item_id"));
                 }
-            }*/
+            }
         }
         return id;
     }
@@ -187,5 +186,9 @@ public class ItemService {
         resmap.put("mainForm",maps);
         resmap.put("lineForm",list);
         return resmap;
+    }
+
+    public void deleteItemByID(SqlSession sqlSession, String itemid) {
+        sqlSession.delete("mdmItem.deleteItemByID",itemid);
     }
 }
