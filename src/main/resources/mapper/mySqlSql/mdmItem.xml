@@ -79,7 +79,7 @@
 
 	<!-- 根据dict_id 跟 dict_out_id 删除func_dict_out 表相关信息  -->
 	<delete id="deleteItemByID" parameterType="java.lang.String">
-        delete from mdm_item where item_id='${item_id}'
+        delete from mdm_item where item_id=#{item_id}
     </delete>
 
 	<delete id="deleteItemByCategoryID" parameterType="Map">
