@@ -74,8 +74,12 @@ public class ItemCategoryController extends RO {
             JSONObject jsonFunc = JSONObject.parseObject(pJson);
             Map<String,String> map=new HashMap();
             map.put("category_id",jsonFunc.getString("category_id"));
-           List<Map> map1 = itemCategoryService.getItemCategorySegmentByPid(map);
-            return SuccessMsg("", map1);
+           List<Map> list = itemCategoryService.getItemCategorySegmentByPid(map);
+           Map itemCategory = itemCategoryService.getItemCategoryById(map);
+           Map resMap = new HashMap();
+           resMap.put("list",list);
+           resMap.put("dataInfo",itemCategory);
+            return SuccessMsg("", resMap);
         } catch (Exception ex){
             ex.printStackTrace();
             return ExceptionMsg(ex.getMessage());
@@ -109,7 +113,7 @@ public class ItemCategoryController extends RO {
             map.put("children",map1);
             List<Map> newamp = new ArrayList<>();
             newamp.add(map);
-            return SuccessMsg("", newamp);
+            return SuccessMsg("", map1);
         } catch (Exception ex){
             return ExceptionMsg(ex.getMessage());
         }

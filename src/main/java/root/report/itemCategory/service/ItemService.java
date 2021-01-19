@@ -61,8 +61,106 @@ public class ItemService {
     /**
      * 功能描述: 根据JSON数据解析 对应数据，生成func_dict记录
      */
-    public String saveOrUpdate(SqlSession sqlSession,JSONObject jsonObject){
+    public String saveOrUpdate(SqlSession sqlSession,JSONObject jsonObjectVal){
         Map<String,Object> map  = new HashMap<>();
+        String id="";
+        Integer newId= sqlSession.selectOne("mdmItem.getMaxId");
+        newId = newId==null?1:newId;
+        Map<String,Object> mapVal  = new HashMap<>();
+        if (null == jsonObjectVal.getString("item_id") || "".equals(jsonObjectVal.getString("item_id")) || "null".equals(jsonObjectVal.getString("item_id"))) {
+            mapVal.put("item_id", newId);
+            mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
+            mapVal.put("item_description", jsonObjectVal.getString("item_description"));
+
+            for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
+                System.out.println("key值=" + entry.getKey());
+                System.out.println("对应key值的value=" + entry.getValue());
+                if(entry.getKey().equalsIgnoreCase("segment1")) {
+                    mapVal.put("segment1", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment2")) {
+                    mapVal.put("segment2", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment3")) {
+                    mapVal.put("segment3", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment4")) {
+                    mapVal.put("segment4", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment5")) {
+                    mapVal.put("segment5", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment6")) {
+                    mapVal.put("segment6", entry.getValue());
+                }if(entry.getKey().equalsIgnoreCase("segment7")) {
+                    mapVal.put("segment7", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment8")) {
+                    mapVal.put("segment8", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment9")) {
+                    mapVal.put("segment9", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment10")) {
+                    mapVal.put("segment10", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute1")) {
+                    mapVal.put("attribute1", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute2")) {
+                    mapVal.put("attribute2", entry.getValue());
+                }
+            }
+            sqlSession.insert("mdmItem.createMdmItem",mapVal);
+            newId++;
+
+        } else {
+            mapVal.put("item_id", jsonObjectVal.getString("item_id"));
+            id = jsonObjectVal.getString("item_id");
+            mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
+            mapVal.put("item_description", jsonObjectVal.getString("item_description"));
+            for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
+                System.out.println("key值=" + entry.getKey());
+                System.out.println("对应key值的value=" + entry.getValue());
+                if(entry.getKey().equalsIgnoreCase("segment1")) {
+                    mapVal.put("segment1", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment2")) {
+                    mapVal.put("segment2", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment3")) {
+                    mapVal.put("segment3", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment4")) {
+                    mapVal.put("segment4", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment5")) {
+                    mapVal.put("segment5", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment6")) {
+                    mapVal.put("segment6", entry.getValue());
+                }if(entry.getKey().equalsIgnoreCase("segment7")) {
+                    mapVal.put("segment7", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment8")) {
+                    mapVal.put("segment8", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment9")) {
+                    mapVal.put("segment9", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("segment10")) {
+                    mapVal.put("segment10", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute1")) {
+                    mapVal.put("attribute1", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute2")) {
+                    mapVal.put("attribute2", entry.getValue());
+                }
+            }
+            sqlSession.insert("mdmItem.updateMdmItem", mapVal);
+        }
+        /*Map<String,Object> map  = new HashMap<>();
         String id="";
         JSONArray addLine = jsonObject.getJSONArray("lineForm");
         JSONArray delLine = jsonObject.getJSONArray("lineDelete");
@@ -172,10 +270,14 @@ public class ItemService {
                     sqlSession.delete("mdmItem.deleteItemByID", jsonObjectVal.getString("item_id"));
                 }
             }
-        }
+        }*/
         return id;
     }
 
+    public Map getItemByItemId(Map<String, String> map) {
+        Map maps=DbFactory.Open(DbFactory.FORM).selectOne("mdmItem.getItemByItemId",map);
+        return maps;
+    }
 
     public Map getAllPageByCategoryId(Map<String, String> map) {
         Map resmap =new HashMap();

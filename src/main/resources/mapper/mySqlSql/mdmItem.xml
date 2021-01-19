@@ -25,6 +25,10 @@
 	<!-- 修改 func_dict 表的信息 -->
 	<update id="updateMdmItem" parameterType="Map">
 		update mdm_item set
+		<if  test="item_category_id == null">item_category_id=NULL</if>
+		<if  test="item_category_id != null">item_category_id=#{item_category_id}</if>,
+		<if  test="item_description == null">item_description=NULL</if>
+		<if  test="item_description != null">item_description=#{item_description}</if>,
 		<if  test="segment1 == null">segment1=NULL</if>
 		<if  test="segment1 != null">segment1=#{segment1}</if>,
 		<if  test="segment2 == null">segment2=NULL</if>
@@ -58,6 +62,12 @@
 
 	<select id="getItemByCategoryId" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_item u where u.item_category_id = #{item_category_id}
+    </select>
+
+
+	<select id="getItemByItemId" parameterType="map" resultType="map">
+        SELECT u.*,mic.category_name,mic.category_code FROM mdm_item u left join mdm_item_category mic on mic.category_id = u.item_category_id
+        where u.item_id = #{item_id}
     </select>
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">

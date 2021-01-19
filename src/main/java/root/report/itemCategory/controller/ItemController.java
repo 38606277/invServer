@@ -65,6 +65,19 @@ public class ItemController extends RO {
         }
     }
 
+    @RequestMapping(value = "/getItemByItemId", produces = "text/plain;charset=UTF-8")
+    public String getItemByItemId(@RequestBody String pJson) {
+        try {
+            JSONObject jsonFunc = JSONObject.parseObject(pJson);
+            Map<String,String> map=new HashMap();
+            map.put("item_id",jsonFunc.getString("item_id"));
+            Map<String,Object> map1 = itemService.getItemByItemId(map);
+            return SuccessMsg("", map1);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
     @RequestMapping(value = "/getAllPageByCategoryId", produces = "text/plain;charset=UTF-8")
     public String getAllPageByCategoryId(@RequestBody String pJson) {
         try {
