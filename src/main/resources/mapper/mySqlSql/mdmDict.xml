@@ -39,9 +39,18 @@
         SELECT u.* FROM mdm_dict u where u.dict_id = #{dict_id}
     </select>
 
+	<select id="getDictByCode" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_dict u where u.dict_code = #{dict_code}
+    </select>
+
 	<select id="getDictValueByPId" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_dict_value u where u.dict_id = #{dict_id} and (u.value_pid is null or u.value_pid='')
     </select>
+
+	<select id="getDictValueListByDictId" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_dict_value u where u.dict_id = #{dict_id}
+    </select>
+
 
 	<select id="getDictValueById" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_dict_value u where u.value_id = #{value_id}

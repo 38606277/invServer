@@ -295,6 +295,13 @@ public class MdmDictService {
         return list;
     }
 
+    public List<Map> getDictValueListByDictId(Map m) {
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        List<Map> list= sqlSession.selectList("mdmDict.getDictValueListByDictId",m);
+
+        return list;
+    }
+
     public List<Map> childrenListItem (SqlSession sqlSession,List<Map> list) {
         if (list.isEmpty()) {
             return list;
@@ -315,5 +322,9 @@ public class MdmDictService {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         List<Map> chilerenlist= sqlSession.selectList("mdmDict.getAllPage",map);
         return chilerenlist;
+    }
+
+    public Map getDictByCode(Map map) {
+        return DbFactory.Open(DbFactory.FORM).selectOne("mdmDict.getDictByCode",map);
     }
 }
