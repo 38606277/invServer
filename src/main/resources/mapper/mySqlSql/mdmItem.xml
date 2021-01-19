@@ -5,8 +5,9 @@
 
 	<!--  创建func_dict信息  -->
 	<insert id="createMdmItem" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
-		insert into mdm_item(item_id,item_category_id,item_description,segment1,segment2,segment3,segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2)
-		values (#{item_id},'${item_category_id}','${item_description}',
+		insert into mdm_item(item_id,item_category_id,item_description,uom,segment1,segment2,segment3,
+		segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2)
+		values (#{item_id},'${item_category_id}','${item_description}','${uom}',
 		<if  test="segment1 == null">NULL</if> <if  test="segment1 != null">#{segment1}</if>,
 		<if  test="segment2 == null">NULL</if> <if  test="segment2 != null">#{segment2}</if>,
 		<if  test="segment3 == null">NULL</if> <if  test="segment3 != null">#{segment3}</if>,
@@ -29,6 +30,8 @@
 		<if  test="item_category_id != null">item_category_id=#{item_category_id}</if>,
 		<if  test="item_description == null">item_description=NULL</if>
 		<if  test="item_description != null">item_description=#{item_description}</if>,
+		<if  test="uom == null">uom=NULL</if>
+		<if  test="uom != null">uom=#{uom}</if>,
 		<if  test="segment1 == null">segment1=NULL</if>
 		<if  test="segment1 != null">segment1=#{segment1}</if>,
 		<if  test="segment2 == null">segment2=NULL</if>

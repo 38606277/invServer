@@ -71,7 +71,7 @@ public class ItemService {
             mapVal.put("item_id", newId);
             mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
             mapVal.put("item_description", jsonObjectVal.getString("item_description"));
-
+            mapVal.put("uom", jsonObjectVal.getString("uom"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
                 System.out.println("对应key值的value=" + entry.getValue());
@@ -119,6 +119,7 @@ public class ItemService {
             id = jsonObjectVal.getString("item_id");
             mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
             mapVal.put("item_description", jsonObjectVal.getString("item_description"));
+            mapVal.put("uom", jsonObjectVal.getString("uom"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
                 System.out.println("对应key值的value=" + entry.getValue());
