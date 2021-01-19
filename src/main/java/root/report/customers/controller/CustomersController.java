@@ -8,11 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import root.report.common.DbSession;
 import root.report.common.RO;
 import root.report.customers.service.CustomersService;
 import root.report.db.DbFactory;
+
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -104,5 +109,27 @@ public class CustomersController extends RO {
         }
     }
 
+    /**
+     * 获取区域信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/getArea", produces = "text/plain;charset=UTF-8")
+    public String getArea(@RequestBody JSONObject pJson) throws UnsupportedEncodingException {
+        String parentCode = pJson.getString("parentCode");
+        String maxLevel = pJson.getString("maxLevel");
+        List<Map<String, Object>> areaList = DbSession.selectList("sys_area.getAreaByParentCode", parentCode);
 
+        List<Map<String, Object>> dataList = new ArrayList<>();
+        for (Map areaData : areaList) {
+            Map data = new HashMap();
+            data.put("label", areaData.get("name").toString());
+            data.put("value", areaData.get("code").toString());
+            data.put("merger_name", areaData.get("merger_name").toString());
+            data.put("level", areaData.get("level_type").toString());
+            data.put("isLeaf", areaData.get("level_type").toString().equals(maxLevel));
+            dataList.add(data);
+        }
+        return SuccessMsg("", dataList);
+    }
 }

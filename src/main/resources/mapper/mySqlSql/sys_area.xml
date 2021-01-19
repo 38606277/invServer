@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sys_area">
+	<select id="getAreaByParentCode" parameterType="java.lang.String" resultType="Map">
+		SELECT  a.code, a.name , a.level_type ,a.merger_name FROM sys_area a  WHERE a.parent_code = #{parentCode}
+	</select>
+
+	<select id="getCityByProvince" parameterType="Map" resultType="Map">
+		SELECT  a.code, a.name , a.level_type ,a.merger_name FROM sys_area a  WHERE a.parent_code = #{parentCode}
+	</select>
+	<select id="getPostionByCityName" parameterType="Map" resultType="Map">
+		SELECT  a.longitude,a.latitude FROM sys_area a  WHERE a.name =#{city_name}
+	</select>
+
+	<select id="getAreaBySexCode" parameterType="java.lang.String" resultType="Map">
+		SELECT  a.code, a.name , a.level_type ,a.merger_name FROM sys_area a  WHERE a.six_code = #{adcode}  and a.level_type = 3
+	</select>
+
+</mapper>
