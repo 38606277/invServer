@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="customers">
+
+	<!--  创建func_dict信息  -->
+	<insert id="createCustomers" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into mdm_customers(customer_id,customer_name,customer_address,customer_bank,customer_link,customer_type,
+		area_id,bank_name,bank_account_num,create_date,create_by)
+		values (#{customer_id},'${customer_name}','${customer_address}',
+		<if  test="customer_bank == null">NULL</if> <if  test="customer_bank != null">#{customer_bank}</if>,
+		<if  test="customer_link == null">NULL</if> <if  test="customer_link != null">#{customer_link}</if>,
+		<if  test="customer_type == null">NULL</if> <if  test="customer_type != null">#{customer_type}</if>,
+		<if  test="area_id == null">NULL</if> <if  test="area_id != null">#{area_id}</if>,
+		<if  test="bank_name == null">NULL</if> <if  test="bank_name != null">#{bank_name}</if>,
+		<if  test="bank_account_num == null">NULL</if> <if  test="bank_account_num != null">#{bank_account_num}</if>,
+		SYSDATE(),
+		<if  test="create_by == null">NULL</if> <if  test="create_by != null">#{create_by}</if>
+		)
+	</insert>
+
+	<!-- 修改 mdm_customers 表的信息 -->
+	<update id="updateCustomers" parameterType="Map">
+		update mdm_customers set
+		<if  test="customer_name == null">customer_name=NULL</if>
+		<if  test="customer_name != null">customer_name=#{customer_name}</if>,
+		<if  test="customer_address == null">customer_address=NULL</if>
+		<if  test="customer_address != null">customer_address=#{customer_address}</if>,
+		<if  test="customer_bank == null">customer_bank=NULL</if>
+		<if  test="customer_bank != null">customer_bank=#{customer_bank}</if>,
+		<if  test="customer_link == null">customer_link=NULL</if>
+		<if  test="customer_link != null">customer_link=#{customer_link}</if>,
+		<if  test="customer_type == null">customer_type=NULL</if>
+		<if  test="customer_type != null">customer_type=#{customer_type}</if>,
+		<if  test="area_id == null">area_id=NULL</if>
+		<if  test="area_id != null">area_id=#{area_id}</if>,
+		<if  test="bank_name == null">bank_name=NULL</if>
+		<if  test="bank_name != null">bank_name=#{bank_name}</if>,
+		<if  test="bank_account_num == null">bank_account_num=NULL</if>
+		<if  test="bank_account_num != null">bank_account_num=#{bank_account_num}</if>
+		where customer_id=#{customer_id}
+	</update>
+
+	<select id="getMaxId" resultType="java.lang.Integer" >
+        SELECT (MAX(customer_id) +1)as customer_id from mdm_customers
+    </select>
+
+	<select id="getCustomersByID" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_customers u where u.customer_id = #{customer_id}
+    </select>
+
+
+
+	<select id="getAllPage" resultType="Map" parameterType="Map">
+		SELECT u.*
+		FROM mdm_customers u where  1=1
+		<if  test="customer_name != null and customer_name!='' ">
+			and  u.customer_name='${customer_name}'
+		</if>
+		<if  test="customer_address != null and customer_address!='' ">
+			and  u.customer_address like '%${customer_address}%'
+		</if>
+		<if  test="customer_link != null and customer_link!='' ">
+			and  u.customer_link='${customer_link}'
+		</if>
+		<if  test="customer_type != null and customer_type!='' ">
+			and  u.customer_type like '%${customer_type}%'
+		</if>
+    </select>
+
+	<delete id="deleteCustomersById" parameterType="Map">
+        delete from mdm_customers where customer_id=#{customer_id}
+    </delete>
+
+	<select id="isExit" parameterType="map" resultType="java.lang.Integer">
+        SELECT count(1) FROM mdm_customers where customer_name='${customer_id}'
+		<if  test="customer_id != null and customer_id!='' ">
+			and  customer_id != '${customer_id}'
+		</if>
+    </select>
+</mapper>
