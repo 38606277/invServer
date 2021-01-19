@@ -106,8 +106,10 @@ public class DictController extends RO {
             Map map = new HashMap();
             map.put("dict_code",obj.get("dict_code"));
             Map jsonObject = this.mdmDictService.getDictByCode(map);
-            map.put("dict_id",jsonObject.get("dict_id"));
-            List<Map> list = this.mdmDictService.getDictValueByDictId(map);
+            List<Map> list =null;
+            if(null!=jsonObject) {
+                list = this.mdmDictService.getDictValueListByDictId(jsonObject.get("dict_id").toString());
+            }
             Map mmm=new HashMap();
             mmm.put("mainForm",jsonObject);
             mmm.put("lineForm",list);
