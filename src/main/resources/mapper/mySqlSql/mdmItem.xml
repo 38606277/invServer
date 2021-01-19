@@ -71,7 +71,32 @@
     </select>
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-        SELECT u.*  FROM mdm_item u  where  1=1
+		SELECT u.item_id,u.item_category_id,u.item_description,d1.value_name as segment1 ,
+		d2.value_name as segment2,
+		d3.value_name as segment3,
+		d4.value_name as segment4,
+		d5.value_name as segment5,
+		d6.value_name as segment6,
+		d7.value_name as segment7,
+		d8.value_name as segment8,
+		d9.value_name as segment9,
+		d10.value_name as segment10,
+		d11.value_name as attribute1,
+		d12.value_name as attribute2
+		FROM mdm_item u
+		LEFT JOIN mdm_dict_value d1 on u.segment1=d1.value_id
+		LEFT JOIN mdm_dict_value d2 on u.segment2=d2.value_id
+		LEFT JOIN mdm_dict_value d3 on u.segment3=d3.value_id
+		LEFT JOIN mdm_dict_value d4 on u.segment4=d4.value_id
+		LEFT JOIN mdm_dict_value d5 on u.segment5=d5.value_id
+		LEFT JOIN mdm_dict_value d6 on u.segment6=d6.value_id
+		LEFT JOIN mdm_dict_value d7 on u.segment7=d7.value_id
+		LEFT JOIN mdm_dict_value d8 on u.segment8=d8.value_id
+		LEFT JOIN mdm_dict_value d9 on u.segment9=d9.value_id
+		LEFT JOIN mdm_dict_value d10 on u.segment10=d10.value_id
+		LEFT JOIN mdm_dict_value d11 on u.attribute1=d11.value_id
+		LEFT JOIN mdm_dict_value d12 on u.attribute2=d12.value_id
+		where  1=1
 		<if  test="item_category_id != null and item_category_id!='' ">
 			and  u.item_category_id='${item_category_id}'
 		</if>
