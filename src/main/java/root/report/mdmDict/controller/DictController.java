@@ -113,7 +113,7 @@ public class DictController extends RO {
             Map mmm=new HashMap();
             mmm.put("mainForm",jsonObject);
             mmm.put("lineForm",list);
-            return SuccessMsg("查询成功",mmm);
+            return SuccessMsg("查询成功",list);
         }catch (Exception ex){
             ex.printStackTrace();
             return ExceptionMsg(ex.getMessage());
