@@ -68,7 +68,6 @@ public class CustomersService {
             Integer count = sqlSession.selectOne("customers.isExit", map);
             if (count == 0) {
                 map.put("customer_address", jsonObject.getString("customer_address"));
-                map.put("customer_bank", jsonObject.getString("customer_bank"));
                 map.put("customer_link", jsonObject.getString("customer_link"));
                 map.put("customer_type", jsonObject.getString("customer_type"));
                 map.put("area_id", jsonObject.getString("area_id").equals("") ? null : jsonObject.getString("area_id"));
