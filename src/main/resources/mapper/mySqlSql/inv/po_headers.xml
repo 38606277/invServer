@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="po_headers">
+
+    <insert id="savePoHeader" parameterType="Map" keyColumn="po_header_id" keyProperty="po_header_id" useGeneratedKeys="true">
+        INSERT INTO po_headers( `header_code`, `po_type`, `agent_id`,`vendor_id`,`po_date`, `bill_to_location`, `ship_to_location`, `status`, `contract_code`, `contract_name`, `contract_file`, `comments`,`create_date`,`create_by`,`update_by`,`update_date`)
+        VALUES (#{header_code}, #{po_type}, #{agent_id},#{vendor_id},#{po_date}, #{bill_to_location}, #{ship_to_location}, #{status}, #{contract_code}, #{contract_name}, #{contract_file}, #{comments},#{create_date},#{create_by},#{update_by},#{update_date});
+    </insert>
+
+    <update id="updatePoHeaderById" parameterType="Map">
+        update po_headers
+        <trim prefix="set" suffixOverrides=",">
+            <if test="po_type!=null">po_type=#{po_type},</if>
+            <if test="agent_id!=null">agent_id=#{agent_id},</if>
+            <if test="vendor_id!=null">vendor_id=#{vendor_id},</if>
+            <if test="po_date!=null">po_date=#{po_date},</if>
+            <if test="bill_to_location!=null">bill_to_location=#{bill_to_location},</if>
+            <if test="ship_to_location!=null">ship_to_location=#{ship_to_location},</if>
+            <if test="status!=null">status=#{status},</if>
+            <if test="contract_code!=null">contract_code=#{contract_code},</if>
+            <if test="contract_name!=null">contract_name=#{contract_name},</if>
+            <if test="contract_file!=null">contract_file=#{contract_file},</if>
+            <if test="comments!=null">comments=#{comments},</if>
+            <if test="create_date!=null">create_date=#{create_date},</if>
+            <if test="create_by!=null">create_by=#{create_by},</if>
+            <if test="update_by!=null">update_by=#{update_by},</if>
+            <if test="update_date!=null">update_date=#{update_date},</if>
+        </trim>
+        where po_header_id=#{po_header_id}
+    </update>
+
+
+    <delete id="deletePoHeaderByIds" parameterType="Map">
+        delete from po_headers where po_header_id in (${ids})
+    </delete>
+
+
+    <delete id="updatePoHeaderStatusByIds" parameterType="Map">
+        update po_headers set status=#{status} where po_header_id in (${ids})
+    </delete>
+    
+    <select id="getPoHeaderListByPageCount" resultType="int" parameterType="Map">
+        SELECT count(1) FROM po_headers ph
+        where 1=1
+        <if test="header_code != null and header_code!=''">  and ph.header_code like '%${header_code}%' </if>
+        <if test="po_type != null and po_type!=''">  and ph.po_type=#{po_type} </if>
+        <if test="agent_id != null and agent_id!=''">  and ph.agent_id=#{agent_id} </if>
+        <if test="vendor_id != null and vendor_id!=''">  and ph.vendor_id=#{vendor_id} </if>
+        <if test="po_date_start != null and po_date_start != '' ">and ph.po_date <![CDATA[>=]]> #{po_date_start}</if>
+        <if test="po_date_end != null and po_date_end != '' ">and ph.po_date <![CDATA[<=]]> #{po_date_end}</if>
+        <if test="bill_to_location != null and bill_to_location!=''"> and ph.bill_to_location like '%${bill_to_location}%' </if>
+        <if test="ship_to_location != null and ship_to_location!=''"> and ph.ship_to_location like '%${ship_to_location}%' </if>
+        <if test="status != null and status!=''">  and ph.status=#{status} </if>
+        <if test="contract_code != null and contract_code!=''"> and ph.contract_code like '%${contract_code}%' </if>
+        <if test="contract_name != null and contract_name!=''"> and ph.contract_name like '%${contract_name}%' </if>
+        <if test="comments != null and comments!=''"> and ph.comments like '%${comments}%' </if>
+        <if test="create_date_start != null and create_date_start != '' ">and ph.create_date <![CDATA[>=]]> #{create_date_start}</if>
+        <if test="create_date_end != null and create_date_end != '' ">and ph.create_date <![CDATA[<=]]> #{create_date_end}\</if>
+        <if test="create_by != null and create_by!=''">  and ph.create_by=#{create_by} </if>
+        <if test="update_date_start != null and update_date_start != '' "> and ph.update_date <![CDATA[>=]]> #{update_date_start} </if>
+        <if test="update_date_end != null and update_date_end != '' "> and ph.update_date <![CDATA[<=]]> #{update_date_end} </if>
+        <if test="update_by != null and update_by!=''">  and ph.update_by=#{update_by} </if>
+    </select>
+
+    <select id="getPoHeaderListByPage" resultType="Map" parameterType="Map">
+        SELECT * FROM po_headers ph
+        where 1=1
+        <if test="header_code != null and header_code!=''">  and ph.header_code like '%${header_code}%' </if>
+        <if test="po_type != null and po_type!=''">  and ph.po_type=#{po_type} </if>
+        <if test="agent_id != null and agent_id!=''">  and ph.agent_id=#{agent_id} </if>
+        <if test="vendor_id != null and vendor_id!=''">  and ph.vendor_id=#{vendor_id} </if>
+        <if test="po_date_start != null and po_date_start != '' ">and ph.po_date <![CDATA[>=]]> #{po_date_start}</if>
+        <if test="po_date_end != null and po_date_end != '' ">and ph.po_date <![CDATA[<=]]> #{po_date_end}</if>
+        <if test="bill_to_location != null and bill_to_location!=''"> and ph.bill_to_location like '%${bill_to_location}%' </if>
+        <if test="ship_to_location != null and ship_to_location!=''"> and ph.ship_to_location like '%${ship_to_location}%' </if>
+        <if test="status != null and status!=''">  and ph.status=#{status} </if>
+        <if test="contract_code != null and contract_code!=''"> and ph.contract_code like '%${contract_code}%' </if>
+        <if test="contract_name != null and contract_name!=''"> and ph.contract_name like '%${contract_name}%' </if>
+        <if test="comments != null and comments!=''"> and ph.comments like '%${comments}%' </if>
+        <if test="create_date_start != null and create_date_start != '' ">and ph.create_date <![CDATA[>=]]> #{create_date_start}</if>
+        <if test="create_date_end != null and create_date_end != '' ">and ph.create_date <![CDATA[<=]]> #{create_date_end}\</if>
+        <if test="create_by != null and create_by!=''">  and ph.create_by=#{create_by} </if>
+        <if test="update_date_start != null and update_date_start != '' "> and ph.update_date <![CDATA[>=]]> #{update_date_start} </if>
+        <if test="update_date_end != null and update_date_end != '' "> and ph.update_date <![CDATA[<=]]> #{update_date_end} </if>
+        <if test="update_by != null and update_by!=''">  and ph.update_by=#{update_by} </if>
+        ORDER BY update_date desc
+        limit #{startIndex},#{perPage}
+    </select>
+
+    <select id="getPoHeaderById" resultType="Map" parameterType="Map">
+        SELECT * FROM po_headers ph
+        where po_header_id=#{po_header_id}
+    </select>
+
+
+</mapper>
+

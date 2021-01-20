@@ -40,11 +40,8 @@ import java.util.*;
 @RequestMapping("/reportServer/aa")
 public class StoreControl extends RO {
 
-
-
     @Autowired
     public DictService dictService;
-
 
     //查询所有的数据字典
     @RequestMapping(value = "/getAllStore", produces = "text/plain;charset=UTF-8")

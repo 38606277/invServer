@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="po_lines">
+
+    <insert id="savePoLines" parameterType="Map">
+        INSERT INTO po_lines(`head_id`, `line_type_id`, `line_num`, `category_id`, `item_id`, `item_description`, `unit_price`, `quantity`,  `uom`, `amount`, `cancel_flag`, `cancel_by`, `cancel_reason`, `cancel_date`, `rcv_quantity`)
+        VALUES (#{head_id}, #{line_type_id}, #{line_num}, #{category_id}, #{item_id}, #{item_description}, #{unit_price}, #{quantity},  #{uom}, #{amount}, #{cancel_flag}, #{cancel_by}, #{cancel_reason}, #{cancel_date}, #{rcv_quantity})
+    </insert>
+
+    <insert id="savePoLinesAll" parameterType="java.util.List">
+        INSERT INTO po_lines(`head_id`, `line_type_id`, `line_num`, `category_id`, `item_id`, `item_description`, `unit_price`, `quantity`, `uom`, `amount`, `cancel_flag`, `cancel_by`, `cancel_reason`, `cancel_date`, `rcv_quantity`) VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.head_id}, #{item.line_type_id}, #{item.line_num}, #{item.category_id}, #{item.item_id}, #{item.item_description}, #{item.unit_price}, #{item.quantity},  #{item.uom}, #{item.amount}, #{item.cancel_flag}, #{item.cancel_by}, #{item.cancel_reason}, #{item.cancel_date}, #{item.rcv_quantity})
+        </foreach>
+    </insert>
+
+    <select id="getPoLinesByHeadId" resultType="Map" parameterType="Map">
+        SELECT * FROM po_lines where head_id=#{head_id} order by line_number asc
+    </select>
+
+    <delete id="deleteByIds" parameterType="Map">
+        delete from po_lines where po_line_id in (${ids})
+    </delete>
+
+    <update id="updatePoLinesById" parameterType="Map">
+        update po_lines
+        <trim prefix="set" suffixOverrides=",">
+            <if test="head_id!=null">head_id=#{head_id},</if>
+            <if test="line_type_id!=null">line_type_id=#{line_type_id},</if>
+            <if test="line_num!=null">line_num=#{line_num},</if>
+            <if test="category_id!=null">category_id=#{category_id},</if>
+            <if test="item_id!=null">item_id=#{item_id},</if>
+            <if test="item_description!=null">item_description=#{item_description},</if>
+            <if test="unit_price!=null">unit_price=#{unit_price},</if>
+            <if test="quantity!=null">quantity=#{quantity},</if>
+            <if test="uom!=null">uom=#{uom},</if>
+            <if test="amount!=null">amount=#{amount},</if>
+            <if test="cancel_flag!=null">cancel_flag=#{cancel_flag},</if>
+            <if test="cancel_by!=null">cancel_by=#{cancel_by},</if>
+            <if test="cancel_reason!=null">cancel_reason=#{cancel_reason},</if>
+            <if test="cancel_date!=null">cancel_date=#{cancel_date},</if>
+            <if test="rcv_quantity!=null">rcv_quantity=#{rcv_quantity},</if>
+        </trim>
+        where po_line_id=#{po_line_id}
+
+    </update>
+
+</mapper>
+

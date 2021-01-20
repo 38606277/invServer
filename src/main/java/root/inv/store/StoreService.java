@@ -20,19 +20,9 @@ public class StoreService {
     private static Logger log = Logger.getLogger(DictService.class);
 
     public List<Map<String,Object>> getStoreListByPage(Map<String,Object> params){
-
         int id = SysContext.getId();//用户的表id
 
         params.put("create_by",id);
-
-        //调拨单
-        if("transfer".equals(params.get("bill_type"))){
-            if("transferIn".equals(params.get("sub_type"))){
-                params.put("target_operator",id);
-            }else{
-                params.put("operator",id);
-            }
-        }
 
         List<Map<String,Object>> resultList = new ArrayList<Map<String,Object>>();
         try

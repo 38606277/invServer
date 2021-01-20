@@ -7,10 +7,9 @@
         SELECT count(1) FROM inv_bill_header
         where 1=1
         <if test="bill_type != null and bill_type!=''">  and bill_type=#{bill_type} </if>
-<!--        <if test="operator != null and operator!=''">  and (operator=#{operator} or create_by =#{create_by}) </if>-->
-<!--        <if test="target_operator != null and target_operator!=''">  and (target_operator=#{target_operator} or create_by =#{create_by}) </if>-->
         <if test="operator != null and operator!=''">  and operator=#{operator} </if>
         <if test="target_operator != null and target_operator!=''">  and target_operator=#{target_operator}</if>
+<!--        <if test="create_by != null and create_by!=''">  and create_by=#{create_by} </if>-->
     </select>
 
     <select id="getStoreListByPage" resultType="Map" parameterType="Map">
@@ -30,6 +29,7 @@
 <!--        <if test="target_operator != null and target_operator!=''">  and (target_operator=#{target_operator} or create_by =#{create_by}) </if>-->
         <if test="operator != null and operator!=''">  and operator=#{operator} </if>
         <if test="target_operator != null and target_operator!=''">  and target_operator=#{target_operator}</if>
+<!--        <if test="create_by != null and create_by!=''">  and create_by=#{create_by} </if>-->
         ORDER BY create_date desc
         limit #{startIndex},#{perPage}
     </select>

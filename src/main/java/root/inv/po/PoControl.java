@@ -1,4 +1,4 @@
-package root.inv.store;
+package root.inv.po;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -10,34 +10,29 @@ import org.springframework.web.bind.annotation.RestController;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.sys.SysContext;
+import root.report.util.DateUtil;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 入库
+ * 采购订单
  */
 @RestController
-@RequestMapping(value = "/reportServer/invStore")
-public class StoreControl extends RO {
-
-
-    @Autowired
-    public StoreService storeService;
+@RequestMapping(value = "/reportServer/po")
+public class PoControl extends RO {
 
     @Autowired
-    InvBillLineService invBillLineService;
+    PoHeadersService poHeadersService;
 
     @Autowired
-    InvItemTransactionService invItemTransactionService;
-
+    PoLinesService poLinesService;
 
     //查询所有事物
-    @RequestMapping(value = "/getStoreListByPage", produces = "text/plain;charset=UTF-8")
-    public String getStoreListByPage(@RequestBody JSONObject pJson) {
+    @RequestMapping(value = "/getPoListByPage", produces = "text/plain;charset=UTF-8")
+    public String getPoListByPage(@RequestBody JSONObject pJson) {
 
         int currentPage = Integer.valueOf(pJson.getString("pageNum"));
         int perPage = Integer.valueOf(pJson.getString("perPage"));
@@ -50,19 +45,20 @@ public class StoreControl extends RO {
         pJson.put("startIndex",currentPage);
         pJson.put("perPage",perPage);
 
-        List<Map<String, Object>> list = storeService.getStoreListByPage(pJson);
-        int total = storeService.getStoreListByPageCount(pJson);
+        List<Map<String, Object>> list = poHeadersService.getPoHeadersListByPage(pJson);
+        int total = poHeadersService.getPoHeadersListByPageCount(pJson);
         return SuccessMsg(list, total);
     }
 
     //查询详情
-    @RequestMapping(value = "/getStoreById", produces = "text/plain;charset=UTF-8")
-    public String getStoreById(@RequestBody JSONObject pJson){
-        Map<String, Object> mainData = storeService.getStoreById(pJson);
+    @RequestMapping(value = "/getPoById", produces = "text/plain;charset=UTF-8")
+    public String getPoById(@RequestBody JSONObject pJson){
+        Map<String, Object> mainData = poHeadersService.getPoHeadersById(pJson);
         if(mainData == null || mainData.isEmpty()){
             return ErrorMsg("2000","数据不存在");
         }
-        List<Map<String,Object>> lines =  invBillLineService.getBillLinesById(pJson);
+        String headId  = String.valueOf(mainData.get("po_header_id"));
+        List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeadId(headId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
         result.put("linesData",lines);
@@ -71,8 +67,8 @@ public class StoreControl extends RO {
 
 
     //更新
-    @RequestMapping(value = "/updateStoreById", produces = "text/plain;charset=UTF-8")
-    public String updateStoreById(@RequestBody JSONObject pJson)throws SQLException{
+    @RequestMapping(value = "/updatePoById", produces = "text/plain;charset=UTF-8")
+    public String updatePoById(@RequestBody JSONObject pJson)throws SQLException {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         int userId = SysContext.getId();
         try {
@@ -81,13 +77,13 @@ public class StoreControl extends RO {
             //更新主实体
             JSONObject mainData = pJson.getJSONObject("mainData");
 
-            storeService.updateStoreById(sqlSession,mainData);
+            poHeadersService.updatePoHeadersById(sqlSession,mainData);
 
 
             //删除行数据
             String deleteIds  = pJson.getString("deleteData");
             if(deleteIds!=null && !deleteIds.isEmpty()){
-                invBillLineService.deleteBillLines(sqlSession,deleteIds);
+                poLinesService.deletePoLines(sqlSession,deleteIds);
             }
 
             //新增或更新行数据
@@ -98,7 +94,7 @@ public class StoreControl extends RO {
                 jsonObject.put("create_by",userId);
                 jsonObject.put("header_id", mainData.get("bill_id"));
             }
-            invBillLineService.saveOrUpdateBillLinesList(sqlSession,jsonArray);
+            poLinesService.saveOrUpdatePoLinesList(sqlSession,jsonArray);
 
             sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",mainData.get("bill_id"));
@@ -117,8 +113,8 @@ public class StoreControl extends RO {
      * @param pJson
      * @return
      */
-    @RequestMapping(value = "/createStore", produces = "text/plain; charset=utf-8")
-    public String createStore(@RequestBody JSONObject pJson) throws SQLException{
+    @RequestMapping(value = "/createPo", produces = "text/plain; charset=utf-8")
+    public String createPo(@RequestBody JSONObject pJson) throws SQLException{
         int userId = SysContext.getId();
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         try {
@@ -127,28 +123,28 @@ public class StoreControl extends RO {
 
             JSONObject mainData = pJson.getJSONObject("mainData");
             mainData.put("create_by",userId);
+            mainData.put("update_by",userId);
+            mainData.put("create_date", DateUtil.getCurrentTimm());
+            mainData.put("update_date", DateUtil.getCurrentTimm());
 
             //保存主数据
-            long billId = storeService.createStore(sqlSession,mainData);
+            long billId = poHeadersService.savePoHeaders(sqlSession,mainData);
 
             if(billId < 0){
                 return ErrorMsg("2000","创建失败");
             }
 
             JSONArray jsonArray = pJson.getJSONArray("linesData");
-
-            for(int i = 0; i < jsonArray.size(); i++){
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                jsonObject.put("line_number",i);
-                jsonObject.put("create_by",userId);
-                jsonObject.put("header_id",billId);
+            if(jsonArray !=null && 0 <jsonArray.size()){
+                for(int i = 0; i < jsonArray.size(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    jsonObject.put("line_num",i);
+                    jsonObject.put("create_by",userId);
+                    jsonObject.put("head_id",billId);
+                }
+                poLinesService.insertPoLinesAll(sqlSession,jsonArray);
             }
-            boolean isLinesSaveSuccess = invBillLineService.insertBillLinesAll(sqlSession,jsonArray);
-
             sqlSession.getConnection().commit();
-            if(!isLinesSaveSuccess){
-                return  ErrorMsg("2000","行数据保存失败");
-            }
             return SuccessMsg("创建成功",billId);
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
@@ -159,8 +155,8 @@ public class StoreControl extends RO {
         }
     }
 
-    @RequestMapping(value = "/deleteStoreByIds", produces = "text/plain;charset=UTF-8")
-    public String deleteStoreByIds(@RequestBody JSONObject pJson)throws SQLException{
+    @RequestMapping(value = "/deletePoByIds", produces = "text/plain;charset=UTF-8")
+    public String deletePoByIds(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
 
         String deleteIds  = pJson.getString("ids");
@@ -171,9 +167,9 @@ public class StoreControl extends RO {
         try {
             sqlSession.getConnection().setAutoCommit(false);
             //更新主实体
-            storeService.deleteStoreByIds(sqlSession,deleteIds);
+            poHeadersService.deletePoHeadersByIds(sqlSession,deleteIds);
             //删除行数据
-            invBillLineService.deleteBillLines(sqlSession,deleteIds);
+            poLinesService.deletePoLines(sqlSession,deleteIds);
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功","");
         } catch (Exception ex){
@@ -186,8 +182,8 @@ public class StoreControl extends RO {
     }
 
 
-    @RequestMapping(value = "/updateStoreStatusByIds", produces = "text/plain;charset=UTF-8")
-    public String updateStoreStatusByIds(@RequestBody JSONObject pJson)throws SQLException{
+    @RequestMapping(value = "/updatePoStatusByIds", produces = "text/plain;charset=UTF-8")
+    public String updatePoStatusByIds(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         String deleteIds  = pJson.getString("ids");
         String status = pJson.getString("bill_status");
@@ -198,31 +194,31 @@ public class StoreControl extends RO {
         try {
             sqlSession.getConnection().setAutoCommit(false);
             //批量过账
-            storeService.updateStoreStatusByIds(sqlSession,deleteIds,status);
-            String[] billIdArr =  deleteIds.split(",");
-            for(String billId : billIdArr){
-                //获取主信息
-                Map<String,Object> billParams = new HashMap<>();
-                billParams.put("bill_id",billId);
-                Map<String,Object> mainObj = storeService.getStoreById(billParams);
-                String billType =  String.valueOf(mainObj.get("bill_type"));
-                String invOrgId =  String.valueOf(mainObj.get("inv_org_id"));
-
-                //获取子信息
-                List<Map<String,Object>> billLines = invBillLineService.getBillLinesById(billParams);
-
-                for(Map<String,Object> billLine : billLines){
-                    billLine.put("bill_type",billType);
-                    billLine.put("org_id",invOrgId);
-
-                    if("store".equals(billType)){ //入库为新增
-                        invItemTransactionService.weightedMean(sqlSession,billLine,true);
-                    }else if("deliver".equals(billType)){ //出库为减少
-                        invItemTransactionService.weightedMean(sqlSession,billLine,false);
-                    }
-
-                }
-            }
+            poHeadersService.updatePoHeadersStatusByIds(sqlSession,deleteIds,status);
+//            String[] billIdArr =  deleteIds.split(",");
+//            for(String billId : billIdArr){
+//                //获取主信息
+//                Map<String,Object> billParams = new HashMap<>();
+//                billParams.put("bill_id",billId);
+//                Map<String,Object> mainObj = storeService.getPoById(billParams);
+//                String billType =  String.valueOf(mainObj.get("bill_type"));
+//                String invOrgId =  String.valueOf(mainObj.get("inv_org_id"));
+//
+//                //获取子信息
+//                List<Map<String,Object>> billLines = invBillLineService.getBillLinesById(billParams);
+//
+//                for(Map<String,Object> billLine : billLines){
+//                    billLine.put("bill_type",billType);
+//                    billLine.put("org_id",invOrgId);
+//
+//                    if("store".equals(billType)){ //入库为新增
+//                        invItemTransactionService.weightedMean(sqlSession,billLine,true);
+//                    }else if("deliver".equals(billType)){ //出库为减少
+//                        invItemTransactionService.weightedMean(sqlSession,billLine,false);
+//                    }
+//
+//                }
+//            }
             sqlSession.getConnection().commit();
             return SuccessMsg("过账成功","");
         } catch (Exception ex){
@@ -233,7 +229,6 @@ public class StoreControl extends RO {
             sqlSession.getConnection().setAutoCommit(true);
         }
     }
-
 
 
 

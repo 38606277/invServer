@@ -17,7 +17,6 @@
     <update id="updateItemOnHand" parameterType="Map">
         update inv_item_onhand
         <trim prefix="set" suffixOverrides=",">
-            <if test="org_id!=null">org_id=#{org_id},</if>
             <if test="location_id!=null">location_id=#{location_id},</if>
             <if test="on_hand_quantity!=null">on_hand_quantity=#{on_hand_quantity},</if>
             <if test="price!=null">price=#{price},</if>
@@ -25,11 +24,24 @@
             <if test="min!=null">min=#{min},</if>
             <if test="max!=null">max=#{max},</if>
         </trim>
-        where item_id=#{item_id}
+        where item_id=#{item_id} and org_id=#{org_id}
     </update>
 
     <select id="getItemOnHandByOrgId" resultType="Map" parameterType="Map">
         SELECT * FROM inv_item_onhand where org_id=#{org_id}
+    </select>
+
+
+    <select id="getItemOnHandByParams" resultType="Map" parameterType="Map">
+        SELECT * FROM inv_item_onhand where 1=1
+        <if test="item_id != null and item_id!=''">  and item_id=#{item_id} </if>
+        <if test="org_id != null and org_id!=''">  and org_id=#{org_id} </if>
+        <if test="location_id != null and location_id!=''">  and location_id=#{location_id} </if>
+        <if test="on_hand_quantity != null and on_hand_quantity!=''">  and on_hand_quantity=#{on_hand_quantity} </if>
+        <if test="price != null and price!=''">  and price=#{price} </if>
+        <if test="amount != null and amount!=''">  and amount=#{amount} </if>
+        <if test="min != null and min!=''">  and min=#{min} </if>
+        <if test="max != null and max!=''">  and max=#{max} </if>
     </select>
 
 
@@ -80,5 +92,7 @@
         ORDER BY iio.item_id desc
         limit #{startIndex},#{perPage}
     </select>
+
+
 
 </mapper>

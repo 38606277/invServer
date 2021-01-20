@@ -30,7 +30,24 @@ public class InvItemOnHandService {
         return  0 < number;
     }
 
+    /**
+     * 保存 存量表
+     * @param sqlSession
+     * @param params
+     */
+    public void saveItemOnHand(SqlSession sqlSession, Map<String,Object> params){
+            sqlSession.insert("inv_item_on_hand.saveItemOnHand",params);
+    }
 
+
+    /**
+     * 更新 存量表
+     * @param sqlSession
+     * @param params
+     */
+    public void updateItemOnHand(SqlSession sqlSession, Map<String,Object> params){
+            sqlSession.update("inv_item_on_hand.updateItemOnHand",params);
+    }
 
     /**
      * 批量保存或更新 存量表
@@ -88,6 +105,16 @@ public class InvItemOnHandService {
     public long getItemOnHandOrgByPageCount(Map<String,Object> map){
         return  DbSession.selectOne("inv_item_on_hand.getItemOnHandOrgByPageCount",map);
     }
+
+    /**
+     * 查询存量
+     * @param map
+     * @return
+     */
+    public Map<String,Object> getItemOnHandByParams(Map<String,Object> map){
+        return  DbSession.selectOne("inv_item_on_hand.getItemOnHandByParams",map);
+    }
+
 
 
 
