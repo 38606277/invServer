@@ -5,10 +5,9 @@
 
 	<!--  创建func_dict信息  -->
 	<insert id="createCustomers" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
-		insert into mdm_customers(customer_id,customer_name,customer_address,customer_bank,customer_link,customer_type,
+		insert into mdm_customers(customer_id,customer_name,customer_address,customer_link,customer_type,
 		area_id,bank_name,bank_account_num,create_date,create_by)
 		values (#{customer_id},'${customer_name}','${customer_address}',
-		<if  test="customer_bank == null">NULL</if> <if  test="customer_bank != null">#{customer_bank}</if>,
 		<if  test="customer_link == null">NULL</if> <if  test="customer_link != null">#{customer_link}</if>,
 		<if  test="customer_type == null">NULL</if> <if  test="customer_type != null">#{customer_type}</if>,
 		<if  test="area_id == null">NULL</if> <if  test="area_id != null">#{area_id}</if>,
@@ -26,8 +25,6 @@
 		<if  test="customer_name != null">customer_name=#{customer_name}</if>,
 		<if  test="customer_address == null">customer_address=NULL</if>
 		<if  test="customer_address != null">customer_address=#{customer_address}</if>,
-		<if  test="customer_bank == null">customer_bank=NULL</if>
-		<if  test="customer_bank != null">customer_bank=#{customer_bank}</if>,
 		<if  test="customer_link == null">customer_link=NULL</if>
 		<if  test="customer_link != null">customer_link=#{customer_link}</if>,
 		<if  test="customer_type == null">customer_type=NULL</if>
@@ -46,14 +43,16 @@
     </select>
 
 	<select id="getCustomersByID" parameterType="map" resultType="map">
-        SELECT u.* FROM mdm_customers u where u.customer_id = #{customer_id}
+        SELECT u.*,sa.merger_name as area_name FROM mdm_customers u  left join sys_area sa on u.area_id=sa.`code` where u.customer_id = #{customer_id}
     </select>
 
 
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-		SELECT u.*
-		FROM mdm_customers u where  1=1
+		SELECT u.*,sa.merger_name as area_name
+		FROM mdm_customers u
+		left join sys_area sa on u.area_id=sa.`code`
+		 where  1=1
 		<if  test="customer_name != null and customer_name!='' ">
 			and  u.customer_name='${customer_name}'
 		</if>
