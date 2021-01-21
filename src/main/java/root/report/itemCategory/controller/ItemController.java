@@ -58,6 +58,7 @@ public class ItemController extends RO {
             map.put("startIndex",jsonFunc.getString("startIndex"));
             map.put("perPage",jsonFunc.getString("perPage"));
             map.put("item_category_id",jsonFunc.getString("item_category_id"));
+            map.put("item_description",jsonFunc.getString("item_description"));
             Map<String,Object> map1 = itemService.getAllPage(map);
             return SuccessMsg("", map1);
         } catch (Exception ex){
