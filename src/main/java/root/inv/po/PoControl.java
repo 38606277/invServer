@@ -11,6 +11,7 @@ import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
+import root.report.util.UUIDUtil;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -64,6 +65,15 @@ public class PoControl extends RO {
         result.put("linesData",lines);
         return SuccessMsg("获取成功", result);
     }
+
+
+    @RequestMapping(value = "/getPoLinesById", produces = "text/plain;charset=UTF-8")
+    public String getPoListById(@RequestBody JSONObject pJson){
+        String headId = String.valueOf(pJson.get("po_header_id"));
+        List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeadId(headId);
+        return SuccessMsg(lines, lines.size());
+    }
+
 
 
     //更新
@@ -126,11 +136,13 @@ public class PoControl extends RO {
             mainData.put("update_by",userId);
             mainData.put("create_date", DateUtil.getCurrentTimm());
             mainData.put("update_date", DateUtil.getCurrentTimm());
+            mainData.put("header_code", UUIDUtil.getUid());
+
 
             //保存主数据
-            long billId = poHeadersService.savePoHeaders(sqlSession,mainData);
+            long id = poHeadersService.savePoHeaders(sqlSession,mainData);
 
-            if(billId < 0){
+            if(id < 0){
                 return ErrorMsg("2000","创建失败");
             }
 
@@ -140,12 +152,12 @@ public class PoControl extends RO {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     jsonObject.put("line_num",i);
                     jsonObject.put("create_by",userId);
-                    jsonObject.put("head_id",billId);
+                    jsonObject.put("head_id",id);
                 }
                 poLinesService.insertPoLinesAll(sqlSession,jsonArray);
             }
             sqlSession.getConnection().commit();
-            return SuccessMsg("创建成功",billId);
+            return SuccessMsg("创建成功",id);
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
             ex.printStackTrace();

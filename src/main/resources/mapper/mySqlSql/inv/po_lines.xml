@@ -16,7 +16,8 @@
     </insert>
 
     <select id="getPoLinesByHeadId" resultType="Map" parameterType="Map">
-        SELECT * FROM po_lines where head_id=#{head_id} order by line_number asc
+        SELECT pl.*,mic.category_name FROM po_lines pl LEFT JOIN mdm_item_category mic on  pl.category_id = mic.category_id
+        where head_id=#{head_id} order by line_num asc
     </select>
 
     <delete id="deleteByIds" parameterType="Map">

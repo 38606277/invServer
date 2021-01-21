@@ -113,11 +113,11 @@ public class InvItemTransactionService {
             transaction.put("remark","入库" +billLineQuantity +billLine.get("uom")+ "衬衫");
         }
 
-        transaction.put("primary_quantity",quantity);
+        //transaction.put("primary_quantity",quantity);
         transaction.put("transaction_quantity",billLineQuantity);
         transaction.put("transaction_uom",String.valueOf(billLine.get("uom")));
         transaction.put("price",billLinePrice);
-        transaction.put("amount",amount);
+        transaction.put("amount",billLineAmount);
         transaction.put("create_by",userId);
         sqlSession.insert("inv_item_transaction.saveItemTransaction",transaction);
 

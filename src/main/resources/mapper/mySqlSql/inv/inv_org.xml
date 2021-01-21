@@ -43,7 +43,6 @@
         update fnd_org set path = replace(path,#{old_path},#{new_path});
     </update>
 
-
     <select id="getById" resultType="Map" parameterType="Map">
         select *, org_id as `key` ,org_name as title  from fnd_org where org_id=#{org_id}
     </select>
@@ -55,7 +54,6 @@
     <select id="getByPath" resultType="Map" parameterType="Map">
         select *, org_id as `key` ,org_name as title from fnd_org where path like '%${path}${org_id}-%'
     </select>
-
 
     <select id="getByKeyword" resultType="Map" parameterType="Map">
         select io.*, io.org_id as `key` ,io.org_name as title from fnd_org io
