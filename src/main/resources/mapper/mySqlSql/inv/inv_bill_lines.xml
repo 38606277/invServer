@@ -14,8 +14,11 @@
         </foreach>
     </insert>
 
-    <select id="getBillLinesById" resultType="Map" parameterType="Map">
-        SELECT * FROM inv_bill_lines where header_id=#{bill_id} order by line_number asc
+    <select id="getBillLinesByHeaderId" resultType="Map" parameterType="Map">
+        SELECT ibl.*,mi.item_description FROM inv_bill_lines ibl
+        LEFT JOIN mdm_item mi on ibl.item_id = mi.item_id
+        where header_id=#{header_id}
+        order by line_number asc
     </select>
 
     <delete id="deleteByIds" parameterType="Map">

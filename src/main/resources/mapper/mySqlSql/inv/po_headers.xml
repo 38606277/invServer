@@ -42,9 +42,9 @@
     
     <select id="getPoHeaderListByPageCount" resultType="int" parameterType="Map">
         SELECT count(1) FROM po_headers ph
-        LEFT JOIN fnd_user fu on ph.agent_id = fu._id -- 采购人
-        LEFT JOIN fnd_user fu2 on ph.create_by = fu2._id -- 创建人
-        LEFT JOIN fnd_user fu3 on ph.update_by = fu3._id -- 更新人
+        LEFT JOIN fnd_user fu_agent on ph.agent_id = fu_agent._id -- 采购人
+        LEFT JOIN fnd_user fu_create on ph.create_by = fu_create._id -- 创建人
+        LEFT JOIN fnd_user fu_update on ph.update_by = fu_update._id -- 更新人
         LEFT JOIN mdm_customers mc on ph.vendor_id = mc.customer_id -- 供应商
         LEFT JOIN mdm_dict md on md.dict_code = 'order_po' -- 获取对应类型的数据字典
         LEFT JOIN mdm_dict_value mdv on  md.dict_id =  mdv.dict_id and  ph.po_type = mdv.value_id -- 获取数据字典的值
@@ -71,9 +71,9 @@
         <if test="keyword != null and keyword!=''">
             and (
                 ph.header_code like '%${keyword}%' or
-                fu.USER_NAME like '%${keyword}%' or
-                fu2.USER_NAME like '%${keyword}%' or
-                fu3.USER_NAME like '%${keyword}%' or
+                fu_agent.USER_NAME like '%${keyword}%' or
+                fu_create.USER_NAME like '%${keyword}%' or
+                fu_update.USER_NAME like '%${keyword}%' or
                 mc.customer_name like '%${keyword}%' or
                 mdv.value_name like '%${keyword}%' or
                 ph.bill_to_location like '%${keyword}%' or
@@ -85,15 +85,15 @@
 
     <select id="getPoHeaderListByPage" resultType="Map" parameterType="Map">
         SELECT ph.*,
-        fu.USER_NAME as agent_name,
-        fu2.USER_NAME as create_name,
-        fu3.USER_NAME as update_name ,
+        fu_agent.USER_NAME as agent_name,
+        fu_create.USER_NAME as create_name,
+        fu_update.USER_NAME as update_name ,
         mc.customer_name as vendor_name,
         mdv.value_name as po_type_name
         FROM po_headers ph
-        LEFT JOIN fnd_user fu on ph.agent_id = fu._id -- 采购人
-        LEFT JOIN fnd_user fu2 on ph.create_by = fu2._id -- 创建人
-        LEFT JOIN fnd_user fu3 on ph.update_by = fu3._id -- 更新人
+        LEFT JOIN fnd_user fu_agent on ph.agent_id = fu_agent._id -- 采购人
+        LEFT JOIN fnd_user fu_create on ph.create_by = fu_create._id -- 创建人
+        LEFT JOIN fnd_user fu_update on ph.update_by = fu_update._id -- 更新人
         LEFT JOIN mdm_customers mc on ph.vendor_id = mc.customer_id -- 供应商
         LEFT JOIN mdm_dict md on md.dict_code = 'order_po' -- 获取对应类型的数据字典
         LEFT JOIN mdm_dict_value mdv on  md.dict_id =  mdv.dict_id and  ph.po_type = mdv.value_id -- 获取数据字典的值
@@ -120,9 +120,9 @@
         <if test="keyword != null and keyword!=''">
             and (
                 ph.header_code like '%${keyword}%' or
-                fu.USER_NAME like '%${keyword}%' or
-                fu2.USER_NAME like '%${keyword}%' or
-                fu3.USER_NAME like '%${keyword}%' or
+                fu_agent.USER_NAME like '%${keyword}%' or
+                fu_create.USER_NAME like '%${keyword}%' or
+                fu_update.USER_NAME like '%${keyword}%' or
                 mc.customer_name like '%${keyword}%' or
                 mdv.value_name like '%${keyword}%' or
                 ph.bill_to_location like '%${keyword}%' or
@@ -136,14 +136,14 @@
 
     <select id="getPoHeaderById" resultType="Map" parameterType="Map">
         SELECT ph.*,
-        fu.USER_NAME as agent_name,
-        fu2.USER_NAME as create_name,
-        fu3.USER_NAME as update_name ,
+        fu_agent.USER_NAME as agent_name,
+        fu_create.USER_NAME as create_name,
+        fu_update.USER_NAME as update_name ,
         mc.customer_name as vendor_name
         FROM po_headers ph
-        LEFT JOIN fnd_user fu on ph.agent_id = fu._id -- 采购人
-        LEFT JOIN fnd_user fu2 on ph.create_by = fu2._id -- 创建人
-        LEFT JOIN fnd_user fu3 on ph.update_by = fu3._id -- 更新人
+        LEFT JOIN fnd_user fu_agent on ph.agent_id = fu_agent._id -- 采购人
+        LEFT JOIN fnd_user fu_create on ph.create_by = fu_create._id -- 创建人
+        LEFT JOIN fnd_user fu_update on ph.update_by = fu_update._id -- 更新人
         LEFT JOIN mdm_customers mc on ph.vendor_id = mc.customer_id -- 供应商
         where po_header_id=#{po_header_id}
     </select>

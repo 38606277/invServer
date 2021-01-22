@@ -64,8 +64,8 @@ public class StoreService {
         sqlSession.update("inv_store.deleteStoreByIds",map);
     }
 
-    public void updateStoreStatusByIds(SqlSession sqlSession,String ids,String status){
-        Map<String,String> map = new HashMap<>();
+    public void updateStoreStatusByIds(SqlSession sqlSession,String ids,int status){
+        Map<String,Object> map = new HashMap<>();
         map.put("ids",ids);
         map.put("bill_status",status);
         sqlSession.update("inv_store.updateStoreStatusByIds",map);

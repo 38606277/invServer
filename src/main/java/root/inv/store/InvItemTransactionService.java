@@ -105,13 +105,18 @@ public class InvItemTransactionService {
         transaction.put("inv_org_id",orgId);
         transaction.put("item_id",itemId);
 
-        if("store".equals(billType)){ //入库
-            transaction.put("remark","入库" + billLineQuantity + billLine.get("uom")+ "衬衫");
+        String billTypeName;
+        if(billType.startsWith("store_other")){ //其他入库
+            billTypeName= "其他入库";
+        }else if(billType.startsWith("store_po")){ //订单入库
+            billTypeName= "订单入库";
         }else if("deliver".equals(billType)){//出库
-            transaction.put("remark","出库" +billLineQuantity+ billLine.get("uom")+ "衬衫");
+            billTypeName= isAdd?"调拨入库":"调拨出库";
         }else{
-            transaction.put("remark","入库" +billLineQuantity +billLine.get("uom")+ "衬衫");
+            billTypeName = "未知类型" + (isAdd?"入库":"出库");
         }
+        transaction.put("remark",billTypeName +  billLineQuantity + billLine.get("uom")+ billLine.get("item_description"));
+
 
         //transaction.put("primary_quantity",quantity);
         transaction.put("transaction_quantity",billLineQuantity);

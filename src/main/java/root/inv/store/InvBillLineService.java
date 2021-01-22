@@ -34,8 +34,10 @@ public class InvBillLineService {
         return  0 < number;
     }
 
-    public List<Map<String,Object>> getBillLinesById(Map<String,Object> jsonObject){
-       return  DbSession.selectList("inv_bill_lines.getBillLinesById",jsonObject);
+    public List<Map<String,Object>> getBillLinesByHeaderId(String headerId){
+        Map<String,Object> param = new HashMap<>();
+        param.put("header_id",headerId);
+       return  DbSession.selectList("inv_bill_lines.getBillLinesByHeaderId",param);
     }
 
     /**

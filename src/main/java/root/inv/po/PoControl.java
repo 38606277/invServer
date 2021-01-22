@@ -59,7 +59,7 @@ public class PoControl extends RO {
             return ErrorMsg("2000","数据不存在");
         }
         String headId  = String.valueOf(mainData.get("po_header_id"));
-        List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeadId(headId);
+        List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeaderId(headId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
         result.put("linesData",lines);
@@ -70,7 +70,7 @@ public class PoControl extends RO {
     @RequestMapping(value = "/getPoLinesById", produces = "text/plain;charset=UTF-8")
     public String getPoListById(@RequestBody JSONObject pJson){
         String headId = String.valueOf(pJson.get("po_header_id"));
-        List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeadId(headId);
+        List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeaderId(headId);
         return SuccessMsg(lines, lines.size());
     }
 
@@ -150,12 +150,13 @@ public class PoControl extends RO {
             if(jsonArray !=null && 0 <jsonArray.size()){
                 for(int i = 0; i < jsonArray.size(); i++){
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    jsonObject.put("line_num",i);
+                    jsonObject.put("line_number",i);
                     jsonObject.put("create_by",userId);
-                    jsonObject.put("head_id",id);
+                    jsonObject.put("header_id",id);
                 }
                 poLinesService.insertPoLinesAll(sqlSession,jsonArray);
             }
+
             sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",id);
         } catch (Exception ex){

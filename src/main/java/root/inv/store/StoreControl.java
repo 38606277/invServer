@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import root.inv.po.PoLinesService;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.sys.SysContext;
+import root.report.util.DateUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,6 +35,10 @@ public class StoreControl extends RO {
 
     @Autowired
     InvItemTransactionService invItemTransactionService;
+
+    @Autowired
+    PoLinesService poLinesService;
+
 
 
     //查询所有事物
@@ -62,7 +68,8 @@ public class StoreControl extends RO {
         if(mainData == null || mainData.isEmpty()){
             return ErrorMsg("2000","数据不存在");
         }
-        List<Map<String,Object>> lines =  invBillLineService.getBillLinesById(pJson);
+        String headerId = String.valueOf(pJson.get("bill_id"));
+        List<Map<String,Object>> lines =  invBillLineService.getBillLinesByHeaderId(headerId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
         result.put("linesData",lines);
@@ -135,6 +142,10 @@ public class StoreControl extends RO {
                 return ErrorMsg("2000","创建失败");
             }
 
+            String billType = mainData.getString("bill_type");
+            String invOrgId =  mainData.getString("inv_org_id");
+            String targetInvOrgId =  mainData.getString("target_inv_org_id");
+            int billStatus = mainData.getIntValue("bill_status");
             JSONArray jsonArray = pJson.getJSONArray("linesData");
 
             for(int i = 0; i < jsonArray.size(); i++){
@@ -142,6 +153,29 @@ public class StoreControl extends RO {
                 jsonObject.put("line_number",i);
                 jsonObject.put("create_by",userId);
                 jsonObject.put("header_id",billId);
+                jsonObject.put("create_date", DateUtil.getCurrentTimm());
+
+                String itemId = jsonObject.getString("item_id");
+
+                if("store_po".equals(billType)){//采购订单 维护剩余数量
+                    //获取订单id
+                    String sourceId =  mainData.getString("source_id");
+                    //接收数量
+                    double rcvQuantity = jsonObject.getDouble("quantity");
+                    poLinesService.updatePoLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
+                }
+
+                if(0 < billStatus){
+                    //添加事物
+                    jsonObject.put("bill_type",billType);
+                    if(billType.startsWith("store_")){ //入库为新增
+                        jsonObject.put("org_id",invOrgId);
+                        invItemTransactionService.weightedMean(sqlSession,jsonObject,true);
+                    }else if("deliver".equals(billType)){ //出库为减少
+                        jsonObject.put("org_id",invOrgId);
+                        invItemTransactionService.weightedMean(sqlSession,jsonObject,false);
+                    }
+                }
             }
             boolean isLinesSaveSuccess = invBillLineService.insertBillLinesAll(sqlSession,jsonArray);
 
@@ -190,7 +224,7 @@ public class StoreControl extends RO {
     public String updateStoreStatusByIds(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         String deleteIds  = pJson.getString("ids");
-        String status = pJson.getString("bill_status");
+        int billStatus = pJson.getIntValue("bill_status");
         if(deleteIds ==null || deleteIds.isEmpty()){
             return ErrorMsg("过账失败","请选择过账项");
         }
@@ -198,7 +232,7 @@ public class StoreControl extends RO {
         try {
             sqlSession.getConnection().setAutoCommit(false);
             //批量过账
-            storeService.updateStoreStatusByIds(sqlSession,deleteIds,status);
+            storeService.updateStoreStatusByIds(sqlSession,deleteIds,billStatus);
             String[] billIdArr =  deleteIds.split(",");
             for(String billId : billIdArr){
                 //获取主信息
@@ -207,20 +241,21 @@ public class StoreControl extends RO {
                 Map<String,Object> mainObj = storeService.getStoreById(billParams);
                 String billType =  String.valueOf(mainObj.get("bill_type"));
                 String invOrgId =  String.valueOf(mainObj.get("inv_org_id"));
+                String targetInvOrgId =  String.valueOf(mainObj.get("target_inv_org_id"));
 
                 //获取子信息
-                List<Map<String,Object>> billLines = invBillLineService.getBillLinesById(billParams);
+                List<Map<String,Object>> billLines = invBillLineService.getBillLinesByHeaderId(billId);
 
                 for(Map<String,Object> billLine : billLines){
                     billLine.put("bill_type",billType);
                     billLine.put("org_id",invOrgId);
-
-                    if("store".equals(billType)){ //入库为新增
+                    if(billType.startsWith("store_")){ //入库为新增
+                        billLine.put("org_id",invOrgId);
                         invItemTransactionService.weightedMean(sqlSession,billLine,true);
                     }else if("deliver".equals(billType)){ //出库为减少
+                        billLine.put("org_id",invOrgId);
                         invItemTransactionService.weightedMean(sqlSession,billLine,false);
                     }
-
                 }
             }
             sqlSession.getConnection().commit();
@@ -233,6 +268,7 @@ public class StoreControl extends RO {
             sqlSession.getConnection().setAutoCommit(true);
         }
     }
+
 
 
 

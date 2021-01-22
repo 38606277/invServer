@@ -31,10 +31,10 @@ public class PoLinesService {
         sqlSession.insert("po_lines.savePoLinesAll",lines);
     }
 
-    public List<Map<String,Object>> getPoLinesByHeadId(String headId){
+    public List<Map<String,Object>> getPoLinesByHeaderId(String headerId){
         Map<String,Object> param = new HashMap<>();
-        param.put("head_id",headId);
-        return  DbSession.selectList("po_lines.getPoLinesByHeadId",param);
+        param.put("header_id",headerId);
+        return  DbSession.selectList("po_lines.getPoLinesByHeaderId",param);
     }
 
     /**
@@ -64,5 +64,13 @@ public class PoLinesService {
         sqlSession.update("po_lines.deleteByIds",map);
     }
 
+
+    public void updatePoLinesRcvQuantity(SqlSession sqlSession, String headerId,String itemId,double rcvQuantity){
+        Map<String,Object> map = new HashMap<>();
+        map.put("header_id",headerId);
+        map.put("item_id",itemId);
+        map.put("rcv_quantity",rcvQuantity);
+        sqlSession.update("po_lines.updatePoLinesRcvQuantity",map);
+    }
 
 }
