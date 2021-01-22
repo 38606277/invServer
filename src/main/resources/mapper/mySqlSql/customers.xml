@@ -72,7 +72,7 @@
     </delete>
 
 	<select id="isExit" parameterType="map" resultType="java.lang.Integer">
-        SELECT count(1) FROM mdm_customers where customer_name='${customer_id}'
+        SELECT count(1) FROM mdm_customers where customer_name='${customer_name}'
 		<if  test="customer_id != null and customer_id!='' ">
 			and  customer_id != '${customer_id}'
 		</if>
