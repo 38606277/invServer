@@ -94,8 +94,8 @@
         limit #{startIndex},#{perPage}
     </select>
 
-    <delete id="deleteItemByID" parameterType="java.lang.String">
-        delete from inv_item_onhand iio where iio.item_id=#{item_id}
+    <delete id="deleteOnHandItemByID" parameterType="java.lang.Integer">
+        delete from inv_item_onhand where item_id=#{item_id}
     </delete>
 
 </mapper>

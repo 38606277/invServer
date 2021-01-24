@@ -311,6 +311,6 @@ public class ItemService {
 
     public void deleteItemByID(SqlSession sqlSession, String itemid) {
         sqlSession.delete("mdmItem.deleteItemByID",itemid);
-        sqlSession.delete("inv_item_on_hand.deleteItemByID",itemid);
+        sqlSession.delete("inv_item_on_hand.deleteOnHandItemByID",Integer.parseInt(itemid));
     }
 }
