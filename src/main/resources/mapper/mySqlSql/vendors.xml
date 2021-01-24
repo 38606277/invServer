@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="vendors">
+
+	<!--  创建func_dict信息  -->
+	<insert id="createVendors" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into mdm_vendors(vendor_id,vendor_name,vendor_address,vendor_link,vendor_type,
+		area_id,bank_name,bank_account_num,create_date,create_by)
+		values (#{vendor_id},'${vendor_name}','${vendor_address}',
+		<if  test="vendor_link == null">NULL</if> <if  test="vendor_link != null">#{vendor_link}</if>,
+		<if  test="vendor_type == null">NULL</if> <if  test="vendor_type != null">#{vendor_type}</if>,
+		<if  test="area_id == null">NULL</if> <if  test="area_id != null">#{area_id}</if>,
+		<if  test="bank_name == null">NULL</if> <if  test="bank_name != null">#{bank_name}</if>,
+		<if  test="bank_account_num == null">NULL</if> <if  test="bank_account_num != null">#{bank_account_num}</if>,
+		SYSDATE(),
+		<if  test="create_by == null">NULL</if> <if  test="create_by != null">#{create_by}</if>
+		)
+	</insert>
+
+	<!-- 修改 mdm_vendors 表的信息 -->
+	<update id="updateVendors" parameterType="Map">
+		update mdm_vendors set
+		<if  test="vendor_name == null">vendor_name=NULL</if>
+		<if  test="vendor_name != null">vendor_name=#{vendor_name}</if>,
+		<if  test="vendor_address == null">vendor_address=NULL</if>
+		<if  test="vendor_address != null">vendor_address=#{vendor_address}</if>,
+		<if  test="vendor_link == null">vendor_link=NULL</if>
+		<if  test="vendor_link != null">vendor_link=#{vendor_link}</if>,
+		<if  test="vendor_type == null">vendor_type=NULL</if>
+		<if  test="vendor_type != null">vendor_type=#{vendor_type}</if>,
+		<if  test="area_id == null">area_id=NULL</if>
+		<if  test="area_id != null">area_id=#{area_id}</if>,
+		<if  test="bank_name == null">bank_name=NULL</if>
+		<if  test="bank_name != null">bank_name=#{bank_name}</if>,
+		<if  test="bank_account_num == null">bank_account_num=NULL</if>
+		<if  test="bank_account_num != null">bank_account_num=#{bank_account_num}</if>
+		where vendor_id=#{vendor_id}
+	</update>
+
+	<select id="getMaxId" resultType="java.lang.Integer" >
+        SELECT (MAX(vendor_id) +1)as vendor_id from mdm_vendors
+    </select>
+
+	<select id="getVendorsByID" parameterType="map" resultType="map">
+        SELECT u.*,sa.merger_name as area_name FROM mdm_vendors u  left join sys_area sa on u.area_id=sa.`code` where u.vendor_id = #{vendor_id}
+    </select>
+
+
+
+	<select id="getAllPage" resultType="Map" parameterType="Map">
+		SELECT u.*,sa.merger_name as area_name
+		FROM mdm_vendors u
+		left join sys_area sa on u.area_id=sa.`code`
+		 where  1=1
+		<if  test="vendor_name != null and vendor_name!='' ">
+			and  u.vendor_name='${vendor_name}'
+		</if>
+		<if  test="vendor_address != null and vendor_address!='' ">
+			and  u.vendor_address like '%${vendor_address}%'
+		</if>
+		<if  test="vendor_link != null and vendor_link!='' ">
+			and  u.vendor_link='${vendor_link}'
+		</if>
+		<if  test="vendor_type != null and vendor_type!='' ">
+			and  u.vendor_type like '%${vendor_type}%'
+		</if>
+    </select>
+
+	<delete id="deleteVendorsById" parameterType="Map">
+        delete from mdm_vendors where vendor_id=#{vendor_id}
+    </delete>
+
+	<select id="isExit" parameterType="map" resultType="java.lang.Integer">
+        SELECT count(1) FROM mdm_vendors where vendor_name='${vendor_name}'
+		<if  test="vendor_id != null and vendor_id!='' ">
+			and  vendor_id != '${vendor_id}'
+		</if>
+    </select>
+</mapper>
