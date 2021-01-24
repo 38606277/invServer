@@ -112,8 +112,26 @@ public class ItemService {
                 }
             }
             sqlSession.insert("mdmItem.createMdmItem",mapVal);
-            newId++;
 
+            List<Map> orgList = sqlSession.selectList("inv_org.getAll");
+
+            List<Map> insertMap=new ArrayList<Map>();
+            if(orgList.size()>0){
+                for(Map resmap :orgList){
+                    Map onHandmap = new HashMap();
+                    onHandmap.put("item_id",mapVal.get("item_id"));
+                    onHandmap.put("location_id",null);
+                    onHandmap.put("on_hand_quantity",null);
+                    onHandmap.put("price",null);
+                    onHandmap.put("amount",null);
+                    onHandmap.put("min",null);
+                    onHandmap.put("max",null);
+                    onHandmap.put("org_id",resmap.get("org_id"));
+                    insertMap.add(onHandmap);
+                }
+                sqlSession.insert("inv_item_on_hand.saveItemOnHandAll",insertMap);
+            }
+            newId++;
         } else {
             mapVal.put("item_id", jsonObjectVal.getString("item_id"));
             id = jsonObjectVal.getString("item_id");
@@ -293,5 +311,6 @@ public class ItemService {
 
     public void deleteItemByID(SqlSession sqlSession, String itemid) {
         sqlSession.delete("mdmItem.deleteItemByID",itemid);
+        sqlSession.delete("inv_item_on_hand.deleteItemByID",itemid);
     }
 }

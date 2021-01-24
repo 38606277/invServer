@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
-        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="inv_item_on_hand">
 
     <insert id="saveItemOnHandAll" parameterType="java.util.List">
@@ -94,6 +94,8 @@
         limit #{startIndex},#{perPage}
     </select>
 
-
+    <delete id="deleteItemByID" parameterType="java.lang.String">
+        delete from inv_item_onhand iio where iio.item_id=#{item_id}
+    </delete>
 
 </mapper>
