@@ -239,8 +239,8 @@ public class StoreControl extends RO {
                 Map<String,Object> billParams = new HashMap<>();
                 billParams.put("bill_id",billId);
                 Map<String,Object> mainObj = storeService.getStoreById(billParams);
-                String billType =  String.valueOf(mainObj.get("bill_type"));
-                String invOrgId =  String.valueOf(mainObj.get("inv_org_id"));
+                String billType = String.valueOf(mainObj.get("bill_type"));
+                String invOrgId = String.valueOf(mainObj.get("inv_org_id"));
                 String targetInvOrgId =  String.valueOf(mainObj.get("target_inv_org_id"));
 
                 //获取子信息
@@ -250,11 +250,24 @@ public class StoreControl extends RO {
                     billLine.put("bill_type",billType);
                     billLine.put("org_id",invOrgId);
                     if(billType.startsWith("store_")){ //入库为新增
-                        billLine.put("org_id",invOrgId);
                         invItemTransactionService.weightedMean(sqlSession,billLine,true);
                     }else if("deliver".equals(billType)){ //出库为减少
-                        billLine.put("org_id",invOrgId);
                         invItemTransactionService.weightedMean(sqlSession,billLine,false);
+                    }else if("transfer".equals(billType)){//调拨
+                        if(2 == billStatus){
+                            //调拨记录两笔
+
+                            //调出仓库减少
+                            billLine.put("org_id",invOrgId);//调出仓库
+                            billLine.put("bill_type","transfer_out");
+                            invItemTransactionService.weightedMean(sqlSession,billLine,false);
+
+                            //调入仓库增加
+                            billLine.put("org_id",targetInvOrgId);//调入仓库
+                            billLine.put("bill_type","transfer_in");
+                            invItemTransactionService.weightedMean(sqlSession,billLine,true);
+
+                        }
                     }
                 }
             }

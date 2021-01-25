@@ -4,16 +4,104 @@
 <mapper namespace="inv_item_transaction">
 
     <insert id="saveItemTransaction"  parameterType="Map" keyColumn="transaction_id" keyProperty="transaction_id" useGeneratedKeys="true">
-        INSERT INTO inv_item_transaction (`transaction_type_id`, `header_id`, `line_number`, `inv_org_id`, `item_id`, `subinv_code`, `locator_id`, `remark`, `transaction_quantity`, `primary_quantity`, `transaction_uom`, `price`, `amount`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`, `transaction_action_id`)
-        VALUES (#{transaction_type_id}, #{header_id}, #{line_number}, #{inv_org_id}, #{item_id}, #{subinv_code}, #{locator_id}, #{remark}, #{transaction_quantity}, #{primary_quantity}, #{transaction_uom}, #{price}, #{amount}, #{create_by}, #{create_date}, #{source_system}, #{source_voucher}, #{source_id}, #{source_line_number}, #{transaction_action_id})
+        INSERT INTO inv_item_transaction (`transaction_type_id`, `header_id`, `line_number`, `inv_org_id`, `item_id`, `subinv_code`, `locator_id`, `remark`, `begin_quantity`, `begin_price`, `begin_amount`,`transaction_quantity`, `transaction_price`, `transaction_amount`, `uom`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`, `transaction_action_id`)
+        VALUES (#{transaction_type_id}, #{header_id}, #{line_number}, #{inv_org_id}, #{item_id}, #{subinv_code}, #{locator_id}, #{remark}, #{begin_quantity}, #{begin_price}, #{begin_amount},#{transaction_quantity}, #{transaction_price}, #{transaction_amount}, #{uom}, #{create_by}, #{create_date}, #{source_system}, #{source_voucher}, #{source_id}, #{source_line_number}, #{transaction_action_id})
     </insert>
 
 
     <insert id="saveItemTransactionAll" parameterType="java.util.List">
-        INSERT INTO inv_item_transaction (`transaction_type_id`, `header_id`, `line_number`, `inv_org_id`, `item_id`, `subinv_code`, `locator_id`, `remark`, `transaction_quantity`, `primary_quantity`, `transaction_uom`, `price`, `amount`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`, `transaction_action_id`) VALUES
+        INSERT INTO inv_item_transaction (`transaction_type_id`, `header_id`, `line_number`, `inv_org_id`, `item_id`, `subinv_code`, `locator_id`, `remark`, `begin_quantity`, `begin_price`, `begin_amount`,`transaction_quantity`, `transaction_price`, `transaction_amount`, `uom`, `create_by`, `create_date`, `source_system`, `source_voucher`, `source_id`, `source_line_number`, `transaction_action_id`) VALUES
         <foreach collection="list" index="index" item="item" separator="," >
-            (#{item.transaction_type_id}, #{item.header_id}, #{item.line_number}, #{item.inv_org_id}, #{item.item_id}, #{item.subinv_code}, #{item.locator_id}, #{item.remark}, #{item.transaction_quantity}, #{item.primary_quantity}, #{item.transaction_uom}, #{item.price}, #{item.amount}, #{item.create_by}, #{item.create_date}, #{item.source_system}, #{item.source_voucher}, #{item.source_id}, #{item.source_line_number}, #{item.transaction_action_id})
+            (#{item.transaction_type_id}, #{item.header_id}, #{item.line_number}, #{item.inv_org_id}, #{item.item_id}, #{item.subinv_code}, #{item.locator_id}, #{item.remark}, #{item.begin_quantity}, #{item.begin_price}, #{item.begin_amount},#{item.transaction_quantity}, #{item.transaction_price}, #{item.transaction_amount}, #{item.uom}, #{item.create_by}, #{item.create_date}, #{item.source_system}, #{item.source_voucher}, #{item.source_id}, #{item.source_line_number}, #{item.transaction_action_id})
         </foreach>
     </insert>
+
+
+    <select id="getItemTransactionByPageCount" resultType="Long" parameterType="Map">
+        SELECT count(1)
+        FROM
+        inv_item_transaction iit
+        LEFT JOIN fnd_org fo on iit.inv_org_id = fo.org_id
+        LEFT JOIN mdm_item mi on iit.item_id = mi.item_id
+
+        where 1=1
+        <!--        <if test="item_id != null and item_id!=''">  and iio.item_id=#{item_id} </if>-->
+        <!--        <if test="org_id != null and org_id!=''">  and iio.org_id=#{org_id} </if>-->
+        <!--        <if test="location_id != null and location_id!=''">  and iio.location_id=#{location_id} </if>-->
+        <!--        <if test="on_hand_quantity != null and on_hand_quantity!=''">  and iio.on_hand_quantity=#{on_hand_quantity} </if>-->
+        <!--        <if test="price != null and price!=''">  and iio.price=#{price} </if>-->
+        <!--        <if test="amount != null and amount!=''">  and iio.amount=#{amount} </if>-->
+        <!--        <if test="min != null and min!=''">  and iio.min=#{min} </if>-->
+        <!--        <if test="max != null and max!=''">  and iio.max=#{max} </if>-->
+        <if test="item_description != null and item_description!=''"> and mi.item_description like '%${item_description}%' </if>
+        <if test="org_name != null and org_name!=''">  and fo.org_name like '%${org_name}%' </if>
+        ORDER BY iit.create_date desc
+        limit #{startIndex},#{perPage}
+    </select>
+
+
+
+
+    <select id="getItemTransactionByPage" resultType="Map" parameterType="Map">
+        SELECT
+        iit.*,
+        fo.org_name,
+        mi.item_description,
+
+        CASE WHEN iit.transaction_type_id = 'store_po'
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        iit.transaction_price ELSE 0
+        END in_price,
+
+        CASE WHEN iit.transaction_type_id =  'deliver' or  iit.transaction_type_id = 'transfer_out' THEN
+        iit.transaction_price ELSE 0
+        END out_price,
+
+        CASE WHEN iit.transaction_type_id = 'store_po'
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        iit.transaction_quantity ELSE 0
+        END in_quantity,
+
+        CASE WHEN iit.transaction_type_id =  'deliver' or  iit.transaction_type_id = 'transfer_out' THEN
+        iit.transaction_quantity ELSE 0
+        END out_quantity,
+
+        CASE WHEN iit.transaction_type_id = 'store_po'
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        iit.transaction_amount ELSE 0
+        END in_amount,
+
+        CASE WHEN iit.transaction_type_id =  'deliver' or  iit.transaction_type_id = 'transfer_out' THEN
+        iit.transaction_amount ELSE 0
+        END out_amount,
+
+        CASE WHEN iit.transaction_type_id = 'store_po'
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        (iit.begin_amount + iit.transaction_amount)/(iit.begin_quantity + iit.transaction_quantity)   ELSE (iit.begin_amount - iit.transaction_amount)/(iit.begin_quantity - iit.transaction_quantity)
+        END end_price,
+
+        CASE WHEN iit.transaction_type_id = 'store_po'
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        iit.begin_quantity + iit.transaction_quantity ELSE iit.begin_quantity - iit.transaction_quantity
+        END end_quantity,
+
+        CASE  WHEN iit.transaction_type_id = 'store_po'
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        iit.begin_amount + iit.transaction_amount ELSE iit.begin_amount - iit.transaction_amount
+        END end_amount
+
+        FROM
+        inv_item_transaction iit
+        LEFT JOIN fnd_org fo ON iit.inv_org_id = fo.org_id
+        LEFT JOIN mdm_item mi ON iit.item_id = mi.item_id
+
+        where 1=1
+        <if test="item_description != null and item_description!=''"> and mi.item_description like '%${item_description}%' </if>
+        <if test="org_name != null and org_name!=''">  and fo.org_name like '%${org_name}%' </if>
+        ORDER BY iit.create_date desc
+        limit #{startIndex},#{perPage}
+    </select>
+
+
 
 </mapper>

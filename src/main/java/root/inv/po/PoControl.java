@@ -31,7 +31,7 @@ public class PoControl extends RO {
     @Autowired
     PoLinesService poLinesService;
 
-    //查询所有事物
+    //查询所有订单
     @RequestMapping(value = "/getPoListByPage", produces = "text/plain;charset=UTF-8")
     public String getPoListByPage(@RequestBody JSONObject pJson) {
 

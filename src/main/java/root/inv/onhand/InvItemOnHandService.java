@@ -1,4 +1,4 @@
-package root.inv.store;
+package root.inv.onhand;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -114,8 +114,5 @@ public class InvItemOnHandService {
     public Map<String,Object> getItemOnHandByParams(Map<String,Object> map){
         return  DbSession.selectOne("inv_item_on_hand.getItemOnHandByParams",map);
     }
-
-
-
 
 }

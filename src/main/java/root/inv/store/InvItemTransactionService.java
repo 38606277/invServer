@@ -1,12 +1,13 @@
 package root.inv.store;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import root.inv.onhand.InvItemOnHandService;
 import root.report.common.DbSession;
 import root.report.sys.SysContext;
+import root.report.util.DateUtil;
+import root.report.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,9 +21,6 @@ public class InvItemTransactionService {
 
     @Autowired
     InvItemOnHandService invItemOnHandService;
-
-    @Autowired
-    InvItemTransactionService invItemTransactionService;
 
     /**
      * 批量插入行数据
@@ -46,10 +44,15 @@ public class InvItemTransactionService {
      * @param isAdd 入 或者 出 ，入为增加 ，出为减少
      */
     public void weightedMean(SqlSession sqlSession ,Map<String,Object> billLine,boolean isAdd){
-        String userId = SysContext.getUserId();
+        int userId = SysContext.getId();
         String orgId = String.valueOf(billLine.get("org_id"));
         String itemId = String.valueOf(billLine.get("item_id"));
         String billType = String.valueOf(billLine.get("bill_type"));
+        Object sourceId = billLine.get("source_id");
+        Object sourceSystem = billLine.get("source_system");
+        Object sourceVoucher =billLine.get("source_voucher");
+        Object sourceLineNumber = billLine.get("source_line_number");
+        Object headerCreateDate = billLine.get("create_Date");
 
         //行信息
         double billLineQuantity = Double.parseDouble(String.valueOf(billLine.get("quantity")));
@@ -66,10 +69,16 @@ public class InvItemTransactionService {
         double onHandAmount = 0;
         boolean hasOnHand = false;
         if(onHandResult!=null && !onHandResult.isEmpty()){
-             hasOnHand = true;
-             onHandQuantity = Double.parseDouble(String.valueOf(onHandResult.get("on_hand_quantity")));
-             onHandPrice = Double.parseDouble(String.valueOf(onHandResult.get("price")));
-             onHandAmount = Double.parseDouble(String.valueOf(onHandResult.get("amount")));
+            hasOnHand = true;
+           if(onHandResult.get("on_hand_quantity") != null){
+               onHandQuantity =  Double.parseDouble(String.valueOf(onHandResult.get("on_hand_quantity")));
+           }
+            if(onHandResult.get("price") != null){
+                onHandPrice =  Double.parseDouble(String.valueOf(onHandResult.get("price")));
+            }
+            if(onHandResult.get("amount") != null){
+                onHandAmount =  Double.parseDouble(String.valueOf(onHandResult.get("amount")));
+            }
         }else{
             onHandResult = new HashMap<>();
             onHandResult.put("org_id",orgId);
@@ -98,6 +107,9 @@ public class InvItemTransactionService {
 
         //事物
         Map<String,Object> transaction = new HashMap<>();
+        transaction.put("begin_price",onHandPrice);
+        transaction.put("begin_quantity",onHandQuantity);
+        transaction.put("begin_amount",onHandAmount);
 
         transaction.put("transaction_type_id",billType);
         transaction.put("header_id",String.valueOf(billLine.get("header_id")));
@@ -106,24 +118,33 @@ public class InvItemTransactionService {
         transaction.put("item_id",itemId);
 
         String billTypeName;
-        if(billType.startsWith("store_other")){ //其他入库
+        if("store_other".equals(billType)){ //其他入库
             billTypeName= "其他入库";
-        }else if(billType.startsWith("store_po")){ //订单入库
+        }else if("store_po".equals(billType)){ //订单入库
             billTypeName= "订单入库";
         }else if("deliver".equals(billType)){//出库
-            billTypeName= isAdd?"调拨入库":"调拨出库";
+            billTypeName= "其他出库";
+        }else if("transfer".equals(billType)){
+            billTypeName =  isAdd?"调拨入库":"调拨出库";
         }else{
             billTypeName = "未知类型" + (isAdd?"入库":"出库");
         }
         transaction.put("remark",billTypeName +  billLineQuantity + billLine.get("uom")+ billLine.get("item_description"));
 
-
-        //transaction.put("primary_quantity",quantity);
         transaction.put("transaction_quantity",billLineQuantity);
-        transaction.put("transaction_uom",String.valueOf(billLine.get("uom")));
-        transaction.put("price",billLinePrice);
-        transaction.put("amount",billLineAmount);
+        transaction.put("transaction_price",billLinePrice);
+        transaction.put("transaction_amount",billLineAmount);
+        transaction.put("uom",String.valueOf(billLine.get("uom")));
+
         transaction.put("create_by",userId);
+        transaction.put("create_date", DateUtil.getCurrentTimm());
+
+        transaction.put("source_id",sourceId);
+        transaction.put("source_system",sourceSystem);
+        transaction.put("source_voucher",sourceVoucher);
+        transaction.put("source_line_number",sourceLineNumber);
+        transaction.put("transaction_date",headerCreateDate);
+
         sqlSession.insert("inv_item_transaction.saveItemTransaction",transaction);
 
         //更新库存表
@@ -133,8 +154,24 @@ public class InvItemTransactionService {
             invItemOnHandService.saveItemOnHand(sqlSession,onHandResult);
         }
 
+    }
 
+    /**
+     * 查询事物 分页
+     * @param map
+     * @return
+     */
+    public List<Map<String,Object>> getItemTransactionByPage(Map<String,Object> map){
+        return  DbSession.selectList("inv_item_transaction.getItemTransactionByPage",map);
+    }
 
+    /**
+     * 查询事物 获取数量
+     * @param map
+     * @return
+     */
+    public long getItemTransactionByPageCount(Map<String,Object> map){
+        return  DbSession.selectOne("inv_item_transaction.getItemTransactionByPageCount",map);
     }
 
 }

@@ -68,6 +68,16 @@ public class StringUtil {
 		return Boolean.FALSE;
 	}
 
+	/**
+	 * 检测是否为null字符 与 空字符
+	 * @param obj
+	 * @return
+	 */
+	public static boolean isEmptyOrNULL(Object obj){
+		String str = String.valueOf(obj);
+		return isBlank(str) || "null".equals(str)|| "NULL".equals(str);
+	}
+
 	public static void main(String[] args) {
 		System.out.println(getLetterIntValue("ab"));
 		int size = getLetterIntValue("AA")-getLetterIntValue("A")+1;
