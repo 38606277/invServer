@@ -120,6 +120,20 @@ public class DictController extends RO {
         }
     }
 
+    //返回数据
+    @RequestMapping(value = "/getDictValueByDictCode", produces = "text/plain;charset=UTF-8")
+    public String getDictByDictCode(@RequestBody String pjson) {
+        JSONObject obj=JSON.parseObject(pjson);
+        try{
+            Map map = new HashMap();
+            map.put("dict_code",obj.get("dict_code"));
+            List<Map> list = this.mdmDictService.getDictValueListByDictCode(map);
+            return SuccessMsg("查询成功",list);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
 
     // 从json数据当中解析 ，批量删除
     @RequestMapping(value = "/deleteDictById", produces = "text/plain;charset=UTF-8")

@@ -113,7 +113,7 @@ public class ItemCategoryController extends RO {
             map.put("children",map1);
             List<Map> newamp = new ArrayList<>();
             newamp.add(map);
-            return SuccessMsg("", map1);
+            return SuccessMsg("", newamp);
         } catch (Exception ex){
             return ExceptionMsg(ex.getMessage());
         }
