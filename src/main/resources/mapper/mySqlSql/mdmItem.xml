@@ -111,7 +111,8 @@
     </select>
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-		SELECT u.item_id,u.item_category_id,u.item_description,ic.category_name,d1.value_name as segment1 ,
+		SELECT u.item_id,u.item_category_id,u.item_description,ic.category_name,u.market_price,u.price,u.promotion_price,u.cost_price,
+		d1.value_name as segment1 ,
 		d2.value_name as segment2,
 		d3.value_name as segment3,
 		d4.value_name as segment4,
@@ -121,8 +122,16 @@
 		d8.value_name as segment8,
 		d9.value_name as segment9,
 		d10.value_name as segment10,
-		u.attribute1,u.attribute2,u.attribute3,u.attribute4,u.attribute5,u.attribute6,u.attribute7,u.attribute8,u.attribute9,
-		u.attribute10,u.market_price,u.price,u.promotion_price,u.cost_price
+		d11.value_name as attribute1 ,
+		d12.value_name as attribute2,
+		d13.value_name as attribute3,
+		d14.value_name as attribute4,
+		d15.value_name as attribute5,
+		d16.value_name as attribute6,
+		d17.value_name as attribute7,
+		d18.value_name as attribute8,
+		d19.value_name as attribute9,
+		d20.value_name as attribute10
 		FROM mdm_item u
 		inner join mdm_item_category ic on u.item_category_id=ic.category_id
 		LEFT JOIN mdm_dict_value d1 on u.segment1=d1.value_id
@@ -135,6 +144,17 @@
 		LEFT JOIN mdm_dict_value d8 on u.segment8=d8.value_id
 		LEFT JOIN mdm_dict_value d9 on u.segment9=d9.value_id
 		LEFT JOIN mdm_dict_value d10 on u.segment10=d10.value_id
+
+		LEFT JOIN mdm_dict_value d11 on u.attribute1=d11.value_id
+		LEFT JOIN mdm_dict_value d12 on u.attribute2=d12.value_id
+		LEFT JOIN mdm_dict_value d13 on u.attribute3=d13.value_id
+		LEFT JOIN mdm_dict_value d14 on u.attribute4=d14.value_id
+		LEFT JOIN mdm_dict_value d15 on u.attribute5=d15.value_id
+		LEFT JOIN mdm_dict_value d16 on u.attribute6=d16.value_id
+		LEFT JOIN mdm_dict_value d17 on u.attribute7=d17.value_id
+		LEFT JOIN mdm_dict_value d18 on u.attribute8=d18.value_id
+		LEFT JOIN mdm_dict_value d19 on u.attribute9=d19.value_id
+		LEFT JOIN mdm_dict_value d20 on u.attribute10=d20.value_id
 		where  1=1
 		<if  test="item_category_id != null and item_category_id!='' ">
 			and  u.item_category_id='${item_category_id}'
