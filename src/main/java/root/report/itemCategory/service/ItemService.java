@@ -110,6 +110,32 @@ public class ItemService {
                 if(entry.getKey().equalsIgnoreCase("attribute2")) {
                     mapVal.put("attribute2", entry.getValue());
                 }
+                if(entry.getKey().equalsIgnoreCase("attribute3")) {
+                    mapVal.put("attribute3", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute4")) {
+                    mapVal.put("attribute4", entry.getValue());
+                }
+
+                if(entry.getKey().equalsIgnoreCase("attribute5")) {
+                    mapVal.put("attribute5", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute6")) {
+                    mapVal.put("attribute6", entry.getValue());
+                }
+
+                if(entry.getKey().equalsIgnoreCase("attribute7")) {
+                    mapVal.put("attribute7", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute8")) {
+                    mapVal.put("attribute8", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute9")) {
+                    mapVal.put("attribute9", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute10")) {
+                    mapVal.put("attribute10", entry.getValue());
+                }
             }
             sqlSession.insert("mdmItem.createMdmItem",mapVal);
 
@@ -176,6 +202,34 @@ public class ItemService {
                 if(entry.getKey().equalsIgnoreCase("attribute2")) {
                     mapVal.put("attribute2", entry.getValue());
                 }
+
+                if(entry.getKey().equalsIgnoreCase("attribute3")) {
+                    mapVal.put("attribute3", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute4")) {
+                    mapVal.put("attribute4", entry.getValue());
+                }
+
+                if(entry.getKey().equalsIgnoreCase("attribute5")) {
+                    mapVal.put("attribute5", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute6")) {
+                    mapVal.put("attribute6", entry.getValue());
+                }
+
+                if(entry.getKey().equalsIgnoreCase("attribute7")) {
+                    mapVal.put("attribute7", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute8")) {
+                    mapVal.put("attribute8", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute9")) {
+                    mapVal.put("attribute9", entry.getValue());
+                }
+                if(entry.getKey().equalsIgnoreCase("attribute10")) {
+                    mapVal.put("attribute10", entry.getValue());
+                }
+
             }
             sqlSession.insert("mdmItem.updateMdmItem", mapVal);
         }

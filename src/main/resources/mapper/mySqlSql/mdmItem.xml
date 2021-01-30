@@ -6,7 +6,8 @@
 	<!--  创建func_dict信息  -->
 	<insert id="createMdmItem" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
 		insert into mdm_item(item_id,item_category_id,item_description,uom,segment1,segment2,segment3,
-		segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2)
+		segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2,attribute3,attribute4
+		,attribute5,attribute6,attribute7,attribute8,attribute9,attribute10)
 		values (#{item_id},'${item_category_id}','${item_description}','${uom}',
 		<if  test="segment1 == null">NULL</if> <if  test="segment1 != null">#{segment1}</if>,
 		<if  test="segment2 == null">NULL</if> <if  test="segment2 != null">#{segment2}</if>,
@@ -19,7 +20,15 @@
 		<if  test="segment9 == null">NULL</if> <if  test="segment9 != null">#{segment9}</if>,
 		<if  test="segment10 == null">NULL</if> <if  test="segment10 != null">#{segment10}</if>,
 		<if  test="attribute1 == null">NULL</if> <if  test="attribute1 != null">#{attribute1}</if>,
-		<if  test="attribute2 == null">NULL</if> <if  test="attribute2 != null">#{attribute2}</if>
+		<if  test="attribute2 == null">NULL</if> <if  test="attribute2 != null">#{attribute2}</if>,
+		<if  test="attribute3 == null">NULL</if> <if  test="attribute3 != null">#{attribute3}</if>,
+		<if  test="attribute4 == null">NULL</if> <if  test="attribute4 != null">#{attribute4}</if>,
+		<if  test="attribute5 == null">NULL</if> <if  test="attribute5 != null">#{attribute5}</if>,
+		<if  test="attribute6 == null">NULL</if> <if  test="attribute6 != null">#{attribute6}</if>,
+		<if  test="attribute7 == null">NULL</if> <if  test="attribute7 != null">#{attribute7}</if>,
+		<if  test="attribute8 == null">NULL</if> <if  test="attribute8 != null">#{attribute8}</if>,
+		<if  test="attribute9 == null">NULL</if> <if  test="attribute9 != null">#{attribute9}</if>,
+		<if  test="attribute10 == null">NULL</if> <if  test="attribute10 != null">#{attribute10}</if>
 		)
 	</insert>
 
@@ -55,7 +64,23 @@
 		<if  test="attribute1 == null">attribute1=NULL</if>
 		<if  test="attribute1 != null">attribute1=#{attribute1}</if>,
 		<if  test="attribute2 == null">attribute2=NULL</if>
-		<if  test="attribute2 != null">attribute2=#{attribute2}</if>
+		<if  test="attribute2 != null">attribute2=#{attribute2}</if>,
+		<if  test="attribute3 == null">attribute3=NULL</if>
+		<if  test="attribute3 != null">attribute3=#{attribute3}</if>,
+		<if  test="attribute4 == null">attribute4=NULL</if>
+		<if  test="attribute4 != null">attribute4=#{attribute4}</if>,
+		<if  test="attribute5 == null">attribute5=NULL</if>
+		<if  test="attribute5 != null">attribute5=#{attribute5}</if>,
+		<if  test="attribute6 == null">attribute6=NULL</if>
+		<if  test="attribute6 != null">attribute6=#{attribute6}</if>,
+		<if  test="attribute7 == null">attribute7=NULL</if>
+		<if  test="attribute7 != null">attribute7=#{attribute7}</if>,
+		<if  test="attribute8 == null">attribute8=NULL</if>
+		<if  test="attribute8 != null">attribute8=#{attribute8}</if>,
+		<if  test="attribute9 == null">attribute9=NULL</if>
+		<if  test="attribute9 != null">attribute9=#{attribute9}</if>,
+		<if  test="attribute10 == null">attribute10=NULL</if>
+		<if  test="attribute10 != null">attribute2=#{attribute10}</if>
 		 where item_id=#{item_id}
 	</update>
 
@@ -84,8 +109,8 @@
 		d8.value_name as segment8,
 		d9.value_name as segment9,
 		d10.value_name as segment10,
-		d11.value_name as attribute1,
-		d12.value_name as attribute2
+		u.attribute1,u.attribute2,u.attribute3,u.attribute4,u.attribute5,u.attribute6,u.attribute7,u.attribute8,u.attribute9,
+		u.attribute10
 		FROM mdm_item u
 		inner join mdm_item_category ic on u.item_category_id=ic.category_id
 		LEFT JOIN mdm_dict_value d1 on u.segment1=d1.value_id
@@ -98,8 +123,6 @@
 		LEFT JOIN mdm_dict_value d8 on u.segment8=d8.value_id
 		LEFT JOIN mdm_dict_value d9 on u.segment9=d9.value_id
 		LEFT JOIN mdm_dict_value d10 on u.segment10=d10.value_id
-		LEFT JOIN mdm_dict_value d11 on u.attribute1=d11.value_id
-		LEFT JOIN mdm_dict_value d12 on u.attribute2=d12.value_id
 		where  1=1
 		<if  test="item_category_id != null and item_category_id!='' ">
 			and  u.item_category_id='${item_category_id}'

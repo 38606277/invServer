@@ -73,12 +73,20 @@ public class ItemCategoryController extends RO {
         try {
             JSONObject jsonFunc = JSONObject.parseObject(pJson);
             Map<String,String> map=new HashMap();
+
             map.put("category_id",jsonFunc.getString("category_id"));
-           List<Map> list = itemCategoryService.getItemCategorySegmentByPid(map);
-           Map itemCategory = itemCategoryService.getItemCategoryById(map);
-           Map resMap = new HashMap();
-           resMap.put("list",list);
-           resMap.put("dataInfo",itemCategory);
+            Map itemCategory = itemCategoryService.getItemCategoryById(map);
+
+            map.put("type","0");
+            List<Map> list = itemCategoryService.getItemCategorySegmentByPid(map);
+
+            map.put("type","1");
+            List<Map> list2 = itemCategoryService.getItemCategorySegmentByPid(map);
+
+            Map resMap = new HashMap();
+            resMap.put("dataInfo",itemCategory);
+            resMap.put("list",list);
+            resMap.put("list2",list2);
             return SuccessMsg("", resMap);
         } catch (Exception ex){
             ex.printStackTrace();
