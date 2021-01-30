@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="inv_org_user">
+
+    <insert id="add" parameterType="Map" keyColumn="id" keyProperty="id" useGeneratedKeys="true">
+        insert into fnd_org_user(org_id,user_id) values( #{org_id}, #{user_id})
+    </insert>
+
+    <delete id="deleteByIds" parameterType="Map">
+        delete from fnd_org_user where id in (${ids})
+    </delete>
+
+    <update id="updateByUserId" parameterType="Map">
+        update fnd_org_user set org_id = #{org_id} where user_id=#{user_id}
+    </update>
+
+
+    <select id="getOrgUserList" resultType="Map" parameterType="Map">
+        SELECT * FROM fnd_org_user fou
+        where 1=1
+        <if test="org_id != null and org_id!=''">  and fou.org_id =#{org_id} </if>
+        <if test="user_id != null and user_id!=''">  and fou.user_id =#{user_id} </if>
+    </select>
+
+
+    <select id="getListByPage" resultType="Map" parameterType="Map">
+        SELECT fou.*,fo.org_name,fu.USER_NAME FROM fnd_org_user fou
+        LEFT JOIN fnd_org fo on fou.org_id = fo.org_id
+        LEFT JOIN fnd_user fu on fou.user_id = fu._id
+        where 1=1
+        <if test="org_id != null and org_id!=''">  and fou.org_id =#{org_id} </if>
+        ORDER BY update_date desc
+        limit #{startIndex},#{perPage}
+    </select>
+
+    <select id="getListByPageCount" resultType="Long" parameterType="Map">
+        SELECT count(1) FROM fnd_org_user fou
+        LEFT JOIN fnd_org fo on fou.org_id = fo.org_id
+        LEFT JOIN fnd_user fu on fou.user_id = fu._id
+        where 1=1
+        <if test="org_id != null and org_id!=''">  and fou.org_id =#{org_id} </if>
+        ORDER BY update_date desc
+        limit #{startIndex},#{perPage}
+    </select>
+
+
+
+</mapper>

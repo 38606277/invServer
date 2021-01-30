@@ -1,18 +1,23 @@
 package root.inv.po;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
 import root.report.util.UUIDUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -102,12 +107,12 @@ public class PoControl extends RO {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 jsonObject.put("line_number",i);
                 jsonObject.put("create_by",userId);
-                jsonObject.put("header_id", mainData.get("bill_id"));
+                jsonObject.put("header_id", mainData.get("po_header_id"));
             }
             poLinesService.saveOrUpdatePoLinesList(sqlSession,jsonArray);
 
             sqlSession.getConnection().commit();
-            return SuccessMsg("创建成功",mainData.get("bill_id"));
+            return SuccessMsg("保存成功",mainData.get("po_header_id"));
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
             ex.printStackTrace();
@@ -242,9 +247,5 @@ public class PoControl extends RO {
             sqlSession.getConnection().setAutoCommit(true);
         }
     }
-
-
-
-
 
 }

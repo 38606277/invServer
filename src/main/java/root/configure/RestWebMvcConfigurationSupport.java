@@ -75,6 +75,7 @@ public class RestWebMvcConfigurationSupport extends WebMvcConfigurationSupport {
                                 "/reportServer/css/*",
                                 "/reportServer/js/*",
                                 "/reportServer/upload/*",
+                                "/reportServer/po/upload",
                                 "/reportServer/DBConnection/test",
                                 "/reportServer/DBConnection/save",
                                 "/reportServer/user/encodePwd",
@@ -82,7 +83,9 @@ public class RestWebMvcConfigurationSupport extends WebMvcConfigurationSupport {
                                 "/reportServer/user/login",
                                 "/reportServer/user/Reactlogin",
                                 "/wechat",
-                                "/reportServer/dataCollect/saveTaskInfo"};
+                                "/reportServer/dataCollect/saveTaskInfo",
+                                "/reportServer/poUpload/*"
+        };
         registry.addInterceptor(new RestInterceptor())
                 .addPathPatterns("/reportServer/**")
                 .excludePathPatterns(EXCLUDE_URL);
