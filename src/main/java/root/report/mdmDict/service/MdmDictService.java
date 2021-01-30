@@ -135,7 +135,6 @@ public class MdmDictService {
             dictId = dictId==null?1:dictId;
             map.put("dict_id",dictId);
             sqlSession.insert("mdmDict.createMdnDict",map);
-          //  dict_id=String.valueOf(map.get("dict_id"));
             Integer newVId=null;
             newVId= sqlSession.selectOne("mdmDict.getMaxValueId");
             newVId = newVId==null?0:newVId;
@@ -172,7 +171,6 @@ public class MdmDictService {
                     mapVal.put("value_name", jsonObjectVal.getString("value_name"));
                     mapVal.put("value_code", jsonObjectVal.getString("value_code"));
                     mapVal.put("value_pid", jsonObjectVal.getString("value_pid").equals("") ? null : jsonObjectVal.getString("value_pid"));
-                    mapKeyId.put(jsonObjectVal.getString("value_id"),newVId);
                     sqlSession.insert("mdmDict.createMdnDictValue", mapVal);
                     if(null!=jsonObjectVal.getJSONArray("children")) {
                         JSONArray objChildren = jsonObjectVal.getJSONArray("children");

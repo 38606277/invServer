@@ -12,7 +12,7 @@
 		)
 	</insert>
 	<insert id="createMdmItemCategorySegment" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
-		insert into mdm_item_category_segment(category_id,row_number,segment,segment_name,dict_id,valid,row_or_column)
+		insert into mdm_item_category_segment(category_id,row_number,segment,segment_name,dict_id,valid,row_or_column,`type`,attribute)
 		values (#{category_id},'${row_number}',
 		<if  test="segment == null">NULL</if>
 		<if  test="segment != null">'${segment}'</if>,
@@ -20,7 +20,7 @@
 		<if  test="dict_id == null">NULL</if>
 		<if  test="dict_id != null">#{dict_id}</if>,
 		<if  test="valid == null">NULL</if>
-		<if  test="valid != null">#{valid}</if>,'${row_or_column}'
+		<if  test="valid != null">#{valid}</if>,'${row_or_column}','${type}','${attribute}'
 		)
 	</insert>
 	<!-- 修改 func_dict 表的信息 -->
@@ -33,7 +33,12 @@
 	<update id="updateMdmItemCategorySegment" parameterType="Map">
 		update mdm_item_category_segment set segment='${segment}',segment_name='${segment_name}',
 		<if  test="dict_id == null">dict_id=NULL</if>
-		<if  test="dict_id != null">dict_id=#{dict_id}</if>,row_or_column='${row_or_column}'
+		<if  test="dict_id != null">dict_id=#{dict_id}</if>,
+		row_or_column='${row_or_column}',
+		<if  test="type == null">`type`=NULL</if>
+		<if  test="type != null">`type`=#{type}</if>,
+		<if  test="attribute == null">attribute=NULL</if>
+		<if  test="attribute != null">attribute=#{attribute}</if>
 		 where category_id=#{category_id,jdbcType=INTEGER} and row_number=#{row_number,jdbcType=INTEGER}
 	</update>
 
@@ -55,6 +60,9 @@
 
 	<select id="getItemCategorySegmentDictByPId" parameterType="map" resultType="map">
        SELECT u.*,dict.dict_name FROM mdm_item_category_segment u LEFT JOIN mdm_dict dict on u.dict_id=dict.dict_id where u.category_id = #{category_id}
+		<if  test="type != null and type!='' ">
+			and  u.type= '${type}'
+		</if>
     </select>
 
 	<select id="getItemCategorySegmentById" parameterType="map" resultType="map">

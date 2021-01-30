@@ -128,10 +128,14 @@ public class ItemCategoryController extends RO {
             Map map = new HashMap();
             map.put("category_id",obj.get("category_id"));
             Map jsonObject = this.itemCategoryService.getItemCategoryById(map);
+            map.put("type",'0');
             List<Map> list = this.itemCategoryService.getItemCategorySegmentByPid(map);
+            map.put("type",'1');
+            List<Map> list2 = this.itemCategoryService.getItemCategorySegmentByPid(map);
             Map mmm=new HashMap();
             mmm.put("mainForm",jsonObject);
             mmm.put("lineForm",list);
+            mmm.put("lineForm2",list2);
             return SuccessMsg("查询成功",mmm);
         }catch (Exception ex){
             ex.printStackTrace();

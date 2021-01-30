@@ -68,7 +68,22 @@ public class ItemCategoryService {
         map.put("category_pid",jsonObject.getString("category_pid"));
         map.put("category_code",jsonObject.getString("category_code"));
         JSONArray addLine = jsonObject.getJSONArray("lineForm");
+        JSONArray addLine2 = jsonObject.getJSONArray("lineForm2");
+        if(addLine.size()>0 && addLine2.size()>0) {
+            addLine.addAll(addLine2);
+        }else if(addLine.size()==0 && addLine2.size()>0){
+            addLine=addLine2;
+        }else if(addLine.size()>0 && addLine2.size()==0){
+
+        }
+
         JSONArray delLine = jsonObject.getJSONArray("lineDelete");
+        JSONArray delLine2 = jsonObject.getJSONArray("lineDelete2");
+        if(delLine.size()>0 && delLine2.size()>0) {
+            delLine.addAll(delLine2);
+        }else if(delLine.size()==0 && delLine2.size()>0){
+            delLine=delLine2;
+        }
         if(null==jsonObject.getString("category_id")|| "".equals(jsonObject.getString("category_id"))){
             Integer newId= sqlSession.selectOne("itemCategory.getMaxId");
             newId = newId==null?1:newId;
@@ -83,7 +98,9 @@ public class ItemCategoryService {
                 mapVal.put("row_number",newVId==null?1:newVId);
                 mapVal.put("segment_name",jsonObjectVal.getString("segment_name"));
                 mapVal.put("segment",jsonObjectVal.getString("segment"));
+                mapVal.put("attribute",jsonObjectVal.getString("attribute"));
                 mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                mapVal.put("type",jsonObjectVal.getString("type"));
                 mapVal.put("valid",1);
                 mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
                 sqlSession.insert("itemCategory.createMdmItemCategorySegment",mapVal);
@@ -102,6 +119,8 @@ public class ItemCategoryService {
                     mapVal.put("segment_name", jsonObjectVal.getString("segment_name"));
                     mapVal.put("segment", jsonObjectVal.getString("segment"));
                     mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                    mapVal.put("type",jsonObjectVal.getString("type"));
+                    mapVal.put("attribute",jsonObjectVal.getString("attribute"));
                     mapVal.put("valid",1);
                     mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
                     sqlSession.insert("itemCategory.createMdmItemCategorySegment", mapVal);
@@ -113,6 +132,8 @@ public class ItemCategoryService {
                         m.put("segment_name", jsonObjectVal.getString("segment_name"));
                         m.put("segment", jsonObjectVal.getString("segment"));
                         m.put("dict_id", jsonObjectVal.getString("dict_id"));
+                        m.put("type",jsonObjectVal.getString("type"));
+                        m.put("attribute",jsonObjectVal.getString("attribute"));
                         m.put("row_or_column", jsonObjectVal.getString("row_or_column"));
                         sqlSession.update("itemCategory.updateMdmItemCategorySegment", m);
                     }else{
@@ -122,6 +143,8 @@ public class ItemCategoryService {
                         mapVal.put("segment_name", jsonObjectVal.getString("segment_name"));
                         mapVal.put("segment", jsonObjectVal.getString("segment"));
                         mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                        mapVal.put("type",jsonObjectVal.getString("type"));
+                        mapVal.put("attribute",jsonObjectVal.getString("attribute"));
                         mapVal.put("valid",1);
                         mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
                         sqlSession.insert("itemCategory.createMdmItemCategorySegment", mapVal);
@@ -132,7 +155,7 @@ public class ItemCategoryService {
         if(delLine.size()>0) {
             for (int i = 0; i < delLine.size(); i++) {
                 Map<String, Object> dmap = new HashMap<>();
-                JSONObject jsonObjectVal = addLine.getJSONObject(i);
+                JSONObject jsonObjectVal = delLine.getJSONObject(i);
                 if(!jsonObjectVal.getString("row_number").contains("NEW")) {
                     dmap.put("category_id", jsonObjectVal.getString("category_id"));
                     dmap.put("row_number", jsonObjectVal.getString("row_number"));
