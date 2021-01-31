@@ -68,31 +68,29 @@ public class ItemCategoryController extends RO {
         }
     }
 
-    @RequestMapping(value = "/getAllPageById", produces = "text/plain;charset=UTF-8")
-    public String getAllPageByPid(@RequestBody String pJson) {
-        try {
-            JSONObject jsonFunc = JSONObject.parseObject(pJson);
-            Map<String,String> map=new HashMap();
-
-            map.put("category_id",jsonFunc.getString("category_id"));
-            Map itemCategory = itemCategoryService.getItemCategoryById(map);
-
-            map.put("type","0");
-            List<Map> list = itemCategoryService.getItemCategorySegmentByPid(map);
-
-            map.put("type","1");
-            List<Map> list2 = itemCategoryService.getItemCategorySegmentByPid(map);
-
-            Map resMap = new HashMap();
-            resMap.put("dataInfo",itemCategory);
-            resMap.put("list",list);
-            resMap.put("list2",list2);
-            return SuccessMsg("", resMap);
-        } catch (Exception ex){
-            ex.printStackTrace();
-            return ExceptionMsg(ex.getMessage());
-        }
-    }
+//    @RequestMapping(value = "/getAllPageById", produces = "text/plain;charset=UTF-8")
+//    public String getAllPageByPid(@RequestBody String pJson) {
+//        try {
+//            JSONObject jsonFunc = JSONObject.parseObject(pJson);
+//            Map<String,String> map=new HashMap();
+//
+//            map.put("category_id",jsonFunc.getString("category_id"));
+//            Map itemCategory = itemCategoryService.getItemCategoryById(map);
+//
+//            List<Map> list = itemCategoryService.getItemCategorySegmentByPid(map);
+//
+//            List<Map> list2 = itemCategoryService.getItemCategoryAttributeByPid(map);
+//
+//            Map resMap = new HashMap();
+//            resMap.put("dataInfo",itemCategory);
+//            resMap.put("list",list);
+//            resMap.put("list2",list2);
+//            return SuccessMsg("", resMap);
+//        } catch (Exception ex){
+//            ex.printStackTrace();
+//            return ExceptionMsg(ex.getMessage());
+//        }
+//    }
 
     @RequestMapping(value = "/getAllPageByIdForLine", produces = "text/plain;charset=UTF-8")
     public String getAllPageByIdForLine(@RequestBody String pJson) {

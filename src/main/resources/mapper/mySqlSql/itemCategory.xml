@@ -15,7 +15,7 @@
 	<!-- 修改 func_dict 表的信息 -->
 	<update id="updateMdmItemCategory" parameterType="Map">
 		update mdm_item_category set category_name='${category_name}',category_code='${category_code}'
-		 where category_id=#{category_id,jdbcType=INTEGER}
+		 where category_id=#{category_id}
 	</update>
 
 	<insert id="createMdmItemCategorySegment" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
@@ -42,7 +42,7 @@
 		<if  test="input_mode != null">`input_mode`=#{input_mode}</if>,
 		<if  test="qualifier == null">qualifier=NULL</if>
 		<if  test="qualifier != null">qualifier=#{qualifier}</if>
-		 where category_id=#{category_id,jdbcType=INTEGER} and row_number=#{row_number,jdbcType=INTEGER}
+		 where category_id=#{category_id} and row_number=#{row_number,jdbcType=INTEGER}
 	</update>
 
 	<insert id="createMdmItemCategoryAttribute" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
@@ -71,7 +71,7 @@
 		<if  test="qualifier != null">qualifier=#{qualifier}</if>,
 		<if  test="required == null">required=NULL</if>
 		<if  test="required != null">required=#{required}</if>
-		where category_id=#{category_id,jdbcType=INTEGER} and row_number=#{row_number,jdbcType=INTEGER}
+		where category_id=#{category_id} and row_number=#{row_number,jdbcType=INTEGER}
 	</update>
 
 	<select id="getMaxId" resultType="java.lang.Integer" >
