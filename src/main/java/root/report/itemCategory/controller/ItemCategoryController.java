@@ -100,7 +100,7 @@ public class ItemCategoryController extends RO {
             JSONObject jsonFunc = JSONObject.parseObject(pJson);
             Map<String,String> map=new HashMap();
             map.put("category_id",jsonFunc.getString("category_id"));
-            List<Map> map1 = itemCategoryService.getItemCategorySegmentListByPid(map);
+            List<Map> map1 = itemCategoryService.getItemCategorySegmentByPid(map);
             return SuccessMsg("", map1);
         } catch (Exception ex){
             return ExceptionMsg(ex.getMessage());
@@ -136,10 +136,8 @@ public class ItemCategoryController extends RO {
             Map map = new HashMap();
             map.put("category_id",obj.get("category_id"));
             Map jsonObject = this.itemCategoryService.getItemCategoryById(map);
-            map.put("type",'0');
             List<Map> list = this.itemCategoryService.getItemCategorySegmentByPid(map);
-            map.put("type",'1');
-            List<Map> list2 = this.itemCategoryService.getItemCategorySegmentByPid(map);
+            List<Map> list2 = this.itemCategoryService.getItemCategoryAttributeByPid(map);
             Map mmm=new HashMap();
             mmm.put("mainForm",jsonObject);
             mmm.put("lineForm",list);

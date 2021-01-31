@@ -11,8 +11,16 @@
 		<if  test="category_pid != null">#{category_pid}</if>,'${category_code}'
 		)
 	</insert>
+
+	<!-- 修改 func_dict 表的信息 -->
+	<update id="updateMdmItemCategory" parameterType="Map">
+		update mdm_item_category set category_name='${category_name}',category_code='${category_code}'
+		 where category_id=#{category_id,jdbcType=INTEGER}
+	</update>
+
 	<insert id="createMdmItemCategorySegment" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
-		insert into mdm_item_category_segment(category_id,row_number,segment,segment_name,dict_id,valid,row_or_column,`type`,attribute)
+		insert into mdm_item_category_segment(
+		category_id,row_number,segment,segment_name,dict_id,valid,spread_mode,`input_mode`,qualifier)
 		values (#{category_id},'${row_number}',
 		<if  test="segment == null">NULL</if>
 		<if  test="segment != null">'${segment}'</if>,
@@ -20,34 +28,61 @@
 		<if  test="dict_id == null">NULL</if>
 		<if  test="dict_id != null">#{dict_id}</if>,
 		<if  test="valid == null">NULL</if>
-		<if  test="valid != null">#{valid}</if>,'${row_or_column}','${type}','${attribute}'
+		<if  test="valid != null">#{valid}</if>,'${spread_mode}','${input_mode}','${qualifier}'
 		)
 	</insert>
-	<!-- 修改 func_dict 表的信息 -->
-	<update id="updateMdmItemCategory" parameterType="Map">
-		update mdm_item_category set category_name='${category_name}',category_code='${category_code}'
-		 where category_id=#{category_id,jdbcType=INTEGER}
-	</update>
 
 	<!-- 修改 func_dict 表的信息 -->
 	<update id="updateMdmItemCategorySegment" parameterType="Map">
 		update mdm_item_category_segment set segment='${segment}',segment_name='${segment_name}',
 		<if  test="dict_id == null">dict_id=NULL</if>
 		<if  test="dict_id != null">dict_id=#{dict_id}</if>,
-		row_or_column='${row_or_column}',
-		<if  test="type == null">`type`=NULL</if>
-		<if  test="type != null">`type`=#{type}</if>,
-		<if  test="attribute == null">attribute=NULL</if>
-		<if  test="attribute != null">attribute=#{attribute}</if>
+		spread_mode='${spread_mode}',
+		<if  test="input_mode == null">`input_mode`=NULL</if>
+		<if  test="input_mode != null">`input_mode`=#{input_mode}</if>,
+		<if  test="qualifier == null">qualifier=NULL</if>
+		<if  test="qualifier != null">qualifier=#{qualifier}</if>
 		 where category_id=#{category_id,jdbcType=INTEGER} and row_number=#{row_number,jdbcType=INTEGER}
+	</update>
+
+	<insert id="createMdmItemCategoryAttribute" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into mdm_item_category_attribute(
+		category_id,row_number,attribute,attribute_name,dict_id,valid,spread_mode,`input_mode`,qualifier,required)
+		values (#{category_id},'${row_number}',
+		<if  test="attribute == null">NULL</if>
+		<if  test="attribute != null">'${attribute}'</if>,
+		'${attribute_name}',
+		<if  test="dict_id == null">NULL</if>
+		<if  test="dict_id != null">#{dict_id}</if>,
+		<if  test="valid == null">NULL</if>
+		<if  test="valid != null">#{valid}</if>,'${spread_mode}','${input_mode}','${qualifier}','${required}'
+		)
+	</insert>
+
+	<!-- 修改 func_dict 表的信息 -->
+	<update id="updateMdmItemCategoryAttribute" parameterType="Map">
+		update mdm_item_category_attribute set attribute='${attribute}',attribute_name='${attribute_name}',
+		<if  test="dict_id == null">dict_id=NULL</if>
+		<if  test="dict_id != null">dict_id=#{dict_id}</if>,
+		spread_mode='${spread_mode}',
+		<if  test="input_mode == null">`input_mode`=NULL</if>
+		<if  test="input_mode != null">`input_mode`=#{input_mode}</if>,
+		<if  test="qualifier == null">qualifier=NULL</if>
+		<if  test="qualifier != null">qualifier=#{qualifier}</if>,
+		<if  test="required == null">required=NULL</if>
+		<if  test="required != null">required=#{required}</if>
+		where category_id=#{category_id,jdbcType=INTEGER} and row_number=#{row_number,jdbcType=INTEGER}
 	</update>
 
 	<select id="getMaxId" resultType="java.lang.Integer" >
         SELECT (MAX(category_id) +1)as category_id from mdm_item_category
     </select>
 
-	<select id="getMaxValueId" resultType="java.lang.Integer" parameterType="map">
+	<select id="getSegmentMaxValueId" resultType="java.lang.Integer" parameterType="map">
         SELECT (MAX(row_number) +1)as row_number from mdm_item_category_segment  where category_id=#{category_id}
+    </select>
+	<select id="getAttributeMaxValueId" resultType="java.lang.Integer" parameterType="map">
+        SELECT (MAX(row_number) +1)as row_number from mdm_item_category_attribute  where category_id=#{category_id}
     </select>
 
 	<select id="getItemCategoryById" parameterType="map" resultType="map">
@@ -58,15 +93,24 @@
         SELECT u.* FROM mdm_item_category_segment u where u.category_id = #{category_id}
     </select>
 
+	<select id="getItemCategoryAttributeByPId" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category_attribute u where u.category_id = #{category_id}
+    </select>
+
 	<select id="getItemCategorySegmentDictByPId" parameterType="map" resultType="map">
        SELECT u.*,dict.dict_name FROM mdm_item_category_segment u LEFT JOIN mdm_dict dict on u.dict_id=dict.dict_id where u.category_id = #{category_id}
-		<if  test="type != null and type!='' ">
-			and  u.type= '${type}'
-		</if>
+    </select>
+
+	<select id="getItemCategoryAttributeDictByPId" parameterType="map" resultType="map">
+       SELECT u.*,dict.dict_name FROM mdm_item_category_attribute u LEFT JOIN mdm_dict dict on u.dict_id=dict.dict_id where u.category_id = #{category_id}
     </select>
 
 	<select id="getItemCategorySegmentById" parameterType="map" resultType="map">
         SELECT u.* FROM mdm_item_category_segment u where u.category_id = #{category_id} and u.row_number='${row_number}'
+    </select>
+
+	<select id="getItemCategoryAttributeById" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category_attribute u where u.category_id = #{category_id} and u.row_number='${row_number}'
     </select>
 
 	<select id="getItemCategoryByPid" parameterType="map" resultType="map">
@@ -97,6 +141,13 @@
 		</if>
 	</select>
 
+	<select id="getAllItemCategoryAtrributePage" resultType="Map" parameterType="Map">
+		SELECT u.*  FROM mdm_item_category_attribute u  where  1=1 and category_id=#{category_id}
+		<if  test="attribute_name != null and attribute_name!='' ">
+			and  u.attribute_name like '%${attribute_name}%'
+		</if>
+	</select>
+
 	<!-- 根据dict_id 跟 dict_out_id 删除func_dict_out 表相关信息  -->
 	<delete id="deleteItemCategoryByID" parameterType="Map">
         delete from mdm_item_category where category_id=#{category_id}
@@ -106,5 +157,12 @@
     </delete>
 	<delete id="deleteItemCategorySegmentByPID" parameterType="Map">
         delete from mdm_item_category_segment where category_id=#{category_id}
+    </delete>
+
+	<delete id="deleteItemCategoryAttributeByID" parameterType="Map">
+        delete from mdm_item_category_attribute where category_id=#{category_id} and row_number=#{row_number}
+    </delete>
+	<delete id="deleteItemCategoryAttributeByPID" parameterType="Map">
+        delete from mdm_item_category_attribute where category_id=#{category_id}
     </delete>
 </mapper>
