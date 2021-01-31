@@ -289,6 +289,11 @@ public class ItemCategoryService {
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
             }
+            map.put("category_id",list.get(i).get("category_id"));
+            List<Map> segmentlist= sqlSession.selectList("itemCategory.getItemCategorySegmentByPId",map);
+            if(null!=segmentlist && segmentlist.size()>0){
+                list.get(i).put("segmentlist",segmentlist);
+            }
         }
         return list;
     }
@@ -303,6 +308,11 @@ public class ItemCategoryService {
             List<Map> chilerenlist= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
+            }
+            map.put("category_id",list.get(i).get("category_id"));
+            List<Map> segmentlist= sqlSession.selectList("itemCategory.getItemCategorySegmentByPId",map);
+            if(null!=segmentlist && segmentlist.size()>0){
+                list.get(i).put("segmentlist",segmentlist);
             }
         }
         return list;
