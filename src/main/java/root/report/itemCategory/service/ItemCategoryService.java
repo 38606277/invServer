@@ -67,99 +67,164 @@ public class ItemCategoryService {
         map.put("category_name",jsonObject.getString("category_name"));
         map.put("category_pid",jsonObject.getString("category_pid"));
         map.put("category_code",jsonObject.getString("category_code"));
-        JSONArray addLine = jsonObject.getJSONArray("lineForm");
-        JSONArray addLine2 = jsonObject.getJSONArray("lineForm2");
-        if(addLine.size()>0 && addLine2.size()>0) {
-            addLine.addAll(addLine2);
-        }else if(addLine.size()==0 && addLine2.size()>0){
-            addLine=addLine2;
-        }else if(addLine.size()>0 && addLine2.size()==0){
+        JSONArray segmentList = jsonObject.getJSONArray("lineForm");
+        JSONArray attributeList = jsonObject.getJSONArray("lineForm2");
 
-        }
+        JSONArray delSegment = jsonObject.getJSONArray("lineDelete");
+        JSONArray delAttribute = jsonObject.getJSONArray("lineDelete2");
 
-        JSONArray delLine = jsonObject.getJSONArray("lineDelete");
-        JSONArray delLine2 = jsonObject.getJSONArray("lineDelete2");
-        if(delLine.size()>0 && delLine2.size()>0) {
-            delLine.addAll(delLine2);
-        }else if(delLine.size()==0 && delLine2.size()>0){
-            delLine=delLine2;
-        }
         if(null==jsonObject.getString("category_id")|| "".equals(jsonObject.getString("category_id"))){
             Integer newId= sqlSession.selectOne("itemCategory.getMaxId");
             newId = newId==null?1:newId;
             map.put("category_id",newId);
             sqlSession.insert("itemCategory.createMdmItemCategory",map);
             id=String.valueOf(map.get("category_id"));
-            for(int i = 0; i < addLine.size(); i++){
+            //segmentList 进行保存
+            for(int i = 0; i < segmentList.size(); i++){
                 Map<String,Object> mapVal  = new HashMap<>();
-                JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                Integer newVId= sqlSession.selectOne("itemCategory.getMaxValueId",newId);
+                JSONObject jsonObjectVal = segmentList.getJSONObject(i);
+                Integer newVId= sqlSession.selectOne("itemCategory.getSegmentMaxValueId",newId);
                 mapVal.put("category_id",newId);
                 mapVal.put("row_number",newVId==null?1:newVId);
                 mapVal.put("segment_name",jsonObjectVal.getString("segment_name"));
                 mapVal.put("segment",jsonObjectVal.getString("segment"));
-                mapVal.put("attribute",jsonObjectVal.getString("attribute"));
+                mapVal.put("input_mode",jsonObjectVal.getString("input_mode"));
                 mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
-                mapVal.put("type",jsonObjectVal.getString("type"));
+                mapVal.put("qualifier",jsonObjectVal.getString("qualifier"));
                 mapVal.put("valid",1);
-                mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
+                mapVal.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
                 sqlSession.insert("itemCategory.createMdmItemCategorySegment",mapVal);
+            }
+            //attributeList 进行保存
+            for(int i = 0; i < attributeList.size(); i++){
+                Map<String,Object> mapVal  = new HashMap<>();
+                JSONObject jsonObjectVal = attributeList.getJSONObject(i);
+                Integer newVId= sqlSession.selectOne("itemCategory.getAttributeMaxValueId",newId);
+                mapVal.put("category_id",newId);
+                mapVal.put("row_number",newVId==null?1:newVId);
+                mapVal.put("attribute_name",jsonObjectVal.getString("attribute_name"));
+                mapVal.put("attribute",jsonObjectVal.getString("attribute"));
+                mapVal.put("input_mode",jsonObjectVal.getString("input_mode"));
+                mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                mapVal.put("qualifier",jsonObjectVal.getString("qualifier"));
+                mapVal.put("valid",1);
+                mapVal.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
+                mapVal.put("required",jsonObjectVal.getString("required").equals("")?0:jsonObjectVal.getString("required"));
+                sqlSession.insert("itemCategory.createMdmItemCategoryAttribute",mapVal);
             }
         }else{
             map.put("category_id",jsonObject.getString("category_id"));
             sqlSession.update("itemCategory.updateMdmItemCategory",map);
             id=jsonObject.getString("category_id");
-            for(int i = 0; i < addLine.size(); i++){
+            for(int i = 0; i < segmentList.size(); i++){
                 Map<String,Object> mapVal  = new HashMap<>();
-                JSONObject jsonObjectVal = addLine.getJSONObject(i);
+                JSONObject jsonObjectVal = segmentList.getJSONObject(i);
                 if(jsonObjectVal.getString("row_number").contains("NEW")) {
-                    Integer newVId = sqlSession.selectOne("itemCategory.getMaxValueId",id);
+                    Integer newVId = sqlSession.selectOne("itemCategory.getSegmentMaxValueId",id);
                     mapVal.put("category_id", id);
                     mapVal.put("row_number", newVId==null?1:newVId);
-                    mapVal.put("segment_name", jsonObjectVal.getString("segment_name"));
-                    mapVal.put("segment", jsonObjectVal.getString("segment"));
+                    mapVal.put("segment_name",jsonObjectVal.getString("segment_name"));
+                    mapVal.put("segment",jsonObjectVal.getString("segment"));
+                    mapVal.put("input_mode",jsonObjectVal.getString("input_mode"));
                     mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
-                    mapVal.put("type",jsonObjectVal.getString("type"));
-                    mapVal.put("attribute",jsonObjectVal.getString("attribute"));
+                    mapVal.put("qualifier",jsonObjectVal.getString("qualifier"));
                     mapVal.put("valid",1);
-                    mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
+                    mapVal.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
                     sqlSession.insert("itemCategory.createMdmItemCategorySegment", mapVal);
                 }else{
                     mapVal.put("category_id", jsonObjectVal.getString("category_id"));
                     mapVal.put("row_number",jsonObjectVal.getString("row_number"));
                     Map m= sqlSession.selectOne("itemCategory.getItemCategorySegmentById",mapVal);
                     if(null!=m) {
-                        m.put("segment_name", jsonObjectVal.getString("segment_name"));
-                        m.put("segment", jsonObjectVal.getString("segment"));
-                        m.put("dict_id", jsonObjectVal.getString("dict_id"));
-                        m.put("type",jsonObjectVal.getString("type"));
-                        m.put("attribute",jsonObjectVal.getString("attribute"));
-                        m.put("row_or_column", jsonObjectVal.getString("row_or_column"));
+                        m.put("segment_name",jsonObjectVal.getString("segment_name"));
+                        m.put("segment",jsonObjectVal.getString("segment"));
+                        m.put("input_mode",jsonObjectVal.getString("input_mode"));
+                        m.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                        m.put("qualifier",jsonObjectVal.getString("qualifier"));
+                        m.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
                         sqlSession.update("itemCategory.updateMdmItemCategorySegment", m);
                     }else{
-                        Integer newVId = sqlSession.selectOne("itemCategory.getMaxValueId",id);
+                        Integer newVId = sqlSession.selectOne("itemCategory.getSegmentMaxValueId",id);
                         mapVal.put("category_id", id);
                         mapVal.put("row_number", jsonObjectVal.getString("row_number"));
-                        mapVal.put("segment_name", jsonObjectVal.getString("segment_name"));
-                        mapVal.put("segment", jsonObjectVal.getString("segment"));
+                        mapVal.put("segment_name",jsonObjectVal.getString("segment_name"));
+                        mapVal.put("segment",jsonObjectVal.getString("segment"));
+                        mapVal.put("input_mode",jsonObjectVal.getString("input_mode"));
                         mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
-                        mapVal.put("type",jsonObjectVal.getString("type"));
-                        mapVal.put("attribute",jsonObjectVal.getString("attribute"));
+                        mapVal.put("qualifier",jsonObjectVal.getString("qualifier"));
                         mapVal.put("valid",1);
-                        mapVal.put("row_or_column",jsonObjectVal.getString("row_or_column").equals("")?null:jsonObjectVal.getString("row_or_column"));
+                        mapVal.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
                         sqlSession.insert("itemCategory.createMdmItemCategorySegment", mapVal);
                     }
                 }
             }
+
+            //attributeList 编辑保存
+            for(int i = 0; i < attributeList.size(); i++){
+                Map<String,Object> mapVal  = new HashMap<>();
+                JSONObject jsonObjectVal = attributeList.getJSONObject(i);
+                if(jsonObjectVal.getString("row_number").contains("NEW")) {
+                    Integer newVId = sqlSession.selectOne("itemCategory.getAttributeMaxValueId",id);
+                    mapVal.put("category_id", id);
+                    mapVal.put("row_number", newVId==null?1:newVId);
+                    mapVal.put("attribute_name",jsonObjectVal.getString("attribute_name"));
+                    mapVal.put("attribute",jsonObjectVal.getString("attribute"));
+                    mapVal.put("input_mode",jsonObjectVal.getString("input_mode"));
+                    mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                    mapVal.put("qualifier",jsonObjectVal.getString("qualifier"));
+                    mapVal.put("valid",1);
+                    mapVal.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
+                    mapVal.put("required",jsonObjectVal.getString("required").equals("")?null:jsonObjectVal.getString("required"));
+                    sqlSession.insert("itemCategory.createMdmItemCategoryAttribute", mapVal);
+                }else{
+                    mapVal.put("category_id", jsonObjectVal.getString("category_id"));
+                    mapVal.put("row_number",jsonObjectVal.getString("row_number"));
+                    Map m= sqlSession.selectOne("itemCategory.getItemCategoryAttributeById",mapVal);
+                    if(null!=m) {
+                        m.put("attribute_name",jsonObjectVal.getString("attribute_name"));
+                        m.put("attribute",jsonObjectVal.getString("attribute"));
+                        m.put("input_mode",jsonObjectVal.getString("input_mode"));
+                        m.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                        m.put("qualifier",jsonObjectVal.getString("qualifier"));
+                        m.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
+                        m.put("required",jsonObjectVal.getString("required").equals("")?null:jsonObjectVal.getString("required"));
+                        sqlSession.update("itemCategory.updateMdmItemCategoryAttribute", m);
+                    }else{
+                        Integer newVId = sqlSession.selectOne("itemCategory.getAttributeMaxValueId",id);
+                        mapVal.put("category_id", id);
+                        mapVal.put("row_number", newVId);
+                        mapVal.put("attribute_name",jsonObjectVal.getString("attribute_name"));
+                        mapVal.put("attribute",jsonObjectVal.getString("attribute"));
+                        mapVal.put("input_mode",jsonObjectVal.getString("input_mode"));
+                        mapVal.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                        mapVal.put("qualifier",jsonObjectVal.getString("qualifier"));
+                        mapVal.put("valid",1);
+                        mapVal.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
+                        mapVal.put("required",jsonObjectVal.getString("required").equals("")?null:jsonObjectVal.getString("required"));
+                        sqlSession.insert("itemCategory.createMdmItemCategoryAttribute", mapVal);
+                    }
+                }
+            }
         }
-        if(delLine.size()>0) {
-            for (int i = 0; i < delLine.size(); i++) {
+        if(delSegment.size()>0) {
+            for (int i = 0; i < delSegment.size(); i++) {
                 Map<String, Object> dmap = new HashMap<>();
-                JSONObject jsonObjectVal = delLine.getJSONObject(i);
+                JSONObject jsonObjectVal = delSegment.getJSONObject(i);
                 if(!jsonObjectVal.getString("row_number").contains("NEW")) {
                     dmap.put("category_id", jsonObjectVal.getString("category_id"));
                     dmap.put("row_number", jsonObjectVal.getString("row_number"));
                     sqlSession.delete("itemCategory.deleteItemCategorySegmentByID", dmap);
+                }
+            }
+        }
+        if(delAttribute.size()>0) {
+            for (int i = 0; i < delAttribute.size(); i++) {
+                Map<String, Object> dmap = new HashMap<>();
+                JSONObject jsonObjectVal = delAttribute.getJSONObject(i);
+                if(!jsonObjectVal.getString("row_number").contains("NEW")) {
+                    dmap.put("category_id", jsonObjectVal.getString("category_id"));
+                    dmap.put("row_number", jsonObjectVal.getString("row_number"));
+                    sqlSession.delete("itemCategory.deleteItemCategoryAttributeByID", dmap);
                 }
             }
         }
@@ -177,15 +242,30 @@ public class ItemCategoryService {
         }
         return list;
     }
-    public List<Map> getItemCategorySegmentListByPid(Map m) {
-        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentDictByPId", m);
+
+
+    public List<Map> getItemCategoryAttributeByPid(Map m) {
+        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategoryAttributeDictByPId", m);
         for(int i=0;i<list.size();i++){
             Map mapp=list.get(i);
-            List dictlist= mdmDictService.getDictValueListByDictId(mapp.get("dict_id").toString());
+            List dictlist =new ArrayList();
+            if(null!=mapp.get("dict_id") && !"".equalsIgnoreCase(mapp.get("dict_id")==null?"":mapp.get("dict_id").toString())) {
+                dictlist=  mdmDictService.getDictValueListByDictId(mapp.get("dict_id").toString());
+            }
             mapp.put("dictList",dictlist);
         }
         return list;
     }
+
+//    public List<Map> getItemCategorySegmentListByPid(Map m) {
+//        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentDictByPId", m);
+//        for(int i=0;i<list.size();i++){
+//            Map mapp=list.get(i);
+//            List dictlist= mdmDictService.getDictValueListByDictId(mapp.get("dict_id").toString());
+//            mapp.put("dictList",dictlist);
+//        }
+//        return list;
+//    }
 
     // 功能描述: 根据 dict_id 和 out_id 批量删除 func_dict的信息
     public void deleteItemCategoryByID(SqlSession sqlSession,String category_id){
@@ -193,6 +273,7 @@ public class ItemCategoryService {
         map.put("category_id",category_id);
         sqlSession.delete("itemCategory.deleteItemCategoryByID",map);
         sqlSession.delete("itemCategory.deleteItemCategorySegmentByPID",map);
+        sqlSession.delete("itemCategory.deleteItemCategoryAttributeByPID",map);
     }
 
     public Map getItemCategoryById(Map m) {
@@ -208,6 +289,11 @@ public class ItemCategoryService {
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
             }
+            map.put("category_id",list.get(i).get("category_id"));
+            List<Map> segmentlist= sqlSession.selectList("itemCategory.getItemCategorySegmentByPId",map);
+            if(null!=segmentlist && segmentlist.size()>0){
+                list.get(i).put("segmentlist",segmentlist);
+            }
         }
         return list;
     }
@@ -222,6 +308,11 @@ public class ItemCategoryService {
             List<Map> chilerenlist= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);
             if(null!=chilerenlist && chilerenlist.size()>0){
                 list.get(i).put("children",childrenListItem(sqlSession,chilerenlist));
+            }
+            map.put("category_id",list.get(i).get("category_id"));
+            List<Map> segmentlist= sqlSession.selectList("itemCategory.getItemCategorySegmentByPId",map);
+            if(null!=segmentlist && segmentlist.size()>0){
+                list.get(i).put("segmentlist",segmentlist);
             }
         }
         return list;

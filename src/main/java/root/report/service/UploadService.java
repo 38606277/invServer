@@ -66,6 +66,7 @@ public class UploadService {
             int i=fullPaths.indexOf("upload");
             String usefilepath=fullPaths.substring(i,fullPaths.length());
             log.info(usefilepath);
+            filepath=usefilepath;
             // E:\springboot-upload\image\20180608\113339\FL_eUljOejPseMeDg86h.png
             Files.write(fullPath, file.getBytes(), StandardOpenOption.CREATE);
             //保存文件信息
