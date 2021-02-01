@@ -230,6 +230,9 @@ public class ItemCategoryService {
         }
         return id;
     }
+    /**
+     * 单个增加
+     * */
     public List<Map> getItemCategorySegmentByPid(Map m) {
         List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentDictByPId", m);
         for(int i=0;i<list.size();i++){
@@ -243,7 +246,28 @@ public class ItemCategoryService {
         return list;
     }
 
+    /**
+     * 批量 segment
+     * 限定词
+     * */
+    public List<Map> getItemCategorySegmentBatchByPId(Map m) {
+        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentDictBatchByPId", m);
+        for(int i=0;i<list.size();i++){
+            Map mapp=list.get(i);
+            List dictlist =new ArrayList();
+            if(null!=mapp.get("dict_id") && !"".equalsIgnoreCase(mapp.get("dict_id")==null?"":mapp.get("dict_id").toString())) {
+                dictlist=  mdmDictService.getDictValueListByDictId(mapp.get("dict_id").toString());
+            }
+            mapp.put("dictList",dictlist);
+        }
+        return list;
+    }
 
+
+
+    /**
+     * 获取属性信息 attribute
+     * */
     public List<Map> getItemCategoryAttributeByPid(Map m) {
         List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategoryAttributeDictByPId", m);
         for(int i=0;i<list.size();i++){

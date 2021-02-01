@@ -101,6 +101,13 @@
        SELECT u.*,dict.dict_name FROM mdm_item_category_segment u LEFT JOIN mdm_dict dict on u.dict_id=dict.dict_id where u.category_id = #{category_id}
     </select>
 
+	<select id="getItemCategorySegmentDictBatchByPId" parameterType="map" resultType="map">
+       SELECT u.*,dict.dict_name FROM mdm_item_category_segment u LEFT JOIN mdm_dict dict on u.dict_id=dict.dict_id where u.category_id = #{category_id}
+		<if  test="qualifier != null and qualifier!='' ">
+			and  u.qualifier = '${qualifier}'
+		</if>
+    </select>
+
 	<select id="getItemCategoryAttributeDictByPId" parameterType="map" resultType="map">
        SELECT u.*,dict.dict_name FROM mdm_item_category_attribute u LEFT JOIN mdm_dict dict on u.dict_id=dict.dict_id where u.category_id = #{category_id}
     </select>

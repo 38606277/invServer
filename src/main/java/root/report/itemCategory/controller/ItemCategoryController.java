@@ -14,12 +14,11 @@ import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
 import root.report.mdmDict.service.MdmDictService;
+import root.report.util.ArrayUtils;
+import root.report.util.JsonUtil;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/reportServer/itemCategory")
@@ -147,6 +146,32 @@ public class ItemCategoryController extends RO {
         }
     }
 
+    //返回数据
+    @RequestMapping(value = "/getItemCategoryBatchByID", produces = "text/plain;charset=UTF-8")
+    public String getItemCategoryBatchByID(@RequestBody String pjson) {
+        JSONObject obj=JSON.parseObject(pjson);
+        try{
+            Map map = new HashMap();
+            map.put("category_id",obj.get("category_id"));
+            Map jsonObject = this.itemCategoryService.getItemCategoryById(map);
+            map.put("qualifier","mkey");
+            List<Map> listmkey = this.itemCategoryService.getItemCategorySegmentBatchByPId(map);
+            map.put("qualifier","skey");
+            List<Map> listskey = this.itemCategoryService.getItemCategorySegmentBatchByPId(map);
+            List<Map> list2 = this.itemCategoryService.getItemCategoryAttributeByPid(map);
+            Map mmm=new HashMap();
+            mmm.put("mainForm",jsonObject);
+            mmm.put("listmkey",listmkey);
+            mmm.put("listskey",listskey);
+            mmm.put("lineForm2",list2);
+            return SuccessMsg("查询成功",mmm);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+
 
     // 从json数据当中解析 ，批量删除
     @RequestMapping(value = "/deleteItemCategoryById", produces = "text/plain;charset=UTF-8")
@@ -179,20 +204,41 @@ public class ItemCategoryController extends RO {
     }
 
     @RequestMapping(value = "/doExchangeList", produces = "text/plain;charset=UTF-8")
-    public void doExchangeList(@RequestBody JSONObject pJson) {
-        List list=new ArrayList();
+    public String doExchangeList(@RequestBody JSONObject pJson) {
+        String[] arr=pJson.getString("arrId").trim().replaceAll("，",",").replaceAll("；",";").split(";");
+        //String[] arrName=pJson.getString("arrName").trim().replaceAll("，",",").replaceAll("；",";").split(";");
+        ArrayList<List<Object>> list3 = new ArrayList<>();
+        for(int i=0;i<arr.length;i++){
+            if(null!=arr[i] && !"".equals(arr[i])) {
+                //String[] news=arr[i].split(",");
+                list3.add(Arrays.asList(arr[i].split(",")));
+            }
+        }
+       /* List<String> list12 = Arrays.asList("一层", "二层", "三层");
+        List<String> list22 = Arrays.asList("圆形", "方形","菱形");
+        List<String> list223 = Arrays.asList("1", "2","3");
+        List<String> list22223 = Arrays.asList("xian", "yul","bejg");
+        list3.add(list12);
+        list3.add(list22);list3.add(list223);list3.add(list22223);*/
+        List<JSONObject> lists=new ArrayList<>();
+       if(!list3.isEmpty()) {
+           List<List<Object>> descartesList = ArrayUtils.getDescartes(list3);
+          // System.err.println(descartesList);
+          // descartesList.forEach(System.out::println);
 
-        String[] color={"1","2","3","4"};
+           for(List<Object> lo:descartesList){
+               JSONObject jsonThree = new JSONObject();
+               for(Object o:lo){
+                  JSONObject newb= JSONObject.parseObject(o.toString());
+                   System.err.println(newb);
+                   jsonThree.putAll(newb);
+               }
+               lists.add(jsonThree);
+           }
 
-        //String[] size={"X","L","M"};
-
-
-        list.add(color);
-        //list.add(size);
-
-        List newArrayLists=new ArrayList<>();
-        newArrayLists= this.doExchange(list,newArrayLists);
-        System.err.println(newArrayLists);
+           return SuccessMsg("分解成功",lists);
+       }
+      return null;
     }
 
     public List  doExchange(List arrayLists,List lists){
@@ -259,6 +305,5 @@ public class ItemCategoryController extends RO {
         lists=  doExchange(newArrayLists,lists);
         return lists;
     }
-
 
 }
