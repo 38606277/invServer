@@ -114,7 +114,7 @@
     </select>
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-		SELECT u.item_id,u.item_category_id,u.item_description,ic.category_name,u.market_price,u.price,u.promotion_price,u.cost_price,
+		SELECT u.item_id,u.item_category_id,u.item_description,ic.category_name,u.market_price,u.price,u.promotion_price,u.cost_price,u.uom,
 		d1.value_name as segment1 ,
 		d2.value_name as segment2,
 		d3.value_name as segment3,
