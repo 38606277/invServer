@@ -28,10 +28,10 @@ public class ItemController extends RO {
     public ItemService itemService;
 
     /**
-     * 功能描述: 接收JSON格式参数，往func_dict跟func_dict_out 中插入相关数据
+     * 单个数据进行保存
      */
     @RequestMapping(value = "/saveItem", produces = "text/plain;charset=UTF-8")
-    public String saveDict(@RequestBody String pJson) throws Exception
+    public String saveItem(@RequestBody String pJson) throws Exception
     {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         try{
@@ -47,6 +47,29 @@ public class ItemController extends RO {
             return ExceptionMsg(ex.getMessage());
         }
     }
+
+    /**
+     * 批量进行保存
+     * */
+    @RequestMapping(value = "/saveItemBatch", produces = "text/plain;charset=UTF-8")
+    public String saveItemBatch(@RequestBody String pJson) throws Exception
+    {
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        try{
+            sqlSession.getConnection().setAutoCommit(false);
+            JSONObject jsonObject = JSON.parseObject(pJson);
+            String id = this.itemService.saveOrUpdateBatch(sqlSession, jsonObject);
+
+            sqlSession.getConnection().commit();
+            return SuccessMsg("保存成功",id);
+        }catch (Exception ex){
+            sqlSession.getConnection().rollback();
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+
     /**
      * 根据类别ID获取数据
      * */

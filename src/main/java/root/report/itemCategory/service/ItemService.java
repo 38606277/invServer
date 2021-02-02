@@ -358,6 +358,127 @@ public class ItemService {
         return id;
     }
 
+
+    public String saveOrUpdateBatch(SqlSession sqlSession,JSONObject jsonObjectVal) {
+        Map<String, Object> map = new HashMap<>();
+        String id = "";
+        Integer newId = sqlSession.selectOne("mdmItem.getMaxId");
+        newId = newId == null ? 1 : newId;
+        Map<String, Object> mapVal = new HashMap<>();
+        if (null == jsonObjectVal.getString("item_id") || "".equals(jsonObjectVal.getString("item_id")) || "null".equals(jsonObjectVal.getString("item_id"))) {
+           JSONArray list=jsonObjectVal.getJSONArray("columnSkeyList");
+            for (int i = 0; i < list.size(); i++) {
+                if (null != list.get(i) && !"".equals(list.get(i))) {
+                    JSONObject objss= (JSONObject) list.get(i);
+                    for (Map.Entry<String, Object> entry : objss.entrySet()) {
+                        Object vale = entry.getValue();
+                        String vkey = entry.getKey();
+                        jsonObjectVal.put(vkey, vale);
+                    }
+                    mapVal.put("item_id", newId);
+                    mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
+                    mapVal.put("item_description", jsonObjectVal.getString("item_description"));
+                    mapVal.put("uom", jsonObjectVal.getString("uom"));
+                    mapVal.put("market_price", jsonObjectVal.getString("market_price"));
+                    mapVal.put("price", jsonObjectVal.getString("price"));
+                    mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
+                    mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
+                    mapVal.put("image_url", jsonObjectVal.getString("image_url"));
+                    for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
+                        System.out.println("key值=" + entry.getKey());
+                        System.out.println("对应key值的value=" + entry.getValue());
+                        if (entry.getKey().equalsIgnoreCase("segment1")) {
+                            mapVal.put("segment1", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment2")) {
+                            mapVal.put("segment2", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment3")) {
+                            mapVal.put("segment3", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment4")) {
+                            mapVal.put("segment4", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment5")) {
+                            mapVal.put("segment5", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment6")) {
+                            mapVal.put("segment6", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment7")) {
+                            mapVal.put("segment7", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment8")) {
+                            mapVal.put("segment8", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment9")) {
+                            mapVal.put("segment9", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("segment10")) {
+                            mapVal.put("segment10", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute1")) {
+                            mapVal.put("attribute1", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute2")) {
+                            mapVal.put("attribute2", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute3")) {
+                            mapVal.put("attribute3", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute4")) {
+                            mapVal.put("attribute4", entry.getValue());
+                        }
+
+                        if (entry.getKey().equalsIgnoreCase("attribute5")) {
+                            mapVal.put("attribute5", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute6")) {
+                            mapVal.put("attribute6", entry.getValue());
+                        }
+
+                        if (entry.getKey().equalsIgnoreCase("attribute7")) {
+                            mapVal.put("attribute7", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute8")) {
+                            mapVal.put("attribute8", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute9")) {
+                            mapVal.put("attribute9", entry.getValue());
+                        }
+                        if (entry.getKey().equalsIgnoreCase("attribute10")) {
+                            mapVal.put("attribute10", entry.getValue());
+                        }
+                    }
+                    sqlSession.insert("mdmItem.createMdmItem", mapVal);
+
+                    List<Map> orgList = sqlSession.selectList("inv_org.getAll");
+
+                    List<Map> insertMap = new ArrayList<Map>();
+                    if (orgList.size() > 0) {
+                        for (Map resmap : orgList) {
+                            Map onHandmap = new HashMap();
+                            onHandmap.put("item_id", mapVal.get("item_id"));
+                            onHandmap.put("location_id", null);
+                            onHandmap.put("on_hand_quantity", null);
+                            onHandmap.put("price", null);
+                            onHandmap.put("amount", null);
+                            onHandmap.put("min", null);
+                            onHandmap.put("max", null);
+                            onHandmap.put("org_id", resmap.get("org_id"));
+                            insertMap.add(onHandmap);
+                        }
+                        sqlSession.insert("inv_item_on_hand.saveItemOnHandAll", insertMap);
+                    }
+                    newId++;
+                }
+
+            }
+
+        }
+        return null;
+    }
+
     public Map getItemByItemId(Map<String, String> map) {
         Map maps=DbFactory.Open(DbFactory.FORM).selectOne("mdmItem.getItemByItemId",map);
         return maps;
