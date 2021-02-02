@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bom_lines">
+
+    <insert id="saveBomLines" parameterType="Map"  keyColumn="line_id" keyProperty="line_id" useGeneratedKeys="true">
+        INSERT INTO mdm_bom_lines(`item_id`, `material_id`, `material_pid`, `quantity`, `uom`, `unit_cost`, `lose_rate`, `cost`)
+        VALUES (#{item_id}, #{material_id}, #{material_pid}, #{quantity}, #{uom}, #{unit_cost}, #{lose_rate}, #{cost})
+    </insert>
+
+    <insert id="saveBomLinesAll" parameterType="java.util.List">
+        INSERT INTO mdm_bom_lines(`item_id`, `material_id`, `material_pid`, `quantity`, `uom`, `unit_cost`, `lose_rate`, `cost`) VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.item_id}, #{item.material_id}, #{item.material_pid}, #{item.quantity}, #{item.uom}, #{item.unit_cost}, #{item.lose_rate}, #{item.cost})
+        </foreach>
+    </insert>
+
+    <select id="getBomLinesByItemId" resultType="Map" parameterType="Map">
+        SELECT mbl.*,mi.item_description as material_description FROM mdm_bom_lines mbl
+        LEFT JOIN mdm_item mi on mbl.material_id = mi.item_id
+        where mbl.item_id=#{item_id}
+        <if test="material_pid != null and material_pid!=''">  and mbl.material_pid =#{material_pid} </if>
+        order by mbl.line_id asc
+    </select>
+
+    <delete id="deleteByIds" parameterType="Map">
+        delete from mdm_bom_lines where line_id in (${ids})
+    </delete>
+
+    <update id="updateBomLinesById" parameterType="Map">
+        update mdm_bom_lines
+        <trim prefix="set" suffixOverrides=",">
+            <if test="item_id!=null">item_id=#{item_id},</if>
+            <if test="material_id!=null">material_id=#{material_id},</if>
+            <if test="material_pid!=null">material_pid=#{material_pid},</if>
+            <if test="uom!=null">uom=#{uom},</if>
+            <if test="unit_cost!=null">unit_cost=#{unit_cost},</if>
+            <if test="lose_rate!=null">lose_rate=#{lose_rate},</if>
+            <if test="cost!=null">cost=#{cost},</if>
+        </trim>
+        where line_id=#{line_id}
+
+    </update>
+</mapper>
+

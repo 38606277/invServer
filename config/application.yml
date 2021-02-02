@@ -17,3 +17,6 @@ management:
          include:*
      shutdown:
        enabled: true
+
+
+fileDirPath: /Users/cannon/files/
