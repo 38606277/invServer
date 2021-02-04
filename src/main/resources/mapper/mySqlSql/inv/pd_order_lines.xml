@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pd_order_lines">
+
+    <insert id="savePdOrderLines" parameterType="Map" keyColumn="line_id" keyProperty="line_id" useGeneratedKeys="true">
+        INSERT INTO pd_order_lines(`header_id`, `item_id`, `item_pid`, `uom`, `price`, `quantity`, `amount`)
+        VALUES (#{header_id}, #{item_id}, #{item_pid}, #{uom}, #{price}, #{quantity}, #{amount})
+    </insert>
+
+    <insert id="savePdOrderLinesAll" parameterType="java.util.List">
+        INSERT INTO pd_order_lines(`header_id`, `item_id`, `item_pid`, `uom`, `price`, `quantity`, `amount`) VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.header_id}, #{item.item_id}, #{item.item_pid}, #{item.uom}, #{item.price}, #{item.quantity}, #{item.amount})
+        </foreach>
+    </insert>
+
+    <select id="getPdOrderLinesByHeaderId" resultType="Map" parameterType="Map">
+        SELECT pol.*,mi.item_description,mic.category_name FROM pd_order_lines pol
+        LEFT JOIN mdm_item mi on pol.item_id = mi.item_id
+        LEFT JOIN mdm_item_category mic on  mi.item_category_id = mic.category_id
+        where pol.header_id=#{header_id}
+        <if test="item_pid != null and item_pid!=''">  and pol.item_pid =#{item_pid} </if>
+        order by header_id asc
+    </select>
+
+    <delete id="deleteByIds" parameterType="Map">
+        delete from pd_order_lines where line_id in (${ids})
+    </delete>
+
+    <update id="updatePdOrderLinesById" parameterType="Map">
+        update pd_order_lines
+        <trim prefix="set" suffixOverrides=",">
+            <if test="header_id!=null">header_id=#{header_id},</if>
+            <if test="item_id!=null">item_id=#{item_id},</if>
+            <if test="item_pid!=null">item_pid=#{item_pid},</if>
+            <if test="uom!=null">uom=#{uom},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="quantity!=null">quantity=#{quantity},</if>
+            <if test="price!=null">price=#{price},</if>
+            <if test="amount!=null">amount=#{amount},</if>
+        </trim>
+        where line_id=#{line_id}
+
+    </update>
+
+</mapper>
+
