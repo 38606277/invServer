@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import root.inv.po.PoLinesService;
 import root.report.common.RO;
 import root.report.db.DbFactory;
+import root.report.itemCategory.service.ItemCategoryService;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
 
@@ -39,6 +40,9 @@ public class StoreControl extends RO {
     @Autowired
     PoLinesService poLinesService;
 
+
+    @Autowired
+    public ItemCategoryService itemCategoryService;
 
 
     //查询所有事物
@@ -72,7 +76,53 @@ public class StoreControl extends RO {
         List<Map<String,Object>> lines =  invBillLineService.getBillLinesByHeaderId(headerId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
-        result.put("linesData",lines);
+      //  result.put("linesData",lines);
+
+
+        Map<String,List<Map>> columnMap = new HashMap<>();
+        Map<String,List<Map>> lineDateMap = new HashMap<>();
+        Map<String,String> categoryNameMap = new HashMap<>();
+        for(Map<String,Object> map : lines){
+          String itemCategoryId = String.valueOf(map.get("item_category_id"));
+            String itemCategoryName = String.valueOf(map.get("category_name"));
+              if(!columnMap.containsKey(itemCategoryId)){
+                  Map<String,Object> params = new HashMap<>();
+                  params.put("category_id",itemCategoryId);
+
+                  //动态列
+                  List<Map> columnList = itemCategoryService.getItemCategorySegmentByPid(params);
+                  for(Map columnItemMap :columnList ){
+                      columnItemMap.put("title",columnItemMap.get("segment_name"));
+                      columnItemMap.put("dataIndex",columnItemMap.get("segment"));
+                  }
+                  columnMap.put(itemCategoryId,columnList);
+                  categoryNameMap.put(itemCategoryId,itemCategoryName);
+                  //行数据
+                  List<Map> lineList = new ArrayList<>();
+                  lineList.add(map);
+                  lineDateMap.put(itemCategoryId,lineList);
+              }else{
+                  List<Map> lineList =  lineDateMap.get(itemCategoryId);
+                  lineList.add(map);
+              }
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for(String key : columnMap.keySet()){
+            List<Map> column  = columnMap.get(key);
+            List<Map> dataList = lineDateMap.get(key);
+            String categoryName =  categoryNameMap.get(key);
+            JSONObject jsonObject = new JSONObject();
+
+            jsonObject.put("columnList",column);
+            jsonObject.put("dataList",dataList);
+            jsonObject.put("categoryName",categoryName);
+            jsonObject.put("categoryId",key);
+            jsonArray.add(jsonObject);
+        }
+
+        result.put("linesData",jsonArray);
+
         return SuccessMsg("获取成功", result);
     }
 
