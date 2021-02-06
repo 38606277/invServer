@@ -182,4 +182,8 @@
 	<delete id="deleteItemByCategoryID" parameterType="Map">
         delete from mdm_item where item_category_id=#{item_category_id}
     </delete>
+
+	<select id="paramStringSql" parameterType="String" resultType="map">
+		${_parameter}
+	</select>
 </mapper>

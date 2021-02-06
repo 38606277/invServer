@@ -42,7 +42,12 @@ public class ItemService {
                 }
                 bounds = new PageRowBounds(startIndex, perPage);
             }
-            List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.getAllPage", map, bounds);
+
+            //根据类别获取段位  segment， attribute
+            List<Map> segmentList = itemCategoryService.getItemCategorySegmentByCatId(map.get("item_category_id"));
+            List<Map> attributeList = itemCategoryService.getItemCategoryAttributeByCatId(map.get("item_category_id"));
+            String stringSql=getSql(segmentList,attributeList,map);
+            List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.paramStringSql", stringSql, bounds);
             Long totalSize = 0L;
             if (map != null && map.size() != 0) {
                 totalSize = ((PageRowBounds) bounds).getTotal();
@@ -57,6 +62,42 @@ public class ItemService {
             e.printStackTrace();
         }
         return map1;
+    }
+
+    public String getSql(List<Map> segmentList,List<Map> attributeList,Map map){
+        StringBuffer stringSql=new StringBuffer();
+        StringBuffer stringfrom=new StringBuffer();
+        StringBuffer stringWhere=new StringBuffer();
+        stringSql.append("SELECT item.item_id,item.item_category_id,item.item_description,item.uom,item.market_price,item.price,item.promotion_price," +
+                "item.cost_price,item.image_url,itemcat.category_name ");
+        if(segmentList.size()>0){
+            for(int i=0;i<segmentList.size();i++){
+                Map map2=segmentList.get(i);
+                if(map2.get("input_mode").equals("dict")){
+                    stringSql.append(",dicts"+i+".value_name as "+map2.get("segment"));
+                    stringfrom.append(" ,mdm_dict_value as dicts"+i);
+                    stringWhere.append(" and item."+map2.get("segment")+"=dicts"+i+".value_id");
+                }else{
+                    stringSql.append(","+map2.get("segment"));
+                }
+            }
+        }
+        if(attributeList.size()>0){
+            for(int i=0;i<attributeList.size();i++){
+                Map map2=attributeList.get(i);
+                if(map2.get("input_mode").equals("dict")){
+                    stringSql.append(",dicta"+i+".value_name as "+map2.get("attribute"));
+                    stringfrom.append(" ,mdm_dict_value as dicta"+i);
+                    stringWhere.append(" and item."+map2.get("attribute")+"=dicta"+i+".value_id");
+                }else{
+                    stringSql.append(","+map2.get("attribute"));
+                }
+            }
+        }
+
+        stringSql.append(" from  mdm_item as item,mdm_item_category as itemcat "+stringfrom+ " where 1=1 "+stringWhere +" and item.item_category_id=itemcat.category_id and item.item_category_id="+ map.get("item_category_id"));
+        System.out.println(stringSql);
+        return stringSql.toString();
     }
     /**
      * 功能描述: 根据JSON数据解析 对应数据，生成func_dict记录
