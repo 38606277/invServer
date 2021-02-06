@@ -78,7 +78,7 @@ public class ItemService {
                     stringfrom.append(" ,mdm_dict_value as dicts"+i);
                     stringWhere.append(" and item."+map2.get("segment")+"=dicts"+i+".value_id");
                 }else{
-                    stringSql.append(","+map2.get("segment"));
+                    stringSql.append(",item."+map2.get("segment"));
                 }
             }
         }
@@ -90,7 +90,7 @@ public class ItemService {
                     stringfrom.append(" ,mdm_dict_value as dicta"+i);
                     stringWhere.append(" and item."+map2.get("attribute")+"=dicta"+i+".value_id");
                 }else{
-                    stringSql.append(","+map2.get("attribute"));
+                    stringSql.append(",item."+map2.get("attribute"));
                 }
             }
         }

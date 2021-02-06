@@ -184,7 +184,7 @@ public class ItemCategoryService {
                         m.put("attribute_name",jsonObjectVal.getString("attribute_name"));
                         m.put("attribute",jsonObjectVal.getString("attribute"));
                         m.put("input_mode",jsonObjectVal.getString("input_mode"));
-                        m.put("dict_id",jsonObjectVal.getString("dict_id").equals("")?null:jsonObjectVal.getString("dict_id"));
+                        m.put("dict_id",jsonObjectVal.get("dict_id")==null?null:jsonObjectVal.getString("dict_id"));
                         m.put("qualifier",jsonObjectVal.getString("qualifier"));
                         m.put("spread_mode",jsonObjectVal.getString("spread_mode").equals("")?null:jsonObjectVal.getString("spread_mode"));
                         m.put("required",jsonObjectVal.getString("required").equals("")?null:jsonObjectVal.getString("required"));
