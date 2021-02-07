@@ -4,8 +4,8 @@
 <mapper namespace="bom_header">
 
     <insert id="saveBomHeader" parameterType="Map" keyColumn="item_id" keyProperty="item_id" useGeneratedKeys="true">
-        INSERT INTO mdm_bom( `bom_name`, `comment`, `create_by`,`create_date`,`update_by`, `update_date`)
-        VALUES (#{bom_name}, #{comment}, #{create_by},#{create_date},#{update_by}, #{update_date});
+        INSERT INTO mdm_bom( `item_id`,`bom_name`, `comment`, `create_by`,`create_date`,`update_by`, `update_date`)
+        VALUES (#{item_id},#{bom_name}, #{comment}, #{create_by},#{create_date},#{update_by}, #{update_date});
     </insert>
 
     <update id="updateBomHeaderById" parameterType="Map">
@@ -40,9 +40,13 @@
     </select>
 
     <select id="getBomHeaderListByPage" resultType="Map" parameterType="Map">
-        SELECT mb.* FROM mdm_bom mb
-        where 1=1
-
+        SELECT
+        mb.*,
+        mi.uom,
+        ( SELECT sum( mbl.cost ) FROM mdm_bom_lines mbl WHERE item_id = mb.item_id AND mbl.material_pid = '-1' ) AS `cost`
+        FROM
+        mdm_bom mb
+        LEFT JOIN mdm_item mi on mb.item_id = mi.item_id
         <if test="bom_name != null and bom_name!=''">  and mb.bom_name like '%${bom_name}%' </if>
         <if test="comment != null and comment!=''">  and mb.comment like '%${comment}%' </if>
         ORDER BY update_date desc

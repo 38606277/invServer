@@ -94,6 +94,9 @@ public class BomLinesService {
     public List<Map<String,Object>> getBomLinesByItemId(Map<String,Object>  map){
         return  DbSession.selectList("bom_lines.getBomLinesByItemId",map);
     }
+    public List<Map<String,Object>> getBomLinesLeafByItemId(Map<String,Object>  map){
+        return  DbSession.selectList("bom_lines.getBomLinesLeafByItemId",map);
+    }
 
     /**
      * 递归 - 层级形式

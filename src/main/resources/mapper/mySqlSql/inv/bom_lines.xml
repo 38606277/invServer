@@ -23,6 +23,16 @@
         order by mbl.line_id asc
     </select>
 
+    <select id="getBomLinesLeafByItemId" resultType="Map" parameterType="Map">
+        SELECT mbl.*,mi.item_description as material_description FROM mdm_bom_lines mbl
+        LEFT JOIN mdm_item mi on mbl.material_id = mi.item_id
+        where mbl.item_id=#{item_id} and mbl.isLeaf = '1'
+        <if test="material_pid != null and material_pid!=''">  and mbl.material_pid =#{material_pid} </if>
+        order by mbl.line_id asc
+    </select>
+
+
+
     <delete id="deleteByIds" parameterType="Map">
         delete from mdm_bom_lines where line_id in (${ids})
     </delete>
