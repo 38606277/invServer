@@ -44,9 +44,8 @@ public class ItemService {
             }
 
             //根据类别获取段位  segment， attribute
-            List<Map> segmentList = itemCategoryService.getItemCategorySegmentByCatId(map.get("item_category_id"));
-            List<Map> attributeList = itemCategoryService.getItemCategoryAttributeByCatId(map.get("item_category_id"));
-            String stringSql=getSql(segmentList,attributeList,map);
+
+            String stringSql=getSql(map.get("item_category_id"));
             List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.paramStringSql", stringSql, bounds);
             Long totalSize = 0L;
             if (map != null && map.size() != 0) {
@@ -64,7 +63,9 @@ public class ItemService {
         return map1;
     }
 
-    public String getSql(List<Map> segmentList,List<Map> attributeList,Map map){
+    public String getSql(String categoryId){
+        List<Map> segmentList = itemCategoryService.getItemCategorySegmentByCatId(categoryId);
+        List<Map> attributeList = itemCategoryService.getItemCategoryAttributeByCatId(categoryId);
         StringBuffer stringSql=new StringBuffer();
         StringBuffer stringfrom=new StringBuffer();
         StringBuffer stringWhere=new StringBuffer();
@@ -94,8 +95,8 @@ public class ItemService {
                 }
             }
         }
-
-        stringSql.append(" from  mdm_item as item,mdm_item_category as itemcat "+stringfrom+ " where 1=1 "+stringWhere +" and item.item_category_id=itemcat.category_id and item.item_category_id="+ map.get("item_category_id"));
+        stringSql.append(" from  mdm_item as item,mdm_item_category as itemcat "+stringfrom+ " where 1=1 "+stringWhere +" " +
+                " and item.item_category_id=itemcat.category_id and item.item_category_id="+ categoryId);
         System.out.println(stringSql);
         return stringSql.toString();
     }
