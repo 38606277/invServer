@@ -4,14 +4,14 @@
 <mapper namespace="pd_order_lines">
 
     <insert id="savePdOrderLines" parameterType="Map" keyColumn="line_id" keyProperty="line_id" useGeneratedKeys="true">
-        INSERT INTO pd_order_lines(`header_id`, `item_id`, `item_pid`, `uom`, `price`, `quantity`, `amount`)
-        VALUES (#{header_id}, #{item_id}, #{item_pid}, #{uom}, #{price}, #{quantity}, #{amount})
+        INSERT INTO pd_order_lines(`header_id`, `item_id`, `item_type`, `item_pid`, `uom`, `price`, `quantity`, `amount`)
+        VALUES (#{header_id}, #{item_id},#{item_type}, #{item_pid}, #{uom}, #{price}, #{quantity}, #{amount})
     </insert>
 
     <insert id="savePdOrderLinesAll" parameterType="java.util.List">
-        INSERT INTO pd_order_lines(`header_id`, `item_id`, `item_pid`, `uom`, `price`, `quantity`, `amount`) VALUES
+        INSERT INTO pd_order_lines(`header_id`, `item_id`, `item_type`, `item_pid`, `uom`, `price`, `quantity`, `amount`)VALUES
         <foreach collection="list" index="index" item="item" separator="," >
-            (#{item.header_id}, #{item.item_id}, #{item.item_pid}, #{item.uom}, #{item.price}, #{item.quantity}, #{item.amount})
+            (#{item.header_id}, #{item.item_id},#{item.item_type}, #{item.item_pid}, #{item.uom}, #{item.price}, #{item.quantity}, #{item.amount})
         </foreach>
     </insert>
 
