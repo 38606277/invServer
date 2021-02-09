@@ -16,8 +16,8 @@
     </insert>
 
     <select id="getPoLinesByHeaderId" resultType="Map" parameterType="Map">
-        SELECT pl.*,(pl.quantity - pl.rcv_quantity) as not_rcv_quantity,mi.item_description,mic.category_name FROM po_lines pl
-        LEFT JOIN mdm_item mi on pl.item_id = mi.item_id
+        SELECT pl.*,(pl.quantity - pl.rcv_quantity) as not_rcv_quantity,mi.*,mic.category_name FROM po_lines pl
+        LEFT JOIN v_item mi on pl.item_id = mi.item_id
         LEFT JOIN mdm_item_category mic on  pl.category_id = mic.category_id
         where header_id=#{header_id}
         order by line_number asc

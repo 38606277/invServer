@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import root.report.common.RO;
 import root.report.db.DbFactory;
+import root.report.itemCategory.service.ItemCategoryService;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
 import root.report.util.UUIDUtil;
@@ -19,6 +20,7 @@ import root.report.util.UUIDUtil;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,9 @@ public class PoControl extends RO {
 
     @Autowired
     PoLinesService poLinesService;
+
+    @Autowired
+    public ItemCategoryService itemCategoryService;
 
     //查询所有订单
     @RequestMapping(value = "/getPoListByPage", produces = "text/plain;charset=UTF-8")
@@ -71,13 +76,57 @@ public class PoControl extends RO {
         return SuccessMsg("获取成功", result);
     }
 
-
     @RequestMapping(value = "/getPoLinesById", produces = "text/plain;charset=UTF-8")
     public String getPoListById(@RequestBody JSONObject pJson){
         String headId = String.valueOf(pJson.get("po_header_id"));
         List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeaderId(headId);
         return SuccessMsg(lines, lines.size());
     }
+
+    @RequestMapping(value = "/getPoLinesColumnById", produces = "text/plain;charset=UTF-8")
+    public String getPoLinesColumnById(@RequestBody JSONObject pJson){
+        String headId = String.valueOf(pJson.get("po_header_id"));
+        List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeaderId(headId);
+        Map<String,List<Map>> columnMap = new HashMap<>();
+        Map<String,String> categoryNameMap = new HashMap<>();
+        for(Map<String,Object> map : lines){
+            String itemCategoryId = String.valueOf(map.get("item_category_id"));
+            String itemCategoryName = String.valueOf(map.get("category_name"));
+            if(!columnMap.containsKey(itemCategoryId)){
+                Map<String,Object> params = new HashMap<>();
+                params.put("category_id",itemCategoryId);
+
+                //动态列
+                List<Map> columnList = itemCategoryService.getItemCategorySegmentByPid(params);
+                for(Map columnItemMap :columnList ){
+                    columnItemMap.put("title",columnItemMap.get("segment_name"));
+                    columnItemMap.put("dataIndex",columnItemMap.get("segment"));
+                }
+                columnMap.put(itemCategoryId,columnList);
+                categoryNameMap.put(itemCategoryId,itemCategoryName);
+                //行数据
+                List<Map> lineList = new ArrayList<>();
+                lineList.add(map);
+            }
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for(String key : columnMap.keySet()){
+            List<Map> column  = columnMap.get(key);
+            String categoryName =  categoryNameMap.get(key);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("columnList",column);
+            jsonObject.put("categoryName",categoryName);
+            jsonObject.put("categoryId",key);
+            jsonArray.add(jsonObject);
+        }
+
+
+        return SuccessMsg("查询成功",jsonArray);
+    }
+
+
+
 
 
 
@@ -158,6 +207,7 @@ public class PoControl extends RO {
                     jsonObject.put("line_number",i);
                     jsonObject.put("create_by",userId);
                     jsonObject.put("header_id",id);
+                    jsonObject.put("rcv_quantity",0);
                 }
                 poLinesService.insertPoLinesAll(sqlSession,jsonArray);
             }
