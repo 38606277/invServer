@@ -45,5 +45,12 @@
     </select>
 
 
+    <select id="getOrgListByUserId" resultType="Map" parameterType="Map">
+        SELECT fou.*,fo.org_name,fu.USER_NAME FROM fnd_org_user fou
+        LEFT JOIN fnd_org fo on fou.org_id = fo.org_id
+        LEFT JOIN fnd_user fu on fou.user_id = fu._id
+        where 1=1
+        <if test="user_id != null and user_id!=''">  and fou.user_id =#{user_id} </if>
+    </select>
 
 </mapper>

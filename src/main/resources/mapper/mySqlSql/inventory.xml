@@ -5,38 +5,26 @@
 
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-		SELECT mdm.item_id,mdm.item_category_id,mdm.item_description,ic.category_name,d1.value_name as segment1 ,
-		d2.value_name as segment2,
-		d3.value_name as segment3,
-		d4.value_name as segment4,
-		d5.value_name as segment5,
-		d6.value_name as segment6,
-		d7.value_name as segment7,
-		d8.value_name as segment8,
-		d9.value_name as segment9,
-		d10.value_name as segment10,
-		d11.value_name as attribute1,
-		d12.value_name as attribute2,iio.amount,iio.price,iio.on_hand_quantity,iio.max,iio.min,fo.org_name
+		SELECT mdm.item_id,mdm.item_category_id,mdm.item_description,ic.category_name,iio.amount,iio.price,
+		iio.on_hand_quantity,iio.max,iio.min,fo.org_name
 		FROM mdm_item mdm
 		INNER JOIN mdm_item_category ic on mdm.item_category_id=ic.category_id
 		INNER JOIN inv_item_onhand iio ON mdm.item_id = iio.item_id
 		inner join fnd_org fo on iio.org_id=fo.org_id
-		LEFT JOIN mdm_dict_value d1 on mdm.segment1=d1.value_id
-		LEFT JOIN mdm_dict_value d2 on mdm.segment2=d2.value_id
-		LEFT JOIN mdm_dict_value d3 on mdm.segment3=d3.value_id
-		LEFT JOIN mdm_dict_value d4 on mdm.segment4=d4.value_id
-		LEFT JOIN mdm_dict_value d5 on mdm.segment5=d5.value_id
-		LEFT JOIN mdm_dict_value d6 on mdm.segment6=d6.value_id
-		LEFT JOIN mdm_dict_value d7 on mdm.segment7=d7.value_id
-		LEFT JOIN mdm_dict_value d8 on mdm.segment8=d8.value_id
-		LEFT JOIN mdm_dict_value d9 on mdm.segment9=d9.value_id
-		LEFT JOIN mdm_dict_value d10 on mdm.segment10=d10.value_id
-		LEFT JOIN mdm_dict_value d11 on mdm.attribute1=d11.value_id
-		LEFT JOIN mdm_dict_value d12 on mdm.attribute2=d12.value_id
 		 where  1=1
 		<if  test="item_description != null and item_description!='' ">
 			and  mdm.item_description like '%${item_description}%'
 		</if>
+		<if  test="item_category_id != null and item_category_id!='' ">
+			and  mdm.item_category_id ='${item_category_id}'
+		</if>
+		<if  test="item_id != null and item_id!='' ">
+			and  mdm.item_id ='${item_id}'
+		</if>
+		<if  test="org_id != null and org_id!='' ">
+			and  fo.org_id ='${org_id}'
+		</if>
+
     </select>
 
 </mapper>

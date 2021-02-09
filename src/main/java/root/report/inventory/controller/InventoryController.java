@@ -36,6 +36,9 @@ public class InventoryController extends RO {
             map.put("startIndex",jsonFunc.getString("startIndex"));
             map.put("perPage",jsonFunc.getString("perPage"));
             map.put("item_description",jsonFunc.getString("item_description"));
+            map.put("item_category_id",jsonFunc.getString("item_category_id"));
+            map.put("item_id",jsonFunc.getString("item_id"));
+            map.put("org_id",jsonFunc.getString("org_id"));
             Map<String,Object> map1 = inventoryService.getAllPage(map);
             return SuccessMsg("", map1);
         } catch (Exception ex){

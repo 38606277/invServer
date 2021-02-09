@@ -75,6 +75,16 @@ public class InvOrgUserController extends RO {
         return SuccessMsg(list, total);
     }
 
+    /**
+     * 查询仓库员工
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/getOrgListByUserId", produces = "text/plain;charset=UTF-8")
+    public String getOrgListByUserId(@RequestBody JSONObject pJson) {
+        List<Map<String, Object>> list = DbSession.selectList("inv_org_user.getOrgListByUserId",pJson);
+        return SuccessMsg("",list);
+    }
 
 
     /**
