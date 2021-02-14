@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import root.inv.pd.PdOrderLinesService;
 import root.inv.po.PoLinesService;
 import root.report.common.RO;
 import root.report.db.DbFactory;
@@ -39,6 +40,9 @@ public class StoreControl extends RO {
 
     @Autowired
     PoLinesService poLinesService;
+
+    @Autowired
+    PdOrderLinesService pdOrderLinesService;
 
 
     @Autowired
@@ -215,6 +219,14 @@ public class StoreControl extends RO {
                     poLinesService.updatePoLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
                 }
 
+                if("store_pd".equals(billType)){//采购订单 维护剩余数量
+                    //获取订单id
+                    String sourceId =  mainData.getString("source_id");
+                    //接收数量
+                    double rcvQuantity = jsonObject.getDouble("quantity");
+                    pdOrderLinesService.updatePdLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
+                }
+
                 if(0 < billStatus){
                     //添加事物
                     jsonObject.put("bill_type",billType);
@@ -299,7 +311,7 @@ public class StoreControl extends RO {
                 for(Map<String,Object> billLine : billLines){
                     billLine.put("bill_type",billType);
                     billLine.put("org_id",invOrgId);
-                    if(billType.startsWith("store_")){ //入库为新增
+                    if(billType.startsWith(" http://localhost:8000")){ //入库为新增
                         invItemTransactionService.weightedMean(sqlSession,billLine,true);
                     }else if("deliver".equals(billType)){ //出库为减少
                         invItemTransactionService.weightedMean(sqlSession,billLine,false);

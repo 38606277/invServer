@@ -122,6 +122,8 @@ public class InvItemTransactionService {
             billTypeName= "其他入库";
         }else if("store_po".equals(billType)){ //订单入库
             billTypeName= "订单入库";
+        }else if("store_pd".equals(billType)){ //订单入库
+            billTypeName= "生产入库";
         }else if("deliver".equals(billType)){//出库
             billTypeName= "其他出库";
         }else if("transfer".equals(billType)){

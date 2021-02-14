@@ -91,9 +91,16 @@ public class PdOrderLinesService {
         return lines;
     }
 
+    public List<Map<String,Object>> getPdOrderLinesByItemId(String  itemId){
+        Map<String,Object> param = new HashMap<>();
+        param.put("header_id",itemId);
+        return  DbSession.selectList("pd_order_lines.getPdOrderLinesByHeaderId",param);
+    }
+
     public List<Map<String,Object>> getPdOrderLinesByItemId(Map<String,Object>  map){
         return  DbSession.selectList("pd_order_lines.getPdOrderLinesByHeaderId",map);
     }
+
 
     /**
      * 递归 - 层级形式
@@ -117,6 +124,14 @@ public class PdOrderLinesService {
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);
         sqlSession.update("pd_order_lines.deleteByIds",map);
+    }
+
+    public void updatePdLinesRcvQuantity(SqlSession sqlSession, String headerId,String itemId,double rcvQuantity){
+        Map<String,Object> map = new HashMap<>();
+        map.put("header_id",headerId);
+        map.put("item_id",itemId);
+        map.put("rcv_quantity",rcvQuantity);
+        sqlSession.update("pd_order_lines.updatePdLinesRcvQuantity",map);
     }
 
 }

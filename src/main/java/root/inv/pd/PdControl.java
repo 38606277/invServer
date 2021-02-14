@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import root.report.common.RO;
 import root.report.db.DbFactory;
+import root.report.itemCategory.service.ItemCategoryService;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,9 @@ public class PdControl extends RO {
 
     @Autowired
     PdOrderLinesService pdOrderLinesService;
+
+    @Autowired
+    public ItemCategoryService itemCategoryService;
 
     @RequestMapping(value = "/getListByPage", produces = "text/plain;charset=UTF-8")
     public String getPdListByPage(@RequestBody JSONObject pJson) {
@@ -57,7 +62,8 @@ public class PdControl extends RO {
             return ErrorMsg("2000","数据不存在");
         }
         String itemId  = String.valueOf(mainData.get("pd_header_id"));
-        List<Map<String,Object>> lines = pdOrderLinesService.getAllChildrenRecursionByItemId(itemId);
+
+        List<Map<String,Object>> lines = pdOrderLinesService.getPdOrderLinesByItemId(itemId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
         result.put("linesData",lines);
@@ -67,11 +73,51 @@ public class PdControl extends RO {
 
     @RequestMapping(value = "/getPdOrderLinesById", produces = "text/plain;charset=UTF-8")
     public String getPdListById(@RequestBody JSONObject pJson){
-        String itemId = String.valueOf(pJson.get("pd_header_id"));
-        List<Map<String,Object>> lines = pdOrderLinesService.getAllChildrenRecursionByItemId(itemId);
+        List<Map<String,Object>> lines = pdOrderLinesService.getPdOrderLinesByItemId(pJson);
         return SuccessMsg(lines, lines.size());
     }
 
+    @RequestMapping(value = "/getPdLinesColumnById", produces = "text/plain;charset=UTF-8")
+    public String getPoLinesColumnById(@RequestBody JSONObject pJson){
+        String headId = String.valueOf(pJson.get("pd_header_id"));
+        List<Map<String,Object>> lines =  pdOrderLinesService.getPdOrderLinesByItemId(headId);
+        Map<String,List<Map>> columnMap = new HashMap<>();
+        Map<String,String> categoryNameMap = new HashMap<>();
+        for(Map<String,Object> map : lines){
+            String itemCategoryId = String.valueOf(map.get("item_category_id"));
+            String itemCategoryName = String.valueOf(map.get("category_name"));
+            if(!columnMap.containsKey(itemCategoryId)){
+                Map<String,Object> params = new HashMap<>();
+                params.put("category_id",itemCategoryId);
+
+                //动态列
+                List<Map> columnList = itemCategoryService.getItemCategorySegmentByPid(params);
+                for(Map columnItemMap :columnList ){
+                    columnItemMap.put("title",columnItemMap.get("segment_name"));
+                    columnItemMap.put("dataIndex",columnItemMap.get("segment"));
+                }
+                columnMap.put(itemCategoryId,columnList);
+                categoryNameMap.put(itemCategoryId,itemCategoryName);
+                //行数据
+                List<Map> lineList = new ArrayList<>();
+                lineList.add(map);
+            }
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for(String key : columnMap.keySet()){
+            List<Map> column  = columnMap.get(key);
+            String categoryName =  categoryNameMap.get(key);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("columnList",column);
+            jsonObject.put("categoryName",categoryName);
+            jsonObject.put("categoryId",key);
+            jsonArray.add(jsonObject);
+        }
+
+
+        return SuccessMsg("查询成功",jsonArray);
+    }
 
 
     //更新

@@ -49,7 +49,7 @@
         mi.item_description,
 
         CASE WHEN iit.transaction_type_id = 'store_po'
-        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'store_pd' OR iit.transaction_type_id = 'transfer_in' THEN
         iit.transaction_price ELSE 0
         END in_price,
 
@@ -58,7 +58,7 @@
         END out_price,
 
         CASE WHEN iit.transaction_type_id = 'store_po'
-        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'store_pd' OR iit.transaction_type_id = 'transfer_in' THEN
         iit.transaction_quantity ELSE 0
         END in_quantity,
 
@@ -67,7 +67,7 @@
         END out_quantity,
 
         CASE WHEN iit.transaction_type_id = 'store_po'
-        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'store_pd' OR iit.transaction_type_id = 'transfer_in' THEN
         iit.transaction_amount ELSE 0
         END in_amount,
 
@@ -76,17 +76,17 @@
         END out_amount,
 
         CASE WHEN iit.transaction_type_id = 'store_po'
-        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'store_pd'  OR iit.transaction_type_id = 'transfer_in' THEN
         (iit.begin_amount + iit.transaction_amount)/(iit.begin_quantity + iit.transaction_quantity)   ELSE (iit.begin_amount - iit.transaction_amount)/(iit.begin_quantity - iit.transaction_quantity)
         END end_price,
 
         CASE WHEN iit.transaction_type_id = 'store_po'
-        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'store_pd' OR iit.transaction_type_id = 'transfer_in' THEN
         iit.begin_quantity + iit.transaction_quantity ELSE iit.begin_quantity - iit.transaction_quantity
         END end_quantity,
 
         CASE  WHEN iit.transaction_type_id = 'store_po'
-        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'transfer_in' THEN
+        OR iit.transaction_type_id = 'store_other' OR iit.transaction_type_id = 'store_pd' OR iit.transaction_type_id = 'transfer_in' THEN
         iit.begin_amount + iit.transaction_amount ELSE iit.begin_amount - iit.transaction_amount
         END end_amount
 
