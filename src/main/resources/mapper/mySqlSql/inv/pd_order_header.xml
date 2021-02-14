@@ -4,8 +4,8 @@
 <mapper namespace="pd_order_header">
 
     <insert id="savePdOrderHeader" parameterType="Map" keyColumn="pd_header_id" keyProperty="pd_header_id" useGeneratedKeys="true">
-        INSERT INTO pd_order_header( `pd_header_name`, `manufactory_id`, `begin_date`,`end_date`,`create_by`, `create_date`, `update_by`, `update_date`)
-        VALUES (#{pd_header_name}, #{manufactory_id}, #{begin_date},#{end_date},#{create_by}, #{create_date}, #{update_by}, #{update_date});
+        INSERT INTO pd_order_header(`pd_header_code`, `pd_header_name`, `manufactory_id`, `begin_date`,`end_date`,`create_by`, `create_date`, `update_by`, `update_date`)
+        VALUES (#{pd_header_code},#{pd_header_name}, #{manufactory_id}, #{begin_date},#{end_date},#{create_by}, #{create_date}, #{update_by}, #{update_date});
     </insert>
 
     <update id="updatePdOrderHeaderById" parameterType="Map">

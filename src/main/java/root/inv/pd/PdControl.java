@@ -12,6 +12,7 @@ import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
+import root.report.util.UUIDUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -167,6 +168,7 @@ public class PdControl extends RO {
             mainData.put("update_by",userId);
             mainData.put("create_date", DateUtil.getCurrentTimm());
             mainData.put("update_date", DateUtil.getCurrentTimm());
+            mainData.put("pd_header_code", UUIDUtil.getUid());
 
             //保存主数据
             long id = pdOrderHeaderService.savePdOrderHeader(sqlSession,mainData);
