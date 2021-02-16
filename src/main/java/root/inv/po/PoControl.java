@@ -64,6 +64,7 @@ public class PoControl extends RO {
     //查询详情
     @RequestMapping(value = "/getPoById", produces = "text/plain;charset=UTF-8")
     public String getPoById(@RequestBody JSONObject pJson){
+
         Map<String, Object> mainData = poHeadersService.getPoHeadersById(pJson);
         if(mainData == null || mainData.isEmpty()){
             return ErrorMsg("2000","数据不存在");
@@ -72,8 +73,54 @@ public class PoControl extends RO {
         List<Map<String,Object>> lines =  poLinesService.getPoLinesByHeaderId(headId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
-        result.put("linesData",lines);
+
+        Map<String,List<Map>> columnMap = new HashMap<>();
+        Map<String,List<Map>> lineDateMap = new HashMap<>();
+        Map<String,String> categoryNameMap = new HashMap<>();
+        for(Map<String,Object> map : lines){
+            String itemCategoryId = String.valueOf(map.get("item_category_id"));
+            String itemCategoryName = String.valueOf(map.get("category_name"));
+            if(!columnMap.containsKey(itemCategoryId)){
+                Map<String,Object> params = new HashMap<>();
+                params.put("category_id",itemCategoryId);
+
+                //动态列
+                List<Map> columnList = itemCategoryService.getItemCategorySegmentByPid(params);
+                for(Map columnItemMap :columnList ){
+                    columnItemMap.put("title",columnItemMap.get("segment_name"));
+                    columnItemMap.put("dataIndex",columnItemMap.get("segment"));
+                }
+                columnMap.put(itemCategoryId,columnList);
+                categoryNameMap.put(itemCategoryId,itemCategoryName);
+                //行数据
+                List<Map> lineList = new ArrayList<>();
+                lineList.add(map);
+                lineDateMap.put(itemCategoryId,lineList);
+            }else{
+                List<Map> lineList =  lineDateMap.get(itemCategoryId);
+                lineList.add(map);
+            }
+        }
+
+        JSONArray jsonArray = new JSONArray();
+        for(String key : columnMap.keySet()){
+            List<Map> column  = columnMap.get(key);
+            List<Map> dataList = lineDateMap.get(key);
+            String categoryName =  categoryNameMap.get(key);
+            JSONObject jsonObject = new JSONObject();
+
+            jsonObject.put("columnList",column);
+            jsonObject.put("dataList",dataList);
+            jsonObject.put("categoryName",categoryName);
+            jsonObject.put("categoryId",key);
+            jsonArray.add(jsonObject);
+        }
+
+        result.put("linesData",jsonArray);
         return SuccessMsg("获取成功", result);
+
+
+
     }
 
     @RequestMapping(value = "/getPoLinesById", produces = "text/plain;charset=UTF-8")
@@ -208,6 +255,7 @@ public class PoControl extends RO {
                     jsonObject.put("create_by",userId);
                     jsonObject.put("header_id",id);
                     jsonObject.put("rcv_quantity",0);
+                    jsonObject.put("cancel_flag",0);
                 }
                 poLinesService.insertPoLinesAll(sqlSession,jsonArray);
             }
