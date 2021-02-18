@@ -209,22 +209,19 @@ public class StoreControl extends RO {
                 jsonObject.put("header_id",billId);
                 jsonObject.put("create_date", DateUtil.getCurrentTimm());
 
+                jsonObject.put("source_id", mainData.get("source_id"));
+                jsonObject.put("source_system",mainData.get("source_system"));
+                jsonObject.put("source_voucher",mainData.get("source_bill"));
+
                 String itemId = jsonObject.getString("item_id");
 
-                if("store_po".equals(billType)){//采购订单 维护剩余数量
+                //采购入库 生产入库 生产出库 维护剩余数量
+                if("store_po".equals(billType) || "store_pd".equals(billType) || "deliver_pd".equals(billType)){
                     //获取订单id
                     String sourceId =  mainData.getString("source_id");
                     //接收数量
                     double rcvQuantity = jsonObject.getDouble("quantity");
                     poLinesService.updatePoLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
-                }
-
-                if("store_pd".equals(billType)){//采购订单 维护剩余数量
-                    //获取订单id
-                    String sourceId =  mainData.getString("source_id");
-                    //接收数量
-                    double rcvQuantity = jsonObject.getDouble("quantity");
-                    pdOrderLinesService.updatePdLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
                 }
 
                 if(0 < billStatus){
@@ -233,7 +230,7 @@ public class StoreControl extends RO {
                     if(billType.startsWith("store_")){ //入库为新增
                         jsonObject.put("org_id",invOrgId);
                         invItemTransactionService.weightedMean(sqlSession,jsonObject,true);
-                    }else if("deliver".equals(billType)){ //出库为减少
+                    }else if(billType.startsWith("deliver_")){ //出库为减少
                         jsonObject.put("org_id",invOrgId);
                         invItemTransactionService.weightedMean(sqlSession,jsonObject,false);
                     }
@@ -311,9 +308,9 @@ public class StoreControl extends RO {
                 for(Map<String,Object> billLine : billLines){
                     billLine.put("bill_type",billType);
                     billLine.put("org_id",invOrgId);
-                    if(billType.startsWith(" http://localhost:8000")){ //入库为新增
+                    if(billType.startsWith("store_")){ //入库为新增
                         invItemTransactionService.weightedMean(sqlSession,billLine,true);
-                    }else if("deliver".equals(billType)){ //出库为减少
+                    }else if(billType.startsWith("deliver_")){ //出库为减少
                         invItemTransactionService.weightedMean(sqlSession,billLine,false);
                     }else if("transfer".equals(billType)){//调拨
                         if(2 == billStatus){

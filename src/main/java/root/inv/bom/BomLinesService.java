@@ -39,18 +39,25 @@ public class BomLinesService {
                     jsonObject.put("create_by",userId);
                     jsonObject.put("item_id",itemId);
                     jsonObject.put("material_pid",parentId);
+
+                    boolean hasChildren  = jsonObject.containsKey("children");
+                    jsonObject.put("isLeaf",hasChildren?0:1);
+
                     //临时数据 执行新增
                     sqlSession.insert("bom_lines.saveBomLines",jsonObject);
-
                     lineId = jsonObject.getString("line_id");
-                    if(jsonObject.containsKey("children")){
+                    if(hasChildren){
                         JSONArray jsonArray = jsonObject.getJSONArray("children");
                         saveOrUpdate(sqlSession,userId,itemId,lineId,jsonArray);
                     }
                 }else{
+
+                    boolean hasChildren  = jsonObject.containsKey("children");
+                    jsonObject.put("isLeaf",hasChildren?0:1);
+
                     //执行更新
                     sqlSession.update("bom_lines.updateBomLinesById",jsonObject);
-                    if(jsonObject.containsKey("children")){
+                    if(hasChildren){
                         JSONArray jsonArray = jsonObject.getJSONArray("children");
                         saveOrUpdate(sqlSession,userId,itemId,lineId,jsonArray);
                     }

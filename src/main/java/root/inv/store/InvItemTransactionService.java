@@ -111,7 +111,7 @@ public class InvItemTransactionService {
         transaction.put("begin_quantity",onHandQuantity);
         transaction.put("begin_amount",onHandAmount);
 
-        transaction.put("transaction_type_id",billType);
+        transaction.put("transaction_type_id",isAdd?1:2);
         transaction.put("header_id",String.valueOf(billLine.get("header_id")));
         transaction.put("line_number",String.valueOf(billLine.get("line_number")));
         transaction.put("inv_org_id",orgId);
@@ -124,8 +124,10 @@ public class InvItemTransactionService {
             billTypeName= "订单入库";
         }else if("store_pd".equals(billType)){ //订单入库
             billTypeName= "生产入库";
-        }else if("deliver".equals(billType)){//出库
+        }else if("deliver_other".equals(billType)){//出库
             billTypeName= "其他出库";
+        }else if("deliver_pd".equals(billType)){//出库
+            billTypeName= "生产出库";
         }else if("transfer".equals(billType)){
             billTypeName =  isAdd?"调拨入库":"调拨出库";
         }else{

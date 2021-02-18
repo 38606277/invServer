@@ -4,14 +4,14 @@
 <mapper namespace="bom_lines">
 
     <insert id="saveBomLines" parameterType="Map"  keyColumn="line_id" keyProperty="line_id" useGeneratedKeys="true">
-        INSERT INTO mdm_bom_lines(`item_id`, `material_id`, `material_pid`, `quantity`, `uom`, `unit_cost`, `lose_rate`, `cost`)
-        VALUES (#{item_id}, #{material_id}, #{material_pid}, #{quantity}, #{uom}, #{unit_cost}, #{lose_rate}, #{cost})
+        INSERT INTO mdm_bom_lines(`item_id`, `material_id`, `material_pid`, `quantity`, `uom`, `unit_cost`, `lose_rate`, `cost`,`isLeaf`)
+        VALUES (#{item_id}, #{material_id}, #{material_pid}, #{quantity}, #{uom}, #{unit_cost}, #{lose_rate}, #{cost}, #{isLeaf})
     </insert>
 
     <insert id="saveBomLinesAll" parameterType="java.util.List">
-        INSERT INTO mdm_bom_lines(`item_id`, `material_id`, `material_pid`, `quantity`, `uom`, `unit_cost`, `lose_rate`, `cost`) VALUES
+        INSERT INTO mdm_bom_lines(`item_id`, `material_id`, `material_pid`, `quantity`, `uom`, `unit_cost`, `lose_rate`, `cost`,`isLeaf`) VALUES
         <foreach collection="list" index="index" item="item" separator="," >
-            (#{item.item_id}, #{item.material_id}, #{item.material_pid}, #{item.quantity}, #{item.uom}, #{item.unit_cost}, #{item.lose_rate}, #{item.cost})
+            (#{item.item_id}, #{item.material_id}, #{item.material_pid}, #{item.quantity}, #{item.uom}, #{item.unit_cost}, #{item.lose_rate}, #{item.cost}, #{isLeaf})
         </foreach>
     </insert>
 
