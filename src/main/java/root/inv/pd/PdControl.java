@@ -168,7 +168,9 @@ public class PdControl extends RO {
             mainData.put("update_by",userId);
             mainData.put("create_date", DateUtil.getCurrentTimm());
             mainData.put("update_date", DateUtil.getCurrentTimm());
-            mainData.put("pd_header_code", UUIDUtil.getUid());
+
+            String billCode = sqlSession.selectOne("fnd_order_number_setting.getOrderNumber","pd_order");
+            mainData.put("pd_header_code", billCode);
 
             //保存主数据
             long id = pdOrderHeaderService.savePdOrderHeader(sqlSession,mainData);

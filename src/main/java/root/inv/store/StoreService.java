@@ -45,6 +45,8 @@ public class StoreService {
     }
 
     public long createStore(SqlSession sqlSession,Map<String,Object> params){
+        String billCode = DbSession.selectOne("fnd_order_number_setting.getOrderNumber",params.get("bill_type"));
+        params.put("bill_code",billCode);
         sqlSession.insert("inv_store.createStore",params);
         if(params.containsKey("bill_id")){
             return  Long.parseLong(params.get("bill_id").toString());

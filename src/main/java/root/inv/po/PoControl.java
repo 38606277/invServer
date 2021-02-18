@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import root.report.common.DbSession;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
@@ -237,8 +238,9 @@ public class PoControl extends RO {
             mainData.put("update_by",userId);
             mainData.put("create_date", DateUtil.getCurrentTimm());
             mainData.put("update_date", DateUtil.getCurrentTimm());
-            mainData.put("header_code", UUIDUtil.getUid());
 
+            String billCode = sqlSession.selectOne("fnd_order_number_setting.getOrderNumber","po_order");
+            mainData.put("header_code", billCode);
 
             //保存主数据
             long id = poHeadersService.savePoHeaders(sqlSession,mainData);

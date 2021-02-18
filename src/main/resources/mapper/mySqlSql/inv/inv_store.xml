@@ -51,8 +51,8 @@
     </select>
 
     <insert id="createStore"  parameterType="Map" keyColumn="bill_id" keyProperty="bill_id" useGeneratedKeys="true">
-        INSERT INTO inv_bill_header( `bill_type`, `inv_org_id`, `target_inv_org_id`,`operator`,`target_operator`, `bill_date`, `remark`, `create_by`, `bill_status`, `source_system`, `source_bill`, `source_id`,`ship_method`,`ship_corp`,`ship_number`)
-        VALUES (#{bill_type}, #{inv_org_id}, #{target_inv_org_id},#{operator},#{target_operator}, #{bill_date}, #{remark}, #{create_by}, #{bill_status}, #{source_system}, #{source_bill}, #{source_id},#{ship_method},#{ship_corp},#{ship_number});
+        INSERT INTO inv_bill_header(`bill_code`, `bill_type`, `inv_org_id`, `target_inv_org_id`,`operator`,`target_operator`, `bill_date`, `remark`, `create_by`, `bill_status`, `source_system`, `source_bill`, `source_id`,`ship_method`,`ship_corp`,`ship_number`)
+        VALUES (#{bill_code},#{bill_type}, #{inv_org_id}, #{target_inv_org_id},#{operator},#{target_operator}, #{bill_date}, #{remark}, #{create_by}, #{bill_status}, #{source_system}, #{source_bill}, #{source_id},#{ship_method},#{ship_corp},#{ship_number});
     </insert>
 
     <update id="updateStoreById" parameterType="Map">
