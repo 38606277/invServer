@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="whole_sale_header">
+
+    <select id="getStoreListByPage" resultType="Map" parameterType="Map">
+        SELECT ibh.*,
+        fo.org_name as `inv_org_name`,
+        fo2.org_name as `target_inv_org_name`,
+        fu.USER_NAME as `operator_name`,
+        fu2.USER_NAME as `target_operator_name`
+        FROM whole_sale_header ibh
+        LEFT JOIN fnd_org fo on ibh.inv_org_id = fo.org_id
+        LEFT JOIN fnd_org fo2 on ibh.target_inv_org_id = fo2.org_id
+        LEFT JOIN fnd_user fu on ibh.operator = fu._id
+        LEFT JOIN fnd_user fu2 on ibh.target_operator = fu2._id
+        where 1=1
+        <if test="bill_type != null and bill_type!=''">  and bill_type=#{bill_type} </if>
+        <if test="operator != null and operator!=''">  and (operator=#{operator} or create_by =#{create_by}) </if>
+        <if test="target_operator != null and target_operator!=''">  and (target_operator=#{target_operator} or create_by =#{create_by}) </if>
+        ORDER BY create_date desc
+    </select>
+
+    <select id="getStoreById" resultType="Map" parameterType="Map">
+        SELECT ibh.*,
+        fo.org_name as `inv_org_name`,
+        fo2.org_name as `target_inv_org_name`,
+        fu.USER_NAME as `operator_name`,
+        fu2.USER_NAME as `target_operator_name`
+        FROM whole_sale_header ibh
+        LEFT JOIN fnd_org fo on ibh.inv_org_id = fo.org_id
+        LEFT JOIN fnd_org fo2 on ibh.target_inv_org_id = fo2.org_id
+        LEFT JOIN fnd_user fu on ibh.operator = fu._id
+        LEFT JOIN fnd_user fu2 on ibh.target_operator = fu2._id
+        where bill_id=#{bill_id}
+    </select>
+
+    <insert id="createStore"  parameterType="Map" keyColumn="bill_id" keyProperty="bill_id" useGeneratedKeys="true">
+        INSERT INTO whole_sale_header(`bill_code`, `bill_type`, `inv_org_id`, `target_inv_org_id`,`operator`,`target_operator`, `bill_date`, `remark`, `create_by`, `bill_status`, `source_system`, `source_bill`, `source_id`,`ship_method`,`ship_corp`,`ship_number`)
+        VALUES (#{bill_code},#{bill_type}, #{inv_org_id}, #{target_inv_org_id},#{operator},#{target_operator}, #{bill_date}, #{remark}, #{create_by}, #{bill_status}, #{source_system}, #{source_bill}, #{source_id},#{ship_method},#{ship_corp},#{ship_number});
+    </insert>
+
+    <update id="updateStoreById" parameterType="Map">
+        update whole_sale_header
+        <trim prefix="set" suffixOverrides=",">
+            <if test="inv_org_id!=null">inv_org_id=#{inv_org_id},</if>
+            <if test="target_inv_org_id!=null">target_inv_org_id=#{target_inv_org_id},</if>
+            <if test="operator!=null">operator=#{operator},</if>
+            <if test="target_operator!=null">target_operator=#{target_operator},</if>
+            <if test="bill_date!=null">bill_date=#{bill_date},</if>
+            <if test="remark!=null">remark=#{remark},</if>
+            <if test="bill_status!=null">bill_status=#{bill_status},</if>
+            <if test="source_system!=null">source_system=#{source_system},</if>
+            <if test="source_bill!=null">source_bill=#{source_bill},</if>
+            <if test="ship_method!=null">ship_method=#{ship_method},</if>
+            <if test="ship_corp!=null">ship_corp=#{ship_corp},</if>
+            <if test="ship_number!=null">ship_number=#{ship_number},</if>
+        </trim>
+        where bill_id=#{bill_id}
+    </update>
+
+
+    <delete id="deleteStoreByIds" parameterType="Map">
+        delete from whole_sale_header where bill_id in (${ids})
+    </delete>
+
+
+    <delete id="updateStoreStatusByIds" parameterType="Map">
+        update whole_sale_header set bill_status=#{bill_status} where bill_id in (${ids})
+    </delete>
+
+</mapper>
+
