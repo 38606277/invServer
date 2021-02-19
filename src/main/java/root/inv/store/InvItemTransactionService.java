@@ -130,6 +130,10 @@ public class InvItemTransactionService {
             billTypeName= "生产出库";
         }else if("transfer".equals(billType)){
             billTypeName =  isAdd?"调拨入库":"调拨出库";
+        }else if("deliver_sales".equals(billType)){//销售出库
+            billTypeName= "销售出库";
+        }else if("deliver_wholesales".equals(billType)){//批发出库
+            billTypeName =  "批发出库";
         }else{
             billTypeName = "未知类型" + (isAdd?"入库":"出库");
         }

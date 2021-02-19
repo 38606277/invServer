@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Service;
 import root.report.common.DbSession;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,18 +42,32 @@ public class WholeSaleLineService {
      * @param sqlSession
      * @param lines
      */
-    public void saveOrUpdateBillLinesList(SqlSession sqlSession, JSONArray lines){
-        for(int i =0 ; i < lines.size();i++){
-            JSONObject jsonObject = lines.getJSONObject(i);
-            String lineId = jsonObject.getString("line_id");
-            if(lineId.startsWith("NEW_TEMP_ID_")){
-                //临时数据 执行新增
-                sqlSession.insert("whole_sale_lines.saveBillLines",jsonObject);
-            }else{
-                //执行更新
-                sqlSession.update("whole_sale_lines.updateBillLinesById",jsonObject);
+    public Boolean saveOrUpdateBillLinesList(SqlSession sqlSession, JSONArray lines,String orgid){
+            for(int i =0 ; i < lines.size();i++){
+                JSONObject jsonObject = lines.getJSONObject(i);
+                String lineId = jsonObject.getString("line_id");
+                Map map=new HashMap();
+                map.put("item_id",jsonObject.get("item_id"));
+                map.put("org_id",orgid);
+                Map obj= sqlSession.selectOne("inv_item_on_hand.getItemOnHandByItemIdOrgId",map);
+                double quantityOld = Double.parseDouble(obj.get("on_hand_quantity").toString());
+                double quantityNew = Double.parseDouble(jsonObject.getString("quantity"));
+                if(quantityOld-quantityNew<0){
+                    return false;
+                }else{
+                    obj.put("on_hand_quantity",quantityOld-quantityNew);
+                    sqlSession.update("inv_item_on_hand.updateItemOnHand",obj);
+                }
+
+                if(lineId.startsWith("NEW_TEMP_ID_")){
+                    //临时数据 执行新增
+                    sqlSession.insert("whole_sale_lines.saveBillLines",jsonObject);
+                }else{
+                    //执行更新
+                    sqlSession.update("whole_sale_lines.updateBillLinesById",jsonObject);
+                }
             }
-        }
+            return true;
     }
 
 

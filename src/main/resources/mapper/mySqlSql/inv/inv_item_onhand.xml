@@ -32,6 +32,12 @@
     </select>
 
 
+    <select id="getItemOnHandByItemIdOrgId" resultType="Map" parameterType="Map">
+        SELECT * FROM inv_item_onhand where 1=1
+        <if test="item_id != null and item_id!=''">  and item_id=#{item_id} </if>
+        <if test="org_id != null and org_id!=''">  and org_id=#{org_id} </if>
+    </select>
+
     <select id="getItemOnHandByParams" resultType="Map" parameterType="Map">
         SELECT * FROM inv_item_onhand where 1=1
         <if test="item_id != null and item_id!=''">  and item_id=#{item_id} </if>

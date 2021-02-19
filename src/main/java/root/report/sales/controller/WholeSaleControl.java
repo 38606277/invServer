@@ -135,7 +135,7 @@ public class WholeSaleControl extends RO {
 
             //更新主实体
             JSONObject mainData = pJson.getJSONObject("mainData");
-
+            String orgid=mainData.getString("inv_org_id");
             wholeSaleService.updateStoreById(sqlSession,mainData);
 
 
@@ -153,7 +153,7 @@ public class WholeSaleControl extends RO {
                 jsonObject.put("create_by",userId);
                 jsonObject.put("header_id", mainData.get("bill_id"));
             }
-            wholeSaleLineService.saveOrUpdateBillLinesList(sqlSession,jsonArray);
+            wholeSaleLineService.saveOrUpdateBillLinesList(sqlSession,jsonArray,orgid);
 
             sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",mainData.get("bill_id"));
@@ -210,32 +210,30 @@ public class WholeSaleControl extends RO {
                 String itemId = jsonObject.getString("item_id");
 
                 //采购入库 生产入库 生产出库 维护剩余数量
-                if("store_po".equals(billType) || "store_pd".equals(billType) || "deliver_pd".equals(billType)){
-                    //获取订单id
-                    String sourceId =  mainData.getString("source_id");
-                    //接收数量
-                    double rcvQuantity = jsonObject.getDouble("quantity");
-                    poLinesService.updatePoLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
-                }
+//                if("store_po".equals(billType) || "store_pd".equals(billType) || "deliver_pd".equals(billType)){
+//                    //获取订单id
+//                    String sourceId =  mainData.getString("source_id");
+//                    //接收数量
+//                    double rcvQuantity = jsonObject.getDouble("quantity");
+//                    poLinesService.updatePoLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
+//                }
 
                 if(0 < billStatus){
                     //添加事物
                     jsonObject.put("bill_type",billType);
-                    if(billType.startsWith("store_")){ //入库为新增
-                        jsonObject.put("org_id",invOrgId);
-                        invItemTransactionService.weightedMean(sqlSession,jsonObject,true);
-                    }else if(billType.startsWith("deliver_")){ //出库为减少
-                        jsonObject.put("org_id",invOrgId);
-                        invItemTransactionService.weightedMean(sqlSession,jsonObject,false);
-                    }
+                     //出库为减少
+                    jsonObject.put("org_id",invOrgId);
+                    invItemTransactionService.weightedMean(sqlSession,jsonObject,false);
+
                 }
             }
-            boolean isLinesSaveSuccess = wholeSaleLineService.insertBillLinesAll(sqlSession,jsonArray);
+            boolean isLinesSaveSuccess = wholeSaleLineService.saveOrUpdateBillLinesList(sqlSession,jsonArray,invOrgId);
 
-            sqlSession.getConnection().commit();
+
             if(!isLinesSaveSuccess){
                 return  ErrorMsg("2000","行数据保存失败");
             }
+            sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",billId);
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
