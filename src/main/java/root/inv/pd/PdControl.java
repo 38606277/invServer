@@ -207,7 +207,7 @@ public class PdControl extends RO {
             //更新主实体
             pdOrderHeaderService.deletePdOrderHeaderByIds(sqlSession,deleteIds);
             //删除行数据
-            pdOrderLinesService.deletePdOrderLines(sqlSession,deleteIds);
+            pdOrderLinesService.deletePdLinesByHeaderIds(sqlSession,deleteIds);
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功","");
         } catch (Exception ex){

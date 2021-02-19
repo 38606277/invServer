@@ -35,8 +35,6 @@
         <!--        <if test="max != null and max!=''">  and iio.max=#{max} </if>-->
         <if test="item_description != null and item_description!=''"> and mi.item_description like '%${item_description}%' </if>
         <if test="org_name != null and org_name!=''">  and fo.org_name like '%${org_name}%' </if>
-        ORDER BY iit.create_date desc
-        limit #{startIndex},#{perPage}
     </select>
 
 

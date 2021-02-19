@@ -123,6 +123,14 @@ public class BomLinesService {
     }
 
 
+
+
+    public void deleteBomLinesByHeaderIds(SqlSession sqlSession, String ids){
+        Map<String,String> map = new HashMap<>();
+        map.put("ids",ids);
+        sqlSession.update("bom_lines.deleteByHeaderIds",map);
+    }
+
     public void deleteBomLines(SqlSession sqlSession, String ids){
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);

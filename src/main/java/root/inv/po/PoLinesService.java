@@ -56,7 +56,11 @@ public class PoLinesService {
         }
     }
 
-
+    public void deletePoLinesByHeaderIds(SqlSession sqlSession, String ids){
+        Map<String,String> map = new HashMap<>();
+        map.put("ids",ids);
+        sqlSession.update("po_lines.deleteByHeaderIds",map);
+    }
 
     public void deletePoLines(SqlSession sqlSession, String ids){
         Map<String,String> map = new HashMap<>();
