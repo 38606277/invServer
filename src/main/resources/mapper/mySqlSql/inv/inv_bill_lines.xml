@@ -21,6 +21,10 @@
         order by line_number asc
     </select>
 
+    <delete id="deleteByHeaderIds" parameterType="Map">
+        delete from inv_bill_lines where header_id in (${ids})
+    </delete>
+
     <delete id="deleteByIds" parameterType="Map">
         delete from inv_bill_lines where line_id in (${ids})
     </delete>

@@ -287,7 +287,7 @@ public class PoControl extends RO {
             //更新主实体
             poHeadersService.deletePoHeadersByIds(sqlSession,deleteIds);
             //删除行数据
-            poLinesService.deletePoLines(sqlSession,deleteIds);
+            poLinesService.deletePoLinesByHeaderIds(sqlSession,deleteIds);
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功","");
         } catch (Exception ex){

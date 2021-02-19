@@ -118,7 +118,11 @@ public class PdOrderLinesService {
             }
         }
     }
-
+    public void deletePdLinesByHeaderIds(SqlSession sqlSession, String ids){
+        Map<String,String> map = new HashMap<>();
+        map.put("ids",ids);
+        sqlSession.update("pd_order_lines.deleteByHeaderIds",map);
+    }
 
     public void deletePdOrderLines(SqlSession sqlSession, String ids){
         Map<String,String> map = new HashMap<>();

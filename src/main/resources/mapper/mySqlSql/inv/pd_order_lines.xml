@@ -25,6 +25,10 @@
         order by pol.header_id asc
     </select>
 
+    <delete id="deleteByHeaderIds" parameterType="Map">
+        delete from pd_order_lines where header_id in (${ids})
+    </delete>
+
     <delete id="deleteByIds" parameterType="Map">
         delete from pd_order_lines where line_id in (${ids})
     </delete>

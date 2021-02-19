@@ -158,7 +158,7 @@ public class BomControl extends RO {
             //更新主实体
             bomHeadersService.deleteBomHeadersByIds(sqlSession,deleteIds);
             //删除行数据
-            bomLinesService.deleteBomLines(sqlSession,deleteIds);
+            bomLinesService.deleteBomLinesByHeaderIds(sqlSession,deleteIds);
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功","");
         } catch (Exception ex){

@@ -61,6 +61,12 @@ public class InvBillLineService {
 
 
 
+    public void deleteBillLinesByHeaderIds(SqlSession sqlSession, String ids){
+        Map<String,String> map = new HashMap<>();
+        map.put("ids",ids);
+        sqlSession.update("inv_bill_lines.deleteByHeaderIds",map);
+    }
+
     public void deleteBillLines(SqlSession sqlSession, String ids){
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);

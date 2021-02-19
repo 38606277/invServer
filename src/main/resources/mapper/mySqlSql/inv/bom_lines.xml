@@ -31,7 +31,9 @@
         order by mbl.line_id asc
     </select>
 
-
+    <delete id="deleteByHeaderIds" parameterType="Map">
+        delete from mdm_bom_lines where item_id in (${ids})
+    </delete>
 
     <delete id="deleteByIds" parameterType="Map">
         delete from mdm_bom_lines where line_id in (${ids})

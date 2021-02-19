@@ -263,10 +263,10 @@ public class StoreControl extends RO {
 
         try {
             sqlSession.getConnection().setAutoCommit(false);
-            //更新主实体
+            //删除主实体
             storeService.deleteStoreByIds(sqlSession,deleteIds);
             //删除行数据
-            invBillLineService.deleteBillLines(sqlSession,deleteIds);
+            invBillLineService.deleteBillLinesByHeaderIds(sqlSession,deleteIds);
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功","");
         } catch (Exception ex){
