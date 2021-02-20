@@ -45,7 +45,7 @@ public class ItemService {
 
             //根据类别获取段位  segment， attribute
 
-            String stringSql=getSql(map.get("item_category_id"));
+            String stringSql=getSqlNew(map.get("item_category_id"));
             List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.paramStringSql", stringSql, bounds);
             Long totalSize = 0L;
             if (map != null && map.size() != 0) {
@@ -100,6 +100,29 @@ public class ItemService {
         System.out.println(stringSql);
         return stringSql.toString();
     }
+
+    public String getSqlNew(String categoryId){
+        List<Map> segmentList = itemCategoryService.getItemCategorySegmentByCatId(categoryId);
+        List<Map> attributeList = itemCategoryService.getItemCategoryAttributeByCatId(categoryId);
+        StringBuffer stringSql=new StringBuffer();
+        stringSql.append("SELECT item.item_id,item.item_category_id,item.item_description,item.uom,item.retail_price,item.factory_price,item.promotion_price," +
+                "item.cost_price,item.image_url,itemcat.category_name ");
+        if(segmentList.size()>0){
+            for(int i=0;i<segmentList.size();i++){
+                Map map2=segmentList.get(i);
+                stringSql.append(",item."+map2.get("segment"));
+            }
+        }
+        if(attributeList.size()>0){
+            for(int i=0;i<attributeList.size();i++){
+                Map map2=attributeList.get(i);
+                stringSql.append(",item."+map2.get("attribute"));
+            }
+        }
+        stringSql.append(" from  mdm_item as item,mdm_item_category as itemcat where item.item_category_id=itemcat.category_id and item.item_category_id="+ categoryId);
+        System.out.println(stringSql);
+        return stringSql.toString();
+    }
     /**
      * 功能描述: 根据JSON数据解析 对应数据，生成func_dict记录
      */
@@ -119,6 +142,8 @@ public class ItemService {
             mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
             mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
             mapVal.put("image_url", jsonObjectVal.getString("image_url"));
+            mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
+            mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
                 System.out.println("对应key值的value=" + entry.getValue());
@@ -211,12 +236,13 @@ public class ItemService {
             mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
             mapVal.put("item_description", jsonObjectVal.getString("item_description"));
             mapVal.put("uom", jsonObjectVal.getString("uom"));
-            mapVal.put("market_price", jsonObjectVal.getString("market_price"));
-            mapVal.put("price", jsonObjectVal.getString("price"));
+            mapVal.put("retail_price", jsonObjectVal.getString("retail_price"));
+            mapVal.put("factory_price", jsonObjectVal.getString("factory_price"));
             mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
             mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
             mapVal.put("image_url", jsonObjectVal.getString("image_url"));
-
+            mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
+            mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
                 System.out.println("对应key值的value=" + entry.getValue());
@@ -286,117 +312,7 @@ public class ItemService {
             }
             sqlSession.insert("mdmItem.updateMdmItem", mapVal);
         }
-        /*Map<String,Object> map  = new HashMap<>();
-        String id="";
-        JSONArray addLine = jsonObject.getJSONArray("lineForm");
-        JSONArray delLine = jsonObject.getJSONArray("lineDelete");
-        Integer newId= sqlSession.selectOne("mdmItem.getMaxId");
-        newId = newId==null?1:newId;
-        for(int i = 0; i < addLine.size(); i++) {
-            Map<String, Object> mapVal = new HashMap<>();
-            JSONObject jsonObjectVal = addLine.getJSONObject(i);
-            if (null != jsonObjectVal.getString("item_id") && !"".equals(jsonObjectVal.getString("item_id")) && jsonObjectVal.getString("item_id").contains("NEW")) {
-                mapVal.put("item_id", newId);
-                mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
-                mapVal.put("item_description", jsonObjectVal.getString("item_description"));
 
-                for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
-                    System.out.println("key值=" + entry.getKey());
-                    System.out.println("对应key值的value=" + entry.getValue());
-                    if(entry.getKey().equalsIgnoreCase("segment1")) {
-                        mapVal.put("segment1", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment2")) {
-                        mapVal.put("segment2", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment3")) {
-                        mapVal.put("segment3", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment4")) {
-                        mapVal.put("segment4", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment5")) {
-                        mapVal.put("segment5", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment6")) {
-                        mapVal.put("segment6", entry.getValue());
-                    }if(entry.getKey().equalsIgnoreCase("segment7")) {
-                        mapVal.put("segment7", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment8")) {
-                        mapVal.put("segment8", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment9")) {
-                        mapVal.put("segment9", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment10")) {
-                        mapVal.put("segment10", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("attribute1")) {
-                        mapVal.put("attribute1", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("attribute2")) {
-                        mapVal.put("attribute2", entry.getValue());
-                    }
-                }
-                 sqlSession.insert("mdmItem.createMdmItem",mapVal);
-                newId++;
-
-            } else {
-                mapVal.put("item_id", jsonObjectVal.getString("item_id"));
-                id = jsonObjectVal.getString("item_id");
-                for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
-                    System.out.println("key值=" + entry.getKey());
-                    System.out.println("对应key值的value=" + entry.getValue());
-                    if(entry.getKey().equalsIgnoreCase("segment1")) {
-                        mapVal.put("segment1", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment2")) {
-                        mapVal.put("segment2", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment3")) {
-                        mapVal.put("segment3", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment4")) {
-                        mapVal.put("segment4", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment5")) {
-                        mapVal.put("segment5", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment6")) {
-                        mapVal.put("segment6", entry.getValue());
-                    }if(entry.getKey().equalsIgnoreCase("segment7")) {
-                        mapVal.put("segment7", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment8")) {
-                        mapVal.put("segment8", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment9")) {
-                        mapVal.put("segment9", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("segment10")) {
-                        mapVal.put("segment10", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("attribute1")) {
-                        mapVal.put("attribute1", entry.getValue());
-                    }
-                    if(entry.getKey().equalsIgnoreCase("attribute2")) {
-                        mapVal.put("attribute2", entry.getValue());
-                    }
-                }
-                sqlSession.insert("mdmItem.updateMdmItem", mapVal);
-            }
-        }
-        if(delLine.size()>0) {
-            for (int i = 0; i < delLine.size(); i++) {
-                Map<String, Object> dmap = new HashMap<>();
-                JSONObject jsonObjectVal = addLine.getJSONObject(i);
-                if(!jsonObjectVal.getString("item_id").contains("NEW")) {
-                   // dmap.put("item_id", jsonObjectVal.getString("item_id"));
-                    sqlSession.delete("mdmItem.deleteItemByID", jsonObjectVal.getString("item_id"));
-                }
-            }
-        }*/
         return id;
     }
 
@@ -426,6 +342,8 @@ public class ItemService {
                     mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
                     mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
                     mapVal.put("image_url", jsonObjectVal.getString("image_url"));
+                    mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
+                    mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
                     for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                         System.out.println("key值=" + entry.getKey());
                         System.out.println("对应key值的value=" + entry.getValue());
