@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import root.report.common.DbSession;
 import root.report.db.DbFactory;
 import root.report.mdmDict.service.MdmDictService;
 
@@ -359,4 +360,7 @@ public class ItemCategoryService {
     }
 
 
+    public List<Map> getAll() {
+       return DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getAll");
+    }
 }

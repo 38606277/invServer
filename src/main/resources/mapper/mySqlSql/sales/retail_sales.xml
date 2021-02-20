@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="retail_sales">
+
+	<!--  创建func_dict信息  -->
+	<insert id="createShipment" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
+		insert into po_shipment(vendor_id,vendor_name,vendor_code,address,create_date,create_by)
+		values (#{vendor_id},'${vendor_name}','${vendor_code}',
+		<if  test="address == null">NULL</if> <if  test="address != null">#{address}</if>,
+		SYSDATE(),
+		<if  test="create_by == null">NULL</if> <if  test="create_by != null">#{create_by}</if>
+		)
+	</insert>
+
+	<!-- 修改 po_shipment 表的信息 -->
+	<update id="updateShipment" parameterType="Map">
+		update po_shipment set
+		<if  test="vendor_name == null">vendor_name=NULL</if>
+		<if  test="vendor_name != null">vendor_name=#{vendor_name}</if>,
+		<if  test="vendor_code == null">vendor_code=NULL</if>
+		<if  test="vendor_code != null">vendor_code=#{vendor_code}</if>,
+		<if  test="address == null">address=NULL</if>
+		<if  test="address != null">address=#{address}</if>
+		where vendor_id=#{vendor_id}
+	</update>
+
+	<select id="getMaxId" resultType="java.lang.Integer" >
+        SELECT (MAX(vendor_id) +1)as vendor_id from po_shipment
+    </select>
+
+	<select id="getShipmentByID" parameterType="map" resultType="map">
+        SELECT u.* FROM po_shipment u  where u.vendor_id = #{vendor_id}
+    </select>
+
+
+
+	<select id="getAllPage" resultType="Map" parameterType="Map">
+		SELECT u.* FROM po_shipment u where  1=1
+		<if  test="vendor_name != null and vendor_name!='' ">
+			and  u.vendor_name  like '%${vendor_name}%'
+		</if>
+		<if  test="vendor_code != null and vendor_code!='' ">
+			and  u.vendor_code like '%${vendor_code}%'
+		</if>
+		<if  test="address != null and address!='' ">
+			and  u.address like '%${address}%'
+		</if>
+    </select>
+
+	<delete id="deleteShipmentById" parameterType="Map">
+        delete from po_shipment where vendor_id=#{vendor_id}
+    </delete>
+
+	<select id="getOrgAll" resultType="map">
+        SELECT * from fnd_org
+    </select>
+</mapper>

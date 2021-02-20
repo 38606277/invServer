@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import root.report.common.RO;
 import root.report.db.DbFactory;
+import root.report.itemCategory.service.ItemCategoryService;
 import root.report.sales.service.SalesService;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,6 +26,9 @@ public class SalesController extends RO {
 
     @Autowired
     public SalesService salesService;
+
+    @Autowired
+    public ItemCategoryService itemCategoryService;
 
     /**
      * 功能描述: 接收JSON格式参数，往func_dict跟func_dict_out 中插入相关数据
@@ -101,6 +106,22 @@ public class SalesController extends RO {
             return ExceptionMsg(ex.getMessage());
         }finally {
             sqlSession.getConnection().setAutoCommit(true);
+        }
+    }
+
+    //获取分类和仓库数据
+    @RequestMapping(value = "/getItemCategoryAndOrg", produces = "text/plain;charset=UTF-8")
+    public String getItemCategoryAndOrg() {
+        try{
+            Map map = new HashMap();
+            List<Map> itemcateList = itemCategoryService.getAll();
+            List<Map> orgList = this.salesService.getOrgAll();
+            map.put("itemcateList",itemcateList);
+            map.put("orgList",orgList);
+            return SuccessMsg("查询成功",map);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
         }
     }
 

@@ -172,4 +172,8 @@
 	<delete id="deleteItemCategoryAttributeByPID" parameterType="Map">
         delete from mdm_item_category_attribute where category_id=#{category_id}
     </delete>
+
+	<select id="getAll" resultType="map">
+		SELECT * from mdm_item_category ORDER BY category_id asc
+	</select>
 </mapper>

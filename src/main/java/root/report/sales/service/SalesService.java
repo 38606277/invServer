@@ -100,4 +100,7 @@ public class SalesService {
         return DbFactory.Open(DbFactory.FORM).selectOne("shipment.getShipmentByID",m);
     }
 
+    public List<Map> getOrgAll() {
+        return DbFactory.Open(DbFactory.FORM).selectList("retail_sales.getOrgAll");
+    }
 }
