@@ -227,7 +227,7 @@ public class WholeSaleControl extends RO {
 
                 }
             }
-            boolean isLinesSaveSuccess = wholeSaleLineService.saveOrUpdateBillLinesList(sqlSession,jsonArray,invOrgId);
+            boolean isLinesSaveSuccess = wholeSaleLineService.insertBillLinesAll(sqlSession,jsonArray);
 
 
             if(!isLinesSaveSuccess){
