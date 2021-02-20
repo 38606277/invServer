@@ -17,7 +17,7 @@
 
     <select id="getPdOrderLinesByHeaderId" resultType="Map" parameterType="Map">
         SELECT pol.*,(pol.quantity - pol.rcv_quantity) as not_rcv_quantity,mi.*,mic.category_name FROM pd_order_lines pol
-        LEFT JOIN v_item mi on pol.item_id = mi.item_id
+        LEFT JOIN mdm_item mi on pol.item_id = mi.item_id
         LEFT JOIN mdm_item_category mic on  mi.item_category_id = mic.category_id
         where pol.header_id=#{header_id}
         <if test="item_pid != null and item_pid!=''">  and pol.item_pid =#{item_pid} </if>
