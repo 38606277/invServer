@@ -3,7 +3,7 @@
         "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="whole_sale_header">
 
-    <select id="getStoreListByPage" resultType="Map" parameterType="Map">
+    <select id="getWholeSaleListByPage" resultType="Map" parameterType="Map">
         SELECT ibh.*,
         fo.org_name as `inv_org_name`,
         fo2.org_name as `target_inv_org_name`,
@@ -21,7 +21,7 @@
         ORDER BY create_date desc
     </select>
 
-    <select id="getStoreById" resultType="Map" parameterType="Map">
+    <select id="getWholeSaleById" resultType="Map" parameterType="Map">
         SELECT ibh.*,
         fo.org_name as `inv_org_name`,
         fo2.org_name as `target_inv_org_name`,
@@ -35,12 +35,12 @@
         where bill_id=#{bill_id}
     </select>
 
-    <insert id="createStore"  parameterType="Map" keyColumn="bill_id" keyProperty="bill_id" useGeneratedKeys="true">
+    <insert id="createWholeSale"  parameterType="Map" keyColumn="bill_id" keyProperty="bill_id" useGeneratedKeys="true">
         INSERT INTO whole_sale_header(`bill_code`, `bill_type`, `inv_org_id`, `target_inv_org_id`,`operator`,`target_operator`, `bill_date`, `remark`, `create_by`, `bill_status`, `source_system`, `source_bill`, `source_id`,`ship_method`,`ship_corp`,`ship_number`)
         VALUES (#{bill_code},#{bill_type}, #{inv_org_id}, #{target_inv_org_id},#{operator},#{target_operator}, #{bill_date}, #{remark}, #{create_by}, #{bill_status}, #{source_system}, #{source_bill}, #{source_id},#{ship_method},#{ship_corp},#{ship_number});
     </insert>
 
-    <update id="updateStoreById" parameterType="Map">
+    <update id="updateWholeSaleById" parameterType="Map">
         update whole_sale_header
         <trim prefix="set" suffixOverrides=",">
             <if test="inv_org_id!=null">inv_org_id=#{inv_org_id},</if>
@@ -60,12 +60,12 @@
     </update>
 
 
-    <delete id="deleteStoreByIds" parameterType="Map">
+    <delete id="deleteWholeSaleByIds" parameterType="Map">
         delete from whole_sale_header where bill_id in (${ids})
     </delete>
 
 
-    <delete id="updateStoreStatusByIds" parameterType="Map">
+    <delete id="updateWholeSaleStatusByIds" parameterType="Map">
         update whole_sale_header set bill_status=#{bill_status} where bill_id in (${ids})
     </delete>
 

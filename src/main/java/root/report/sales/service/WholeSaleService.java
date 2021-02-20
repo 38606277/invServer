@@ -21,37 +21,37 @@ public class WholeSaleService {
 
     private static Logger log = Logger.getLogger(WholeSaleService.class);
 
-    public Map<String,Object> getStoreById(Map<String,Object> params){
-        return DbSession.selectOne("whole_sale_header.getStoreById",params);
+    public Map<String,Object> getWholeSaleById(Map<String,Object> params){
+        return DbSession.selectOne("whole_sale_header.getWholeSaleById",params);
     }
 
-    public long createStore(SqlSession sqlSession,Map<String,Object> params){
+    public long createWholeSale(SqlSession sqlSession,Map<String,Object> params){
         String billCode = DbSession.selectOne("fnd_order_number_setting.getOrderNumber",params.get("bill_type"));
         params.put("bill_code",billCode);
-        sqlSession.insert("whole_sale_header.createStore",params);
+        sqlSession.insert("whole_sale_header.createWholeSale",params);
         if(params.containsKey("bill_id")){
             return  Long.parseLong(params.get("bill_id").toString());
         }
         return  -1;
     }
 
-    public boolean updateStoreById(SqlSession sqlSession,JSONObject params){
-       int number =  sqlSession.update("whole_sale_header.updateStoreById",params);
+    public boolean updateWholeSaleById(SqlSession sqlSession,JSONObject params){
+       int number =  sqlSession.update("whole_sale_header.updateWholeSaleById",params);
         return  0 < number;
     }
 
 
-    public void deleteStoreByIds(SqlSession sqlSession,String ids){
+    public void deleteWholeSaleByIds(SqlSession sqlSession,String ids){
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);
-        sqlSession.update("whole_sale_header.deleteStoreByIds",map);
+        sqlSession.update("whole_sale_header.deleteWholeSaleByIds",map);
     }
 
-    public void updateStoreStatusByIds(SqlSession sqlSession,String ids,int status){
+    public void updateWholeSaleStatusByIds(SqlSession sqlSession,String ids,int status){
         Map<String,Object> map = new HashMap<>();
         map.put("ids",ids);
         map.put("bill_status",status);
-        sqlSession.update("whole_sale_header.updateStoreStatusByIds",map);
+        sqlSession.update("whole_sale_header.updateWholeSaleStatusByIds",map);
     }
 
 
@@ -77,7 +77,7 @@ public class WholeSaleService {
             }
             int id = SysContext.getId();//用户的表id
             pJson.put("create_by",id);
-            List<Map<String, Object>> resultList = DbSession.selectList("whole_sale_header.getStoreListByPage", pJson, bounds);
+            List<Map<String, Object>> resultList = DbSession.selectList("whole_sale_header.getWholeSaleListByPage", pJson, bounds);
             Long totalSize = 0L;
             if (pJson != null && pJson.size() != 0) {
                 totalSize = ((PageRowBounds) bounds).getTotal();
