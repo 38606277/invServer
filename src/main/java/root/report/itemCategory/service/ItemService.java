@@ -69,7 +69,7 @@ public class ItemService {
         StringBuffer stringSql=new StringBuffer();
         StringBuffer stringfrom=new StringBuffer();
         StringBuffer stringWhere=new StringBuffer();
-        stringSql.append("SELECT item.item_id,item.item_category_id,item.item_description,item.uom,item.wholesale_price,item.factory_price,item.promotion_price," +
+        stringSql.append("SELECT item.item_id,item.item_category_id,item.item_description,item.uom,item.retail_price,item.factory_price,item.promotion_price," +
                 "item.cost_price,item.image_url,itemcat.category_name ");
         if(segmentList.size()>0){
             for(int i=0;i<segmentList.size();i++){
@@ -114,7 +114,7 @@ public class ItemService {
             mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
             mapVal.put("item_description", jsonObjectVal.getString("item_description"));
             mapVal.put("uom", jsonObjectVal.getString("uom"));
-            mapVal.put("wholesale_price", jsonObjectVal.getString("wholesale_price"));
+            mapVal.put("retail_price", jsonObjectVal.getString("retail_price"));
             mapVal.put("factory_price", jsonObjectVal.getString("factory_price"));
             mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
             mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
@@ -421,7 +421,7 @@ public class ItemService {
                     mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
                     mapVal.put("item_description", jsonObjectVal.getString("item_description"));
                     mapVal.put("uom", jsonObjectVal.getString("uom"));
-                    mapVal.put("wholesale_price", jsonObjectVal.getString("wholesale_price"));
+                    mapVal.put("retail_price", jsonObjectVal.getString("retail_price"));
                     mapVal.put("factory_price", jsonObjectVal.getString("factory_price"));
                     mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
                     mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
