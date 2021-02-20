@@ -46,7 +46,7 @@ public class WholeSaleLineService {
             for(int i =0 ; i < lines.size();i++){
                 JSONObject jsonObject = lines.getJSONObject(i);
                 String lineId = jsonObject.getString("line_id");
-                Map map=new HashMap();
+               /* Map map=new HashMap();
                 map.put("item_id",jsonObject.get("item_id"));
                 map.put("org_id",orgid);
                 Map obj= sqlSession.selectOne("inv_item_on_hand.getItemOnHandByItemIdOrgId",map);
@@ -57,7 +57,7 @@ public class WholeSaleLineService {
                 }else{
                     obj.put("on_hand_quantity",quantityOld-quantityNew);
                     sqlSession.update("inv_item_on_hand.updateItemOnHand",obj);
-                }
+                }*/
 
                 if(lineId.startsWith("NEW_TEMP_ID_")){
                     //临时数据 执行新增
