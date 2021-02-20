@@ -7,7 +7,7 @@
 	<insert id="createMdmItem" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
 		insert into mdm_item(item_id,item_category_id,item_description,uom,segment1,segment2,segment3,
 		segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2,attribute3,attribute4
-		,attribute5,attribute6,attribute7,attribute8,attribute9,attribute10,market_price,price,promotion_price,cost_price,image_url)
+		,attribute5,attribute6,attribute7,attribute8,attribute9,attribute10,wholesale_price,factory_price,promotion_price,cost_price,image_url)
 		values (#{item_id},'${item_category_id}','${item_description}','${uom}',
 		<if  test="segment1 == null">NULL</if> <if  test="segment1 != null">#{segment1}</if>,
 		<if  test="segment2 == null">NULL</if> <if  test="segment2 != null">#{segment2}</if>,
@@ -29,8 +29,8 @@
 		<if  test="attribute8 == null">NULL</if> <if  test="attribute8 != null">#{attribute8}</if>,
 		<if  test="attribute9 == null">NULL</if> <if  test="attribute9 != null">#{attribute9}</if>,
 		<if  test="attribute10 == null">NULL</if> <if  test="attribute10 != null">#{attribute10}</if>,
-		<if  test="market_price == null">NULL</if> <if  test="market_price != null">#{market_price}</if>,
-		<if  test="price == null">NULL</if> <if  test="price != null">#{price}</if>,
+		<if  test="wholesale_price == null">NULL</if> <if  test="wholesale_price != null">#{wholesale_price}</if>,
+		<if  test="factory_price == null">NULL</if> <if  test="factory_price != null">#{factory_price}</if>,
 		<if  test="promotion_price == null">NULL</if> <if  test="promotion_price != null">#{promotion_price}</if>,
 		<if  test="cost_price == null">NULL</if> <if  test="cost_price != null">#{cost_price}</if>,
 		<if  test="image_url == null">NULL</if> <if  test="image_url != null">#{image_url}</if>
@@ -86,10 +86,10 @@
 		<if  test="attribute9 != null">attribute9=#{attribute9}</if>,
 		<if  test="attribute10 == null">attribute10=NULL</if>
 		<if  test="attribute10 != null">attribute2=#{attribute10}</if>,
-		<if  test="market_price == null">market_price=NULL</if>
-		<if  test="market_price != null">market_price=#{market_price}</if>,
-		<if  test="price == null">price=NULL</if>
-		<if  test="price != null">price=#{price}</if>,
+		<if  test="wholesale_price == null">wholesale_price=NULL</if>
+		<if  test="wholesale_price != null">wholesale_price=#{wholesale_price}</if>,
+		<if  test="factory_price == null">factory_price=NULL</if>
+		<if  test="factory_price != null">factory_price=#{factory_price}</if>,
 		<if  test="promotion_price == null">promotion_price=NULL</if>
 		<if  test="promotion_price != null">promotion_price=#{promotion_price}</if>,
 		<if  test="cost_price == null">cost_price=NULL</if>
@@ -114,7 +114,7 @@
     </select>
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-		SELECT u.item_id,u.item_category_id,u.item_description,ic.category_name,u.market_price,u.price,u.promotion_price,u.cost_price,u.uom,
+		SELECT u.item_id,u.item_category_id,u.item_description,ic.category_name,u.wholesale_price,u.factory_price,u.promotion_price,u.cost_price,u.uom,
 		d1.value_name as segment1 ,
 		d2.value_name as segment2,
 		d3.value_name as segment3,
