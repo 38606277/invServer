@@ -83,7 +83,7 @@
     <select id="getItemOnHandByPage" resultType="Map" parameterType="Map">
         SELECT iio.*, fo.org_name , mi.item_description,mi.uom FROM inv_item_onhand iio
         LEFT JOIN fnd_org fo on fo.org_id = iio.org_id
-        LEFT JOIN v_item mi on iio.item_id = mi.item_id
+        LEFT JOIN mdm_item mi on iio.item_id = mi.item_id
         where 1=1
         <if test="item_id != null and item_id!=''">  and iio.item_id=#{item_id} </if>
         <if test="org_id != null and org_id!=''">  and iio.org_id=#{org_id} </if>

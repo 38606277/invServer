@@ -16,7 +16,7 @@
 
     <select id="getBillLinesByHeaderId" resultType="Map" parameterType="Map">
         SELECT ibl.*,mi.* FROM whole_sale_lines ibl
-        LEFT JOIN v_item mi on ibl.item_id = mi.item_id
+        LEFT JOIN mdm_item mi on ibl.item_id = mi.item_id
         where header_id=#{header_id}
         order by line_number asc
     </select>
