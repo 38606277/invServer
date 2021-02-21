@@ -144,6 +144,7 @@ public class ItemService {
             mapVal.put("image_url", jsonObjectVal.getString("image_url"));
             mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
             mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
+            mapVal.put("vendor_id", jsonObjectVal.getString("vendor_id"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
                 System.out.println("对应key值的value=" + entry.getValue());
@@ -243,6 +244,7 @@ public class ItemService {
             mapVal.put("image_url", jsonObjectVal.getString("image_url"));
             mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
             mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
+            mapVal.put("vendor_id", jsonObjectVal.getString("vendor_id"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
                 System.out.println("对应key值的value=" + entry.getValue());
@@ -344,6 +346,7 @@ public class ItemService {
                     mapVal.put("image_url", jsonObjectVal.getString("image_url"));
                     mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
                     mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
+                    mapVal.put("vendor_id", jsonObjectVal.getString("vendor_id"));
                     for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                         System.out.println("key值=" + entry.getKey());
                         System.out.println("对应key值的value=" + entry.getValue());
@@ -458,5 +461,20 @@ public class ItemService {
     public void deleteItemByID(SqlSession sqlSession, String itemid) {
         sqlSession.delete("mdmItem.deleteItemByID",itemid);
         sqlSession.delete("inv_item_on_hand.deleteOnHandItemByID",Integer.parseInt(itemid));
+    }
+
+    public void batchUpdateItem(JSONObject pJson) {
+        Map parammap =new HashMap();
+        parammap.put("cost_price",pJson.getString("cost_price").equalsIgnoreCase("undefined")?null:pJson.getString("cost_price"));
+        parammap.put("factory_price",pJson.getString("factory_price").equalsIgnoreCase("undefined")?null:pJson.getString("factory_price"));
+        parammap.put("promotion_price",pJson.getString("promotion_price").equalsIgnoreCase("undefined")?null:pJson.getString("promotion_price"));
+        parammap.put("retail_price",pJson.getString("retail_price").equalsIgnoreCase("undefined")?null:pJson.getString("retail_price"));
+        parammap.put("item_category_id",pJson.getString("item_category_id").equalsIgnoreCase("undefined")?null:pJson.getString("item_category_id"));
+        parammap.put("vendor_id",pJson.getString("vendor_id").equalsIgnoreCase("undefined")?null:pJson.getString("vendor_id"));
+        String[] arrid=pJson.getString("arrid").split(",");
+        for(int i =0;i<arrid.length;i++) {
+           parammap.put("item_id", arrid[i]);
+           DbFactory.Open(DbFactory.FORM).update("mdmItem.batchUpdateItem", parammap);
+        }
     }
 }

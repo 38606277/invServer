@@ -139,4 +139,17 @@ public class ItemController extends RO {
         }
     }
 
+    @RequestMapping(value = "/batchUpdateItem", produces = "text/plain;charset=UTF-8")
+    public String batchUpdateItem(@RequestBody JSONObject pJson) {
+        try {
+            Map<String,String> map=new HashMap();
+
+            itemService.batchUpdateItem(pJson);
+            return SuccessMsg("", "");
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
 }

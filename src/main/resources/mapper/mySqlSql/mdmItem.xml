@@ -7,7 +7,8 @@
 	<insert id="createMdmItem" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
 		insert into mdm_item(item_id,item_category_id,item_description,uom,segment1,segment2,segment3,
 		segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2,attribute3,attribute4
-		,attribute5,attribute6,attribute7,attribute8,attribute9,attribute10,retail_price,factory_price,promotion_price,cost_price,image_url,bar_code,iot_code)
+		,attribute5,attribute6,attribute7,attribute8,attribute9,attribute10,retail_price,factory_price,promotion_price,
+		cost_price,image_url,bar_code,iot_code,vendor_id)
 		values (#{item_id},'${item_category_id}','${item_description}','${uom}',
 		<if  test="segment1 == null">NULL</if> <if  test="segment1 != null">#{segment1}</if>,
 		<if  test="segment2 == null">NULL</if> <if  test="segment2 != null">#{segment2}</if>,
@@ -35,7 +36,8 @@
 		<if  test="cost_price == null">NULL</if> <if  test="cost_price != null">#{cost_price}</if>,
 		<if  test="image_url == null">NULL</if> <if  test="image_url != null">#{image_url}</if>,
 		<if  test="bar_code == null">NULL</if> <if  test="bar_code != null">#{bar_code}</if>,
-		<if  test="iot_code == null">NULL</if> <if  test="iot_code != null">#{iot_code}</if>
+		<if  test="iot_code == null">NULL</if> <if  test="iot_code != null">#{iot_code}</if>,
+		<if  test="vendor_id == null">NULL</if> <if  test="vendor_id != null">#{vendor_id}</if>
 		)
 	</insert>
 
@@ -101,7 +103,9 @@
 		<if  test="bar_code == null">bar_code=NULL</if>
 		<if  test="bar_code != null">bar_code=#{bar_code}</if>,
 		<if  test="iot_code == null">iot_code=NULL</if>
-		<if  test="iot_code != null">iot_code=#{iot_code}</if>
+		<if  test="iot_code != null">iot_code=#{iot_code}</if>,
+		<if  test="vendor_id == null">vendor_id=NULL</if>
+		<if  test="vendor_id != null">vendor_id=#{vendor_id}</if>
 		 where item_id=#{item_id}
 	</update>
 
@@ -115,7 +119,9 @@
 
 
 	<select id="getItemByItemId" parameterType="map" resultType="map">
-        SELECT u.*,mic.category_name,mic.category_code FROM mdm_item u left join mdm_item_category mic on mic.category_id = u.item_category_id
+        SELECT u.*,mic.category_name,mic.category_code,mv.vendor_name FROM mdm_item u
+        inner join mdm_item_category mic on mic.category_id = u.item_category_id
+        left join mdm_vendors mv on mv.vendor_id = u.vendor_id
         where u.item_id = #{item_id}
     </select>
 
@@ -151,4 +157,16 @@
 	<select id="paramStringSql" parameterType="String" resultType="map">
 		${_parameter}
 	</select>
+
+	<update id="batchUpdateItem" parameterType="Map">
+		update mdm_item set
+		<if  test="item_category_id != null">item_category_id=#{item_category_id}</if>,
+		<if  test="retail_price != null">retail_price=#{retail_price}</if>,
+		<if  test="factory_price != null">factory_price=#{factory_price}</if>,
+		<if  test="promotion_price != null">promotion_price=#{promotion_price}</if>,
+		<if  test="cost_price != null">cost_price=#{cost_price}</if>,
+		<if  test="vendor_id != null">vendor_id=#{vendor_id}</if>
+		where item_id=#{item_id}
+	</update>
+
 </mapper>
