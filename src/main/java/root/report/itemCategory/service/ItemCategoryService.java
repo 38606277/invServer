@@ -317,6 +317,13 @@ public class ItemCategoryService {
         return  DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategoryAttributeByPId",map);
     }
 
+    public List<Map> getItemCategorySegmentByCatIdAndKey(String catId,String paramKey) {
+        Map map=new HashMap();
+        map.put("category_id",catId);
+        map.put("qualifier",paramKey);
+        return  DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentByCIdAndKey",map);
+    }
+
     public List<Map> getItemCategoryByPid(Map map) {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         List<Map> list= sqlSession.selectList("itemCategory.getItemCategoryByPid",map);

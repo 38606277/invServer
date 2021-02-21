@@ -97,6 +97,10 @@
         SELECT u.* FROM mdm_item_category_attribute u where u.category_id = #{category_id}
     </select>
 
+	<select id="getItemCategorySegmentByCIdAndKey" parameterType="map" resultType="map">
+        SELECT u.* FROM mdm_item_category_segment u where u.category_id = #{category_id} and u.qualifier=#{qualifier}
+    </select>
+
 	<select id="getItemCategorySegmentDictByPId" parameterType="map" resultType="map">
        SELECT u.*,dict.dict_name FROM mdm_item_category_segment u LEFT JOIN mdm_dict dict on u.dict_id=dict.dict_id where u.category_id = #{category_id}
     </select>

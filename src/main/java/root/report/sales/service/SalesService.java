@@ -5,17 +5,20 @@ import com.github.pagehelper.PageRowBounds;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import root.report.db.DbFactory;
+import root.report.itemCategory.service.ItemCategoryService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class SalesService {
 
     private static Logger log = Logger.getLogger(SalesService.class);
+
+    @Autowired
+    public ItemCategoryService itemCategoryService;
 
     public Map<String,Object> getAllPage(Map<String,String> map) {
         Map<String,Object> map1=new HashMap<>();
@@ -35,14 +38,48 @@ public class SalesService {
                 }
                 bounds = new PageRowBounds(startIndex, perPage);
             }
-            List<Map<String, Object>> resultList = sqlSession.selectList("shipment.getAllPage", map, bounds);
+            List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.getAllPage", map, bounds);
             Long totalSize = 0L;
             if (map != null && map.size() != 0) {
                 totalSize = ((PageRowBounds) bounds).getTotal();
             } else {
                 totalSize = Long.valueOf(resultList.size());
             }
-
+            Set<String> itemcate = new HashSet<>();
+            Map<String,Object> ppmap = new HashMap();
+            for(int i=0;i<resultList.size();i++) {
+                Map tempmap = resultList.get(i);
+                String mkeyRes="", skeyRes="";
+                List<Map> mlist=null, slist=null;
+                String catid=tempmap.get("item_category_id").toString();
+                if(!itemcate.contains(catid)) {
+                    Map msmap = new HashMap();
+                    mlist= itemCategoryService.getItemCategorySegmentByCatIdAndKey(catid,"mkey");
+                    slist= itemCategoryService.getItemCategorySegmentByCatIdAndKey(catid,"skey");
+                    msmap.put("mkey",mlist);
+                    msmap.put("skey",slist);
+                    ppmap.put(catid,msmap);
+                    itemcate.add(catid);
+                }else{
+                    Map m= (Map) ppmap.get(catid);
+                    mlist = (List<Map>) m.get("mkey");
+                    slist = (List<Map>) m.get("skey");
+                }
+                if(null!=mlist) {
+                    for (int ii = 0; ii < mlist.size(); ii++) {
+                        String segment = mlist.get(ii).get("segment").toString();
+                        mkeyRes = tempmap.get(segment)+ " " + mkeyRes;
+                    }
+                }
+                if(null!=slist) {
+                    for (int iii = 0; iii < slist.size(); iii++) {
+                        String segment = slist.get(iii).get("segment").toString();
+                        skeyRes = tempmap.get(segment)+ " " + skeyRes;
+                    }
+                }
+                tempmap.put("mkeyRes",mkeyRes);
+                tempmap.put("skeyRes",skeyRes);
+            }
             map1.put("list", resultList);
             map1.put("total", totalSize);
 

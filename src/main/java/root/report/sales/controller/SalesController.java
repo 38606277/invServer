@@ -53,13 +53,12 @@ public class SalesController extends RO {
     @RequestMapping(value = "/getAllPage", produces = "text/plain;charset=UTF-8")
     public String getAllPage(@RequestBody String pJson) {
         try {
+
             JSONObject jsonFunc = JSONObject.parseObject(pJson);
             Map<String,String> map=new HashMap();
             map.put("startIndex",jsonFunc.getString("startIndex"));
             map.put("perPage",jsonFunc.getString("perPage"));
-            map.put("vendor_name",jsonFunc.getString("vendor_name"));
-            map.put("vendor_code",jsonFunc.getString("vendor_code"));
-            map.put("address",jsonFunc.getString("address"));
+
             Map<String,Object> map1 = salesService.getAllPage(map);
             return SuccessMsg("", map1);
         } catch (Exception ex){
