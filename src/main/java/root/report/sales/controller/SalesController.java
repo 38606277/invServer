@@ -51,14 +51,35 @@ public class SalesController extends RO {
     }
 
     @RequestMapping(value = "/getAllPage", produces = "text/plain;charset=UTF-8")
-    public String getAllPage(@RequestBody String pJson) {
+    public String getAllPage(@RequestBody JSONObject pJson) {
         try {
-
-            JSONObject jsonFunc = JSONObject.parseObject(pJson);
             Map<String,String> map=new HashMap();
-            map.put("startIndex",jsonFunc.getString("startIndex"));
-            map.put("perPage",jsonFunc.getString("perPage"));
-
+            map.put("startIndex",pJson.getString("startIndex"));
+            map.put("perPage",pJson.getString("perPage"));
+            String category_idlist=pJson.getString("category_id")==null?"":pJson.getString("category_id");
+            String categoryidInID = "";
+            if(null!=category_idlist && !"".equals(category_idlist)) {
+                String[] arr = category_idlist.split(",");
+                for (String id : arr) {
+                    categoryidInID = categoryidInID + ",'" + id +"'";
+                }
+                if (null != categoryidInID && !"".equals(categoryidInID)) {
+                    categoryidInID = categoryidInID.substring(1, categoryidInID.length());
+                }
+            }
+            map.put("item_category_id",categoryidInID);
+            String org_idlist=pJson.getString("org_id")==null?"":pJson.getString("org_id");
+            String orgInid = "";
+            if(null!=org_idlist && !"".equals(org_idlist)) {
+                String[] arr = org_idlist.split(",");
+                for (String id : arr) {
+                    orgInid = orgInid + ",'" + id +"'";
+                }
+                if (null != orgInid && !"".equals(orgInid)) {
+                    orgInid = orgInid.substring(1, orgInid.length());
+                }
+            }
+            map.put("org_id",orgInid);
             Map<String,Object> map1 = salesService.getAllPage(map);
             return SuccessMsg("", map1);
         } catch (Exception ex){

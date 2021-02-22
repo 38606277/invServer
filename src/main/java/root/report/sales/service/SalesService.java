@@ -38,7 +38,7 @@ public class SalesService {
                 }
                 bounds = new PageRowBounds(startIndex, perPage);
             }
-            List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.getAllPage", map, bounds);
+            List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.getAllPageForSales", map, bounds);
             Long totalSize = 0L;
             if (map != null && map.size() != 0) {
                 totalSize = ((PageRowBounds) bounds).getTotal();

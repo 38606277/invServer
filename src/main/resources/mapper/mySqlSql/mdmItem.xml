@@ -138,6 +138,24 @@
 		</if>
     </select>
 
+	<select id="getAllPageForSales" resultType="Map" parameterType="Map">
+		SELECT DISTINCT u.*,ic.category_name,(SELECT sum(on_hand_quantity) from inv_item_onhand where item_id=u.item_id
+		<if  test="org_id != null and org_id!='' ">
+			and  org_id in (${org_id})
+		</if>
+		) as quantity
+		FROM mdm_item u
+		inner join mdm_item_category ic on u.item_category_id=ic.category_id
+		left JOIN inv_item_onhand iio on u.item_id=iio.item_id
+		where  1=1
+		<if  test="item_category_id != null and item_category_id!='' ">
+			and  u.item_category_id in (${item_category_id})
+		</if>
+		<if  test="org_id != null and org_id!='' ">
+			and  iio.org_id in (${org_id})
+		</if>
+	</select>
+
 	<select id="getAllPageByCategoryId" parameterType="map" resultType="map">
 		SELECT u.*  FROM mdm_item u  where  1=1
 		<if  test="item_category_id != null and item_category_id!='' ">
