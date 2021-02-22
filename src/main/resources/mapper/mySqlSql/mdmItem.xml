@@ -151,6 +151,9 @@
 		<if  test="item_category_id != null and item_category_id!='' ">
 			and  u.item_category_id in (${item_category_id})
 		</if>
+		<if  test="item_description != null and item_description!='' ">
+			and  u.item_description like '%${item_description}%'
+		</if>
 		<if  test="org_id != null and org_id!='' ">
 			and  iio.org_id in (${org_id})
 		</if>

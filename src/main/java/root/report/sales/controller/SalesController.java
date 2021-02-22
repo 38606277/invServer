@@ -56,6 +56,7 @@ public class SalesController extends RO {
             Map<String,String> map=new HashMap();
             map.put("startIndex",pJson.getString("startIndex"));
             map.put("perPage",pJson.getString("perPage"));
+            map.put("item_description",pJson.getString("item_description"));
             String category_idlist=pJson.getString("category_id")==null?"":pJson.getString("category_id");
             String categoryidInID = "";
             if(null!=category_idlist && !"".equals(category_idlist)) {
