@@ -6,67 +6,61 @@
     <select id="getWholeSaleListByPage" resultType="Map" parameterType="Map">
         SELECT ibh.*,
         fo.org_name as `inv_org_name`,
-        fo2.org_name as `target_inv_org_name`,
-        fu.USER_NAME as `operator_name`,
-        fu2.USER_NAME as `target_operator_name`
-        FROM whole_sale_header ibh
+        mv.vendor_name,
+        fu.USER_NAME as `operator_name`
+        FROM so_headers ibh
         LEFT JOIN fnd_org fo on ibh.inv_org_id = fo.org_id
-        LEFT JOIN fnd_org fo2 on ibh.target_inv_org_id = fo2.org_id
-        LEFT JOIN fnd_user fu on ibh.operator = fu._id
-        LEFT JOIN fnd_user fu2 on ibh.target_operator = fu2._id
+        LEFT JOIN mdm_vendors mv on ibh.customer_id = mv.vendor_id
+        LEFT JOIN fnd_user fu on ibh.sales_id = fu._id
         where 1=1
-        <if test="bill_type != null and bill_type!=''">  and bill_type=#{bill_type} </if>
-        <if test="operator != null and operator!=''">  and (operator=#{operator} or create_by =#{create_by}) </if>
-        <if test="target_operator != null and target_operator!=''">  and (target_operator=#{target_operator} or create_by =#{create_by}) </if>
+        <if test="so_type != null and so_type!=''">  and so_type=#{so_type} </if>
+        <if test="sales_id != null and sales_id!=''">  and (sales_id=#{sales_id} or create_by =#{create_by}) </if>
         ORDER BY create_date desc
     </select>
 
     <select id="getWholeSaleById" resultType="Map" parameterType="Map">
         SELECT ibh.*,
         fo.org_name as `inv_org_name`,
-        fo2.org_name as `target_inv_org_name`,
-        fu.USER_NAME as `operator_name`,
-        fu2.USER_NAME as `target_operator_name`
-        FROM whole_sale_header ibh
+        mv.vendor_name,
+        fu.USER_NAME as `operator_name`
+        FROM so_headers ibh
         LEFT JOIN fnd_org fo on ibh.inv_org_id = fo.org_id
-        LEFT JOIN fnd_org fo2 on ibh.target_inv_org_id = fo2.org_id
-        LEFT JOIN fnd_user fu on ibh.operator = fu._id
-        LEFT JOIN fnd_user fu2 on ibh.target_operator = fu2._id
-        where bill_id=#{bill_id}
+        LEFT JOIN mdm_vendors mv on ibh.customer_id = mv.vendor_id
+        LEFT JOIN fnd_user fu on ibh.sales_id = fu._id
+        where so_header_id=#{so_header_id}
     </select>
 
-    <insert id="createWholeSale"  parameterType="Map" keyColumn="bill_id" keyProperty="bill_id" useGeneratedKeys="true">
-        INSERT INTO whole_sale_header(`bill_code`, `bill_type`, `inv_org_id`, `target_inv_org_id`,`operator`,`target_operator`, `bill_date`, `remark`, `create_by`, `bill_status`, `source_system`, `source_bill`, `source_id`,`ship_method`,`ship_corp`,`ship_number`)
-        VALUES (#{bill_code},#{bill_type}, #{inv_org_id}, #{target_inv_org_id},#{operator},#{target_operator}, #{bill_date}, #{remark}, #{create_by}, #{bill_status}, #{source_system}, #{source_bill}, #{source_id},#{ship_method},#{ship_corp},#{ship_number});
+    <insert id="createWholeSale"  parameterType="Map" keyColumn="so_header_id" keyProperty="so_header_id" useGeneratedKeys="true">
+        INSERT INTO so_headers(`header_code`, `so_type`, `customer_id`,  `sales_id`,  `so_date`, `comments`, `create_by`, `create_date`, `status`, `contract_code`, `contract_name`, `contract_file`,`bill_to_location`,`ship_to_location`,`inv_org_id`)
+        VALUES (#{header_code},#{so_type}, #{customer_id}, #{sales_id}, #{so_date}, #{comments}, #{create_by}, sysdate(),#{status}, #{contract_code}, #{contract_name}, #{contract_file},#{bill_to_location},#{ship_to_location},#{inv_org_id});
     </insert>
 
     <update id="updateWholeSaleById" parameterType="Map">
-        update whole_sale_header
+        update so_headers
         <trim prefix="set" suffixOverrides=",">
-            <if test="inv_org_id!=null">inv_org_id=#{inv_org_id},</if>
-            <if test="target_inv_org_id!=null">target_inv_org_id=#{target_inv_org_id},</if>
-            <if test="operator!=null">operator=#{operator},</if>
-            <if test="target_operator!=null">target_operator=#{target_operator},</if>
-            <if test="bill_date!=null">bill_date=#{bill_date},</if>
-            <if test="remark!=null">remark=#{remark},</if>
-            <if test="bill_status!=null">bill_status=#{bill_status},</if>
-            <if test="source_system!=null">source_system=#{source_system},</if>
-            <if test="source_bill!=null">source_bill=#{source_bill},</if>
-            <if test="ship_method!=null">ship_method=#{ship_method},</if>
-            <if test="ship_corp!=null">ship_corp=#{ship_corp},</if>
+            <if test="customer_id!=null">customer_id=#{customer_id},</if>
+            <if test="sales_id!=null">sales_id=#{sales_id},</if>
+            <if test="so_date!=null">so_date=#{so_date},</if>
+            <if test="comments!=null">comments=#{comments},</if>
+            <if test="status!=null">status=#{status},</if>
+            <if test="contract_code!=null">contract_code=#{contract_code},</if>
+            <if test="contract_name!=null">contract_name=#{contract_name},</if>
+            <if test="bill_to_location!=null">bill_to_location=#{bill_to_location},</if>
+            <if test="ship_to_location!=null">ship_to_location=#{ship_to_location},</if>
             <if test="ship_number!=null">ship_number=#{ship_number},</if>
+            <if test="inv_org_id!=null">inv_org_id=#{inv_org_id},</if>
         </trim>
-        where bill_id=#{bill_id}
+        where so_header_id=#{so_header_id}
     </update>
 
 
     <delete id="deleteWholeSaleByIds" parameterType="Map">
-        delete from whole_sale_header where bill_id in (${ids})
+        delete from so_headers where so_header_id in (${ids})
     </delete>
 
 
     <delete id="updateWholeSaleStatusByIds" parameterType="Map">
-        update whole_sale_header set bill_status=#{bill_status} where bill_id in (${ids})
+        update so_headers set status=#{status} where so_header_id in (${ids})
     </delete>
 
 </mapper>

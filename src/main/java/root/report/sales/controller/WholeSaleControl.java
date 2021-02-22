@@ -60,7 +60,7 @@ public class WholeSaleControl extends RO {
         if(mainData == null || mainData.isEmpty()){
             return ErrorMsg("2000","数据不存在");
         }
-        String headerId = String.valueOf(pJson.get("bill_id"));
+        String headerId = String.valueOf(pJson.get("so_header_id"));
         List<Map<String,Object>> lines =  wholeSaleLineService.getBillLinesByHeaderId(headerId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
@@ -141,12 +141,12 @@ public class WholeSaleControl extends RO {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 jsonObject.put("line_number",i);
                 jsonObject.put("create_by",userId);
-                jsonObject.put("header_id", mainData.get("bill_id"));
+                jsonObject.put("header_id", mainData.get("so_header_id"));
             }
             wholeSaleLineService.saveOrUpdateBillLinesList(sqlSession,jsonArray,orgid);
 
             sqlSession.getConnection().commit();
-            return SuccessMsg("创建成功",mainData.get("bill_id"));
+            return SuccessMsg("创建成功",mainData.get("so_header_id"));
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
             ex.printStackTrace();
@@ -175,9 +175,9 @@ public class WholeSaleControl extends RO {
             if(billId < 0){
                 return ErrorMsg("2000","创建失败");
             }
-            String billType = mainData.getString("bill_type");
+            String billType = mainData.getString("so_type");
             String invOrgId =  mainData.getString("inv_org_id");
-            int billStatus = mainData.getIntValue("bill_status");
+            int status = mainData.getIntValue("status");
             JSONArray jsonArray = pJson.getJSONArray("linesData");
 
             for(int i = 0; i < jsonArray.size(); i++){
@@ -187,13 +187,12 @@ public class WholeSaleControl extends RO {
                 jsonObject.put("header_id",billId);
                 jsonObject.put("create_date", DateUtil.getCurrentTimm());
 
-                jsonObject.put("source_id", mainData.get("source_id"));
-                jsonObject.put("source_system",mainData.get("source_system"));
-                jsonObject.put("source_voucher",mainData.get("source_bill"));
+                jsonObject.put("category_id", mainData.get("source_id"));
+                jsonObject.put("line_type_id",1);
 
-                if(0 < billStatus){
+                if(0 < status){
                     //添加事物
-                    jsonObject.put("bill_type",billType);
+                    jsonObject.put("so_type",billType);
                      //出库为减少
                     jsonObject.put("org_id",invOrgId);
                     invItemTransactionService.weightedMean(sqlSession,jsonObject,false);
@@ -246,7 +245,7 @@ public class WholeSaleControl extends RO {
     public String updateWholeSaleStatusByIds(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         String deleteIds  = pJson.getString("ids");
-        int billStatus = pJson.getIntValue("bill_status");
+        int billStatus = pJson.getIntValue("status");
         if(deleteIds ==null || deleteIds.isEmpty()){
             return ErrorMsg("过账失败","请选择过账项");
         }
@@ -259,19 +258,18 @@ public class WholeSaleControl extends RO {
             for(String billId : billIdArr){
                 //获取主信息
                 Map<String,Object> billParams = new HashMap<>();
-                billParams.put("bill_id",billId);
+                billParams.put("so_header_id",billId);
                 Map<String,Object> mainObj = wholeSaleService.getWholeSaleById(billParams);
-                String billType = String.valueOf(mainObj.get("bill_type"));
+                String billType = String.valueOf(mainObj.get("so_type"));
                 String invOrgId = String.valueOf(mainObj.get("inv_org_id"));
-                String targetInvOrgId =  String.valueOf(mainObj.get("target_inv_org_id"));
 
                 //获取子信息
                 List<Map<String,Object>> billLines = wholeSaleLineService.getBillLinesByHeaderId(billId);
 
                 for(Map<String,Object> billLine : billLines){
-                    billLine.put("bill_type",billType);
+                    billLine.put("so_type",billType);
                     billLine.put("org_id",invOrgId);
-                    invItemTransactionService.weightedMean(sqlSession,billLine,false);
+                    invItemTransactionService.weightedMeanForSales(sqlSession,billLine,false);
                 }
             }
             sqlSession.getConnection().commit();

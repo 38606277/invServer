@@ -26,11 +26,11 @@ public class WholeSaleService {
     }
 
     public long createWholeSale(SqlSession sqlSession,Map<String,Object> params){
-        String billCode = DbSession.selectOne("fnd_order_number_setting.getOrderNumber",params.get("bill_type"));
-        params.put("bill_code",billCode);
+        String billCode = DbSession.selectOne("fnd_order_number_setting.getOrderNumber",params.get("deliver_wholesales"));
+        params.put("header_code",billCode);
         sqlSession.insert("whole_sale_header.createWholeSale",params);
-        if(params.containsKey("bill_id")){
-            return  Long.parseLong(params.get("bill_id").toString());
+        if(params.containsKey("so_header_id")){
+            return  Long.parseLong(params.get("so_header_id").toString());
         }
         return  -1;
     }
@@ -50,7 +50,7 @@ public class WholeSaleService {
     public void updateWholeSaleStatusByIds(SqlSession sqlSession,String ids,int status){
         Map<String,Object> map = new HashMap<>();
         map.put("ids",ids);
-        map.put("bill_status",status);
+        map.put("status",status);
         sqlSession.update("whole_sale_header.updateWholeSaleStatusByIds",map);
     }
 
