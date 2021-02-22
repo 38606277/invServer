@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ap_invoice">
+
+    <insert id="saveApInvoice" parameterType="Map" keyColumn="invoice_id" keyProperty="invoice_id" useGeneratedKeys="true">
+        INSERT INTO ap_invoice( `invoice_date`, `vendor_id`, `invoice_num`,`invoice_amount`,`amount_paid`, `description`, `invoice_type`, `payment_status`, `create_date`, `create_by`,`update_date`, `update_by`)
+        VALUES (#{invoice_date}, #{vendor_id}, #{invoice_num},#{invoice_amount},#{amount_paid}, #{description}, #{invoice_type}, #{payment_status}, #{create_date}, #{create_by}, #{update_date}, #{update_by});
+    </insert>
+
+    <update id="updateApInvoiceById" parameterType="Map">
+        update ap_invoice
+        <trim prefix="set" suffixOverrides=",">
+            <if test="invoice_date!=null">invoice_date=#{invoice_date},</if>
+            <if test="vendor_id!=null">vendor_id=#{vendor_id},</if>
+            <if test="invoice_num!=null">invoice_num=#{invoice_num},</if>
+            <if test="invoice_amount!=null">invoice_amount=#{invoice_amount},</if>
+            <if test="amount_paid!=null">amount_paid=#{amount_paid},</if>
+            <if test="description!=null">description=#{description},</if>
+            <if test="invoice_type!=null">invoice_type=#{invoice_type},</if>
+            <if test="payment_status!=null">payment_status=#{payment_status},</if>
+            <if test="create_date!=null">create_date=#{create_date},</if>
+            <if test="create_by!=null">create_by=#{create_by},</if>
+            <if test="update_date!=null">update_date=#{update_date},</if>
+            <if test="update_by!=null">update_by=#{update_by},</if>
+        </trim>
+        where invoice_id=#{invoice_id}
+    </update>
+
+
+    <delete id="deleteApInvoiceByIds" parameterType="Map">
+        delete from ap_invoice where invoice_id in (${ids})
+    </delete>
+
+
+    <select id="getApInvoiceListByPage" resultType="Map" parameterType="Map">
+        SELECT ai.*,mv.vendor_name from ap_invoice ai
+        LEFT JOIN mdm_vendors mv on ai.vendor_id = mv.vendor_id
+        where 1=1
+        <if test="invoice_date_start != null and po_date_start != '' ">and ai.po_date <![CDATA[>=]]> #{po_date_start}</if>
+        <if test="invoice_date_end != null and po_date_end != '' ">and ai.po_date <![CDATA[<=]]> #{po_date_end}</if>
+        <if test="vendor_id != null and vendor_id!=''">  and ai.vendor_id=#{vendor_id} </if>
+        <if test="invoice_num != null and invoice_num!=''">  and ai.invoice_num like '%${invoice_num}%' </if>
+        <if test="invoice_amount != null and invoice_amount!=''"> and ai.invoice_amount like '%${invoice_amount}%' </if>
+        <if test="description != null and description!=''"> and ai.description like '%${description}%' </if>
+        <if test="invoice_type != null and invoice_type!=''">  and ai.invoice_type=#{invoice_type} </if>
+        <if test="payment_status != null and payment_status!=''"> and ai.payment_status like '%${payment_status}%' </if>
+        <if test="create_date_start != null and create_date_start != '' ">and ai.create_date <![CDATA[>=]]> #{create_date_start}</if>
+        <if test="create_date_end != null and create_date_end != '' ">and ai.create_date <![CDATA[<=]]> #{create_date_end}\</if>
+        <if test="create_by != null and create_by!=''">  and ai.create_by=#{create_by} </if>
+        <if test="update_date_start != null and update_date_start != '' "> and ai.update_date <![CDATA[>=]]> #{update_date_start} </if>
+        <if test="update_date_end != null and update_date_end != '' "> and ai.update_date <![CDATA[<=]]> #{update_date_end} </if>
+        <if test="update_by != null and update_by!=''">  and ai.update_by=#{update_by} </if>
+        ORDER BY update_date desc
+
+    </select>
+
+    <select id="getApInvoiceById" resultType="Map" parameterType="Map">
+        SELECT ai.*,mv.vendor_name from ap_invoice ai
+        LEFT JOIN mdm_vendors mv on ai.vendor_id = mv.vendor_id
+        where ai.invoice_id = #{invoice_id}
+    </select>
+
+
+</mapper>
+

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ap_invoice_lines">
+
+    <insert id="saveApInvoiceLines" parameterType="Map">
+        INSERT INTO ap_invoice_lines(`invoice_id`, `po_id`, `po_line_id`, `invoiced_amount`, `line_type`)
+        VALUES (#{invoice_id}, #{po_id}, #{po_line_id}, #{invoiced_amount}, #{line_type})
+    </insert>
+
+    <insert id="saveApInvoiceLinesAll" parameterType="java.util.List">
+        INSERT INTO ap_invoice_lines(`invoice_id`, `po_id`, `po_line_id`, `invoiced_amount`, `line_type`) VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.invoice_id}, #{item.po_id}, #{item.po_line_id}, #{item.invoiced_amount}, #{item.line_type})
+        </foreach>
+    </insert>
+
+    <select id="getApInvoiceLinesByInvoiceId" resultType="Map" parameterType="Map">
+        SELECT ail.*,ph.header_code as po_code,mi.item_description FROM ap_invoice_lines ail
+        LEFT JOIN po_headers ph on ail.po_id = ph.po_header_id
+        LEFT JOIN po_lines pl on  ail.po_id = pl.header_id and ail.po_line_id = pl.line_id
+        LEFT JOIN mdm_item mi on pl.item_id = mi.item_id
+        where invoice_id = #{invoice_id}
+    </select>
+
+    <delete id="deleteByInvoiceIds" parameterType="Map">
+        delete from ap_invoice_lines where invoice_id in (${ids})
+    </delete>
+
+
+    <delete id="deleteByIds" parameterType="Map">
+        delete from ap_invoice_lines where line_id in (${ids})
+    </delete>
+
+    <update id="updateApInvoiceLinesById" parameterType="Map">
+        update ap_invoice_lines
+
+        <trim prefix="set" suffixOverrides=",">
+            <if test="invoice_id!=null">invoice_id=#{invoice_id},</if>
+            <if test="po_id!=null">po_id=#{po_id},</if>
+            <if test="po_line_id!=null">po_line_id=#{po_line_id},</if>
+            <if test="invoiced_amount!=null">invoiced_amount=#{invoiced_amount},</if>
+            <if test="line_type!=null">line_type=#{line_type},</if>
+        </trim>
+
+        where line_id=#{line_id}
+    </update>
+
+
+
+
+</mapper>
+
