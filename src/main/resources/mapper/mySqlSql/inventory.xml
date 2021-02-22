@@ -5,7 +5,7 @@
 
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-		SELECT mdm.item_id,mdm.item_category_id,mdm.item_description,ic.category_name,iio.amount,iio.price,
+		SELECT mdm.item_id,mdm.item_category_id,mdm.item_category_id as category_id,mdm.item_description,ic.category_name,iio.amount,iio.price,
 		iio.on_hand_quantity,iio.max,iio.min,fo.org_name,
 		CONCAT(iio.item_id,'-',iio.org_id) as tempid
 		FROM mdm_item mdm

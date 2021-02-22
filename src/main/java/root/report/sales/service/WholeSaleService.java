@@ -26,7 +26,7 @@ public class WholeSaleService {
     }
 
     public long createWholeSale(SqlSession sqlSession,Map<String,Object> params){
-        String billCode = DbSession.selectOne("fnd_order_number_setting.getOrderNumber",params.get("deliver_wholesales"));
+        String billCode = DbSession.selectOne("fnd_order_number_setting.getOrderNumber",params.get("so_type"));
         params.put("header_code",billCode);
         sqlSession.insert("whole_sale_header.createWholeSale",params);
         if(params.containsKey("so_header_id")){

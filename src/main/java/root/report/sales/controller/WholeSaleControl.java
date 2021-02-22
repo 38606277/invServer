@@ -126,6 +126,7 @@ public class WholeSaleControl extends RO {
             //更新主实体
             JSONObject mainData = pJson.getJSONObject("mainData");
             String orgid=mainData.getString("inv_org_id");
+            mainData.put("type",0);
             wholeSaleService.updateWholeSaleById(sqlSession,mainData);
 
 
@@ -170,6 +171,7 @@ public class WholeSaleControl extends RO {
             sqlSession.getConnection().setAutoCommit(false);
             JSONObject mainData = pJson.getJSONObject("mainData");
             mainData.put("create_by",userId);
+            mainData.put("type",0);
             //保存主数据
             long billId = wholeSaleService.createWholeSale(sqlSession,mainData);
             if(billId < 0){
@@ -195,7 +197,7 @@ public class WholeSaleControl extends RO {
                     jsonObject.put("so_type",billType);
                      //出库为减少
                     jsonObject.put("org_id",invOrgId);
-                    invItemTransactionService.weightedMean(sqlSession,jsonObject,false);
+                    invItemTransactionService.weightedMeanForSales(sqlSession,jsonObject,false);
                 }
             }
             boolean isLinesSaveSuccess = wholeSaleLineService.insertBillLinesAll(sqlSession,jsonArray);

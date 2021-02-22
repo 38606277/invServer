@@ -1,7 +1,10 @@
 package root.report.sales.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageRowBounds;
+import com.google.gson.JsonObject;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
@@ -9,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
+import root.report.sys.SysContext;
+import root.report.util.DateUtil;
 
 import java.util.*;
 
@@ -19,6 +24,12 @@ public class SalesService {
 
     @Autowired
     public ItemCategoryService itemCategoryService;
+
+    @Autowired
+    public WholeSaleService wholeSaleService;
+
+    @Autowired
+    WholeSaleLineService wholeSaleLineService;
 
     public Map<String,Object> getAllPage(Map<String,String> map) {
         Map<String,Object> map1=new HashMap<>();
@@ -88,56 +99,87 @@ public class SalesService {
         }
         return map1;
     }
-    /**
-     * 功能描述: 根据JSON数据解析 对应数据，生成func_dict记录
-     */
-    public Map saveOrUpdateShipment(SqlSession sqlSession,JSONObject jsonObject){
-        Map<String,Object> resmap  = new HashMap<>();
-        resmap.put("status",true);
-        resmap.put("info","保存成功");
-        try {
-            Map<String, Object> map = new HashMap<>();
-            map.put("vendor_code", jsonObject.getString("vendor_code"));
-            map.put("vendor_id", jsonObject.getString("vendor_id"));
-            Integer count = sqlSession.selectOne("shipment.isExit", map);
-            if (count == 0) {
-                map.put("vendor_name", jsonObject.getString("vendor_name"));
-                map.put("address", jsonObject.getString("address"));
-               if (null == jsonObject.getString("vendor_id") || "".equals(jsonObject.getString("vendor_id"))) {
-                    Integer newId = sqlSession.selectOne("shipment.getMaxId");
-                    newId = newId == null ? 1 : newId;
-                    map.put("vendor_id", newId);
-                    sqlSession.insert("shipment.createShipment", map);
-                } else {
-                    map.put("vendor_id", jsonObject.getString("vendor_id"));
-                    sqlSession.update("shipment.updateShipment", map);
-                }
-            } else {
-                resmap.put("status", false);
-                resmap.put("info", "名称已存在");
-            }
-        }catch (Exception e){
-            resmap.put("status", false);
-            resmap.put("info", "保存失败");
-            e.printStackTrace();
-        }
-        return resmap;
-    }
-
-
-
-
-    public void deleteShipmentById(SqlSession sqlSession,String vendor_id){
-        Map<String,Object> map=new HashMap();
-        map.put("vendor_id",vendor_id);
-        sqlSession.delete("shipment.deleteShipmentById",map);
-    }
-
-    public Map getShipmentByID(Map m) {
-        return DbFactory.Open(DbFactory.FORM).selectOne("shipment.getShipmentByID",m);
-    }
 
     public List<Map> getOrgAll() {
         return DbFactory.Open(DbFactory.FORM).selectList("retail_sales.getOrgAll");
+    }
+
+    public Map getSalesOrderByID(String sales_id, String status, JSONObject jsonObject) {
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        Map map=new HashMap();
+        map.put("sales_id",sales_id);
+        map.put("status",status);
+        map.put("type",1);
+        Map m= sqlSession.selectOne("whole_sale_header.getSalesOrderBystatusAndSalesId",map);
+        int userId = SysContext.getId();
+        if(null!=m){
+            Integer header_id = (Integer) m.get("so_header_id");
+            JSONArray jsonArray = new JSONArray();
+            Integer i= sqlSession.selectOne("whole_sale_header.getSalesOrderByheaderId",header_id);
+            jsonObject.put("line_number",i);
+            jsonObject.put("create_by",userId);
+            jsonObject.put("header_id",header_id);
+            jsonObject.put("create_date", DateUtil.getCurrentTimm());
+            jsonObject.put("line_type_id",1);
+            jsonArray.add(jsonObject);
+            boolean isLinesSaveSuccess = wholeSaleLineService.insertBillLinesAll(sqlSession,jsonArray);
+        }else{
+
+            try {
+                Map mainData = new HashMap();
+                mainData.put("create_by",userId);
+                mainData.put("so_type","deliver_wholesales");
+                mainData.put("sales_id",jsonObject.getString("sales_id"));
+                mainData.put("inv_org_id",jsonObject.getString("inv_org_id"));
+                mainData.put("customer_id","");
+                mainData.put("bill_to_location","");
+                mainData.put("ship_to_location","");
+                mainData.put("contract_code","");
+                mainData.put("contract_name","");
+                mainData.put("contract_file","");
+                mainData.put("comments","");
+                mainData.put("create_date",DateUtil.getCurrentTimm());
+                mainData.put("create_by",userId);
+                mainData.put("status","0");
+                mainData.put("so_date",DateUtil.getCurrentTimm());
+                mainData.put("type",1);
+                //保存主数据
+                long header_id = wholeSaleService.createWholeSale(sqlSession,mainData);
+                if(header_id==-1){
+
+                }else {
+                    JSONArray jsonArray = new JSONArray();
+                    jsonObject.put("line_number", 1);
+                    jsonObject.put("create_by", userId);
+                    jsonObject.put("header_id", header_id);
+                    jsonObject.put("create_date", DateUtil.getCurrentTimm());
+                    jsonObject.put("line_type_id", 1);
+                    jsonArray.add(jsonObject);
+                    boolean isLinesSaveSuccess = wholeSaleLineService.insertBillLinesAll(sqlSession, jsonArray);
+                }
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        return m;
+    }
+
+    public Map getCarSalesByID(String sales_id, String status, JSONObject pJson) {
+        Map resmap=new HashMap();
+        List<Map<String,Object>> lists=new ArrayList<>();
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        Map map=new HashMap();
+        map.put("sales_id",sales_id);
+        map.put("status",status);
+        map.put("type",1);
+        Map m= sqlSession.selectOne("whole_sale_header.getSalesOrderBystatusAndSalesId",map);
+        if(null!=m) {
+            String headerId = m.get("so_header_id").toString();
+            lists =   wholeSaleLineService.getBillLinesByHeaderId(headerId);
+        }
+        resmap.put("maindata",m);
+        resmap.put("lines",lists);
+        return resmap;
+
     }
 }

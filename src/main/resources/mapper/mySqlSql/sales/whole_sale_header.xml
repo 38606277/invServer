@@ -31,13 +31,14 @@
     </select>
 
     <insert id="createWholeSale"  parameterType="Map" keyColumn="so_header_id" keyProperty="so_header_id" useGeneratedKeys="true">
-        INSERT INTO so_headers(`header_code`, `so_type`, `customer_id`,  `sales_id`,  `so_date`, `comments`, `create_by`, `create_date`, `status`, `contract_code`, `contract_name`, `contract_file`,`bill_to_location`,`ship_to_location`,`inv_org_id`)
-        VALUES (#{header_code},#{so_type}, #{customer_id}, #{sales_id}, #{so_date}, #{comments}, #{create_by}, sysdate(),#{status}, #{contract_code}, #{contract_name}, #{contract_file},#{bill_to_location},#{ship_to_location},#{inv_org_id});
+        INSERT INTO so_headers(`header_code`, `so_type`, `customer_id`,  `sales_id`,  `so_date`, `comments`, `create_by`, `create_date`, `status`, `contract_code`, `contract_name`, `contract_file`,`bill_to_location`,`ship_to_location`,`inv_org_id`,`type`)
+        VALUES (#{header_code},#{so_type}, #{customer_id}, #{sales_id}, #{so_date}, #{comments}, #{create_by}, sysdate(),#{status}, #{contract_code}, #{contract_name}, #{contract_file},#{bill_to_location},#{ship_to_location},#{inv_org_id},#{type});
     </insert>
 
     <update id="updateWholeSaleById" parameterType="Map">
         update so_headers
         <trim prefix="set" suffixOverrides=",">
+            <if test="type!=null">type=#{type},</if>
             <if test="customer_id!=null">customer_id=#{customer_id},</if>
             <if test="sales_id!=null">sales_id=#{sales_id},</if>
             <if test="so_date!=null">so_date=#{so_date},</if>
@@ -63,5 +64,12 @@
         update so_headers set status=#{status} where so_header_id in (${ids})
     </delete>
 
+    <select id="getSalesOrderBystatusAndSalesId" resultType="map" parameterType="map">
+        select *  FROM so_headers so where status=#{status} and sales_id=#{sales_id} and type=#{type}
+    </select>
+
+    <select id="getSalesOrderByheaderId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select (MAX(line_number) +1)as line_number from so_lines where header_id=#{header_id}
+    </select>
 </mapper>
 

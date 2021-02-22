@@ -114,19 +114,19 @@
     </select>
 
 	<select id="getItemByCategoryId" parameterType="map" resultType="map">
-        SELECT u.* FROM mdm_item u where u.item_category_id = #{item_category_id}
+        SELECT u.*,u.item_category_id as category_id FROM mdm_item u where u.item_category_id = #{item_category_id}
     </select>
 
 
 	<select id="getItemByItemId" parameterType="map" resultType="map">
-        SELECT u.*,mic.category_name,mic.category_code,mv.vendor_name FROM mdm_item u
+        SELECT u.*,u.item_category_id as category_id,mic.category_name,mic.category_code,mv.vendor_name FROM mdm_item u
         inner join mdm_item_category mic on mic.category_id = u.item_category_id
         left join mdm_vendors mv on mv.vendor_id = u.vendor_id
         where u.item_id = #{item_id}
     </select>
 
 	<select id="getAllPage" resultType="Map" parameterType="Map">
-		SELECT u.*,ic.category_name
+		SELECT u.*,u.item_category_id as category_id,ic.category_name
 		FROM mdm_item u
 		inner join mdm_item_category ic on u.item_category_id=ic.category_id
 		where  1=1
@@ -139,7 +139,7 @@
     </select>
 
 	<select id="getAllPageForSales" resultType="Map" parameterType="Map">
-		SELECT DISTINCT u.*,ic.category_name,iio.on_hand_quantity as quantity,iio.org_id,fo.org_name
+		SELECT DISTINCT u.*,u.item_category_id as category_id,ic.category_name,iio.on_hand_quantity as quantity,iio.org_id,fo.org_name
 		FROM mdm_item u
 		inner join mdm_item_category ic on u.item_category_id=ic.category_id
 		inner JOIN inv_item_onhand iio on u.item_id=iio.item_id
@@ -157,7 +157,7 @@
 	</select>
 
 	<select id="getAllPageByCategoryId" parameterType="map" resultType="map">
-		SELECT u.*  FROM mdm_item u  where  1=1
+		SELECT u.*,u.item_category_id as category_id  FROM mdm_item u  where  1=1
 		<if  test="item_category_id != null and item_category_id!='' ">
 			and  u.item_category_id='${item_category_id}'
 		</if>
