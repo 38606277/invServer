@@ -1,4 +1,4 @@
-package root.inv.ap.invoice;
+package root.inv.ap.payment;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -20,98 +20,55 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 发票
+ * 付款
  */
 @RestController
-@RequestMapping(value = "/reportServer/ap/invoice")
-public class ApInvoiceControl extends RO {
+@RequestMapping(value = "/reportServer/ap/payment")
+public class ApPaymentControl extends RO {
 
     @Autowired
-    ApInvoiceService apInvoiceService;
+    ApPaymentService apPaymentService;
 
     @Autowired
-    ApInvoiceLinesService apInvoiceLinesService;
+    ApPaymentLinesService apPaymentLinesService;
 
     @Autowired
     public ItemCategoryService itemCategoryService;
 
     //查询所有订单
-    @RequestMapping(value = "/getInvoiceListByPage", produces = "text/plain;charset=UTF-8")
-    public String getInvoiceListByPage(@RequestBody JSONObject pJson) {
-        Map<String,Object> result = apInvoiceService.getApInvoiceListByPage(pJson);
+    @RequestMapping(value = "/getPaymentListByPage", produces = "text/plain;charset=UTF-8")
+    public String getPaymentListByPage(@RequestBody JSONObject pJson) {
+        Map<String,Object> result = apPaymentService.getApPaymentListByPage(pJson);
         return SuccessMsg("", result);
     }
 
     //查询详情
-    @RequestMapping(value = "/getInvoiceById", produces = "text/plain;charset=UTF-8")
-    public String getInvoiceById(@RequestBody JSONObject pJson){
+    @RequestMapping(value = "/getPaymentById", produces = "text/plain;charset=UTF-8")
+    public String getPaymentById(@RequestBody JSONObject pJson){
 
-        Map<String, Object> mainData = apInvoiceService.getApInvoiceById(pJson);
+        Map<String, Object> mainData = apPaymentService.getApPaymentById(pJson);
         if(mainData == null || mainData.isEmpty()){
             return ErrorMsg("2000","数据不存在");
         }
-        String headId  = String.valueOf(mainData.get("invoice_id"));
-        List<Map<String,Object>> lines =  apInvoiceLinesService.getApInvoiceLinesByInvoiceId(headId);
+        String headId  = String.valueOf(mainData.get("payment_id"));
+        List<Map<String,Object>> lines =  apPaymentLinesService.getApPaymentLinesByPaymentId(headId);
         Map<String,Object> result = new HashMap<>();
         result.put("mainData",mainData);
-//
-//        Map<String,List<Map>> columnMap = new HashMap<>();
-//        Map<String,List<Map>> lineDateMap = new HashMap<>();
-//        Map<String,String> categoryNameMap = new HashMap<>();
-//        for(Map<String,Object> map : lines){
-//            String itemCategoryId = String.valueOf(map.get("item_category_id"));
-//            String itemCategoryName = String.valueOf(map.get("category_name"));
-//            if(!columnMap.containsKey(itemCategoryId)){
-//                Map<String,Object> params = new HashMap<>();
-//                params.put("category_id",itemCategoryId);
-//
-//                //动态列
-//                List<Map> columnList = itemCategoryService.getItemCategorySegmentByPid(params);
-//                for(Map columnItemMap :columnList ){
-//                    columnItemMap.put("title",columnItemMap.get("segment_name"));
-//                    columnItemMap.put("dataIndex",columnItemMap.get("segment"));
-//                }
-//                columnMap.put(itemCategoryId,columnList);
-//                categoryNameMap.put(itemCategoryId,itemCategoryName);
-//                //行数据
-//                List<Map> lineList = new ArrayList<>();
-//                lineList.add(map);
-//                lineDateMap.put(itemCategoryId,lineList);
-//            }else{
-//                List<Map> lineList =  lineDateMap.get(itemCategoryId);
-//                lineList.add(map);
-//            }
-//        }
-//
-//        JSONArray jsonArray = new JSONArray();
-//        for(String key : columnMap.keySet()){
-//            List<Map> column  = columnMap.get(key);
-//            List<Map> dataList = lineDateMap.get(key);
-//            String categoryName =  categoryNameMap.get(key);
-//            JSONObject jsonObject = new JSONObject();
-//
-//            jsonObject.put("columnList",column);
-//            jsonObject.put("dataList",dataList);
-//            jsonObject.put("categoryName",categoryName);
-//            jsonObject.put("categoryId",key);
-//            jsonArray.add(jsonObject);
-//        }
-
         result.put("linesData",lines);
         return SuccessMsg("获取成功", result);
     }
 
-    @RequestMapping(value = "/getApInvoiceLinesById", produces = "text/plain;charset=UTF-8")
-    public String getInvoiceListById(@RequestBody JSONObject pJson){
-        String headId = String.valueOf(pJson.get("invoice_id"));
-        List<Map<String,Object>> lines =  apInvoiceLinesService.getApInvoiceLinesByInvoiceId(headId);
+    @RequestMapping(value = "/getApPaymentLinesById", produces = "text/plain;charset=UTF-8")
+    public String getPaymentListById(@RequestBody JSONObject pJson){
+        String headId = String.valueOf(pJson.get("payment_id"));
+        List<Map<String,Object>> lines =  apPaymentLinesService.getApPaymentLinesByPaymentId(headId);
         return SuccessMsg(lines, lines.size());
     }
 
-    @RequestMapping(value = "/getApInvoiceLinesColumnById", produces = "text/plain;charset=UTF-8")
-    public String getApInvoiceLinesColumnById(@RequestBody JSONObject pJson){
-        String headId = String.valueOf(pJson.get("invoice_id"));
-        List<Map<String,Object>> lines =  apInvoiceLinesService.getApInvoiceLinesByInvoiceId(headId);
+    @RequestMapping(value = "/getApPaymentLinesColumnById", produces = "text/plain;charset=UTF-8")
+    public String getApPaymentLinesColumnById(@RequestBody JSONObject pJson){
+        String headId = String.valueOf(pJson.get("payment_id"));
+        List<Map<String,Object>> lines =  apPaymentLinesService.getApPaymentLinesByPaymentId(headId);
         Map<String,List<Map>> columnMap = new HashMap<>();
         Map<String,String> categoryNameMap = new HashMap<>();
         for(Map<String,Object> map : lines){
@@ -150,13 +107,9 @@ public class ApInvoiceControl extends RO {
     }
 
 
-
-
-
-
     //更新
-    @RequestMapping(value = "/updateInvoiceById", produces = "text/plain;charset=UTF-8")
-    public String updateInvoiceById(@RequestBody JSONObject pJson)throws SQLException {
+    @RequestMapping(value = "/updatePaymentById", produces = "text/plain;charset=UTF-8")
+    public String updatePaymentById(@RequestBody JSONObject pJson)throws SQLException {
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         int userId = SysContext.getId();
         try {
@@ -165,25 +118,25 @@ public class ApInvoiceControl extends RO {
             //更新主实体
             JSONObject mainData = pJson.getJSONObject("mainData");
 
-            apInvoiceService.updateApInvoiceById(sqlSession,mainData);
+            apPaymentService.updateApPaymentById(sqlSession,mainData);
 
 
             //删除行数据
             String deleteIds  = pJson.getString("deleteData");
             if(deleteIds!=null && !deleteIds.isEmpty()){
-                apInvoiceLinesService.deleteApInvoiceLines(sqlSession,deleteIds);
+                apPaymentLinesService.deleteApPaymentLines(sqlSession,deleteIds);
             }
 
             //新增或更新行数据
             JSONArray jsonArray = pJson.getJSONArray("linesData");
             for(int i = 0; i < jsonArray.size(); i++){
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                jsonObject.put("invoice_id", mainData.get("invoice_id"));
+                jsonObject.put("payment_id", mainData.get("payment_id"));
             }
-            apInvoiceLinesService.saveOrUpdateApInvoiceLinesList(sqlSession,jsonArray);
+            apPaymentLinesService.saveOrUpdateApPaymentLinesList(sqlSession,jsonArray);
 
             sqlSession.getConnection().commit();
-            return SuccessMsg("保存成功",mainData.get("invoice_id"));
+            return SuccessMsg("保存成功",mainData.get("payment_id"));
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
             ex.printStackTrace();
@@ -199,8 +152,8 @@ public class ApInvoiceControl extends RO {
      * @param pJson
      * @return
      */
-    @RequestMapping(value = "/createInvoice", produces = "text/plain; charset=utf-8")
-    public String createInvoice(@RequestBody JSONObject pJson) throws SQLException{
+    @RequestMapping(value = "/createPayment", produces = "text/plain; charset=utf-8")
+    public String createPayment(@RequestBody JSONObject pJson) throws SQLException{
         int userId = SysContext.getId();
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         try {
@@ -218,7 +171,7 @@ public class ApInvoiceControl extends RO {
 //            mainData.put("header_code", billCode);
 
             //保存主数据
-            long id = apInvoiceService.saveApInvoice(sqlSession,mainData);
+            long id = apPaymentService.saveApPayment(sqlSession,mainData);
 
             if(id < 0){
                 return ErrorMsg("2000","创建失败");
@@ -228,9 +181,9 @@ public class ApInvoiceControl extends RO {
             if(jsonArray !=null && 0 <jsonArray.size()){
                 for(int i = 0; i < jsonArray.size(); i++){
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    jsonObject.put("invoice_id",id);
+                    jsonObject.put("payment_id",id);
                 }
-                apInvoiceLinesService.insertApInvoiceLinesAll(sqlSession,jsonArray);
+                apPaymentLinesService.insertApPaymentLinesAll(sqlSession,jsonArray);
             }
 
             sqlSession.getConnection().commit();
@@ -244,8 +197,8 @@ public class ApInvoiceControl extends RO {
         }
     }
 
-    @RequestMapping(value = "/deleteInvoiceByIds", produces = "text/plain;charset=UTF-8")
-    public String deleteInvoiceByIds(@RequestBody JSONObject pJson)throws SQLException{
+    @RequestMapping(value = "/deletePaymentByIds", produces = "text/plain;charset=UTF-8")
+    public String deletePaymentByIds(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
 
         String deleteIds  = pJson.getString("ids");
@@ -256,9 +209,9 @@ public class ApInvoiceControl extends RO {
         try {
             sqlSession.getConnection().setAutoCommit(false);
             //更新主实体
-            apInvoiceService.deleteApInvoiceByIds(sqlSession,deleteIds);
+            apPaymentService.deleteApPaymentByIds(sqlSession,deleteIds);
             //删除行数据
-            apInvoiceLinesService.deleteApInvoiceLinesByInvoiceIds(sqlSession,deleteIds);
+            apPaymentLinesService.deleteApPaymentLinesByPaymentIds(sqlSession,deleteIds);
             sqlSession.getConnection().commit();
             return SuccessMsg("删除成功","");
         } catch (Exception ex){

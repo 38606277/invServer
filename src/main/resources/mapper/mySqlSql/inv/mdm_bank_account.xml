@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mdm_bank_account">
+
+    <insert id="saveBankAccount" parameterType="Map" keyColumn="bank_account_id" keyProperty="bank_account_id" useGeneratedKeys="true">
+        INSERT INTO mdm_bank_account( `bank_account_name`, `bank_account_number`, `currency_code`,`description`,`contact_name`, `contact_phone`,
+        `max_check_amount`, `min_check_amount`, `inactive_date`, `bank_name`,`bank_branch`, `create_date`, `create_by`, `update_date`, `update_by`)
+        VALUES (#{bank_account_name}, #{bank_account_number}, #{currency_code},#{description},#{contact_name}, #{contact_phone},
+        #{max_check_amount}, #{min_check_amount},#{inactive_date},#{bank_name},#{bank_branch}, #{create_date}, #{create_by}, #{update_date}, #{update_by});
+    </insert>
+
+    <update id="updateBankAccountById" parameterType="Map">
+        update mdm_bank_account
+        <trim prefix="set" suffixOverrides=",">
+            <if test="bank_account_name!=null">bank_account_name=#{bank_account_name},</if>
+            <if test="bank_account_number!=null">bank_account_number=#{bank_account_number},</if>
+            <if test="currency_code!=null">currency_code=#{currency_code},</if>
+            <if test="description!=null">description=#{description},</if>
+            <if test="contact_name!=null">contact_name=#{contact_name},</if>
+            <if test="contact_phone!=null">contact_phone=#{contact_phone},</if>
+            <if test="max_check_amount!=null">max_check_amount=#{max_check_amount},</if>
+            <if test="min_check_amount!=null">min_check_amount=#{min_check_amount},</if>
+            <if test="inactive_date!=null">inactive_date=#{inactive_date},</if>
+            <if test="bank_name!=null">bank_name=#{bank_name},</if>
+            <if test="bank_branch!=null">bank_branch=#{bank_branch},</if>
+            <if test="create_date!=null">create_date=#{create_date},</if>
+            <if test="create_by!=null">create_by=#{create_by},</if>
+            <if test="update_date!=null">update_date=#{update_date},</if>
+            <if test="update_by!=null">update_by=#{update_by},</if>
+        </trim>
+        where bank_account_id=#{bank_account_id}
+    </update>
+
+
+    <delete id="deleteBankAccountByIds" parameterType="Map">
+        delete from mdm_bank_account where bank_account_id in (${ids})
+    </delete>
+
+
+    <select id="getBankAccountListByPage" resultType="Map" parameterType="Map">
+        SELECT mba.* from mdm_bank_account mba
+      
+        where 1=1
+        <if test="bank_account_name != null and bank_account_name!=''">  and mba.bank_account_name like '%${bank_account_name}%' </if>
+        <if test="bank_account_number != null and bank_account_number!=''">  and mba.bank_account_number like '%${bank_account_number}%' </if>
+        <if test="currency_code != null and currency_code!=''">  and mba.currency_code=#{currency_code} </if>
+        <if test="contact_name != null and contact_name!=''">  and mba.contact_name like '%${contact_name}%' </if>
+        <if test="contact_phone != null and contact_phone!=''">  and mba.contact_phone like '%${contact_phone}%' </if>
+        <if test="max_check_amount != null and max_check_amount!=''">  and mba.max_check_amount=#{max_check_amount} </if>
+        <if test="min_check_amount != null and min_check_amount!=''">  and mba.min_check_amount=#{min_check_amount} </if>
+        <if test="bank_name != null and bank_name!=''">  and mba.bank_name like '%${bank_name}%' </if>
+        <if test="bank_branch != null and bank_branch!=''">  and mba.bank_branch like '%${bank_branch}%' </if>
+        <if test="inactive_date_start != null and inactive_date_start != '' ">and mba.inactive_date <![CDATA[>=]]> #{inactive_date_start}</if>
+        <if test="inactive_date_end != null and inactive_date_end != '' ">and mba.inactive_date <![CDATA[<=]]> #{inactive_date_end}\</if>
+        <if test="description != null and description!=''">  and mba.description like '%${description}%' </if>
+        <if test="create_date_start != null and create_date_start != '' ">and mba.create_date <![CDATA[>=]]> #{create_date_start}</if>
+        <if test="create_date_end != null and create_date_end != '' ">and mba.create_date <![CDATA[<=]]> #{create_date_end}</if>
+        <if test="create_by != null and create_by!=''">  and mba.create_by=#{create_by} </if>
+        <if test="update_date_start != null and update_date_start != '' "> and mba.update_date <![CDATA[>=]]> #{update_date_start} </if>
+        <if test="update_date_end != null and update_date_end != '' "> and mba.update_date <![CDATA[<=]]> #{update_date_end} </if>
+        <if test="update_by != null and update_by!=''">  and mba.update_by=#{update_by} </if>
+        ORDER BY update_date desc
+
+    </select>
+
+    <select id="getBankAccountById" resultType="Map" parameterType="Map">
+        SELECT mba.* from mdm_bank_account mba
+        where mba.bank_account_id = #{bank_account_id}
+    </select>
+
+
+</mapper>
+

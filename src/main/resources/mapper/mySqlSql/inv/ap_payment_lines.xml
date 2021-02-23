@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ap_payment_lines">
+
+    <insert id="saveApPaymentLines" parameterType="Map">
+        INSERT INTO ap_payment_lines(`invoice_id`, `payment_id`, `amount`)
+        VALUES (#{invoice_id}, #{payment_id}, #{amount})
+    </insert>
+
+    <insert id="saveApPaymentLinesAll" parameterType="java.util.List">
+        INSERT INTO ap_payment_lines(`invoice_id`, `payment_id`, `amount`) VALUES
+        <foreach collection="list" index="index" item="item" separator="," >
+            (#{item.invoice_id}, #{item.payment_id}, #{item.amount})
+        </foreach>
+    </insert>
+
+    <select id="getApPaymentLinesByPaymentId" resultType="Map" parameterType="Map">
+        SELECT apl.* ,ai.invoice_num from ap_payment_lines apl
+        LEFT JOIN ap_invoice ai on apl.payment_id = ai.payment_id
+        where payment_id = #{payment_id}
+    </select>
+
+    <delete id="deleteByPaymentIds" parameterType="Map">
+        delete from ap_payment_lines where payment_id in (${ids})
+    </delete>
+
+
+    <delete id="deleteByIds" parameterType="Map">
+        delete from ap_payment_lines where line_id in (${ids})
+    </delete>
+
+
+    <update id="updateApPaymentLinesById" parameterType="Map">
+        update ap_payment_lines
+        <trim prefix="set" suffixOverrides=",">
+            <if test="payment_id!=null">payment_id=#{payment_id},</if>
+            <if test="invoice_id!=null">invoice_id=#{invoice_id},</if>
+            <if test="amount!=null">amount=#{amount},</if>
+        </trim>
+        where line_id=#{line_id}
+    </update>
+
+
+
+
+</mapper>
+

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ap_payment">
+
+    <insert id="saveApPayment" parameterType="Map" keyColumn="payment_id" keyProperty="payment_id" useGeneratedKeys="true">
+        INSERT INTO ap_payment( `payment_number`, `bank_account_id`, `bank_account_name`,`payment_date`,`amount`, `payment_type`, `vendor_id`, `description`, `create_date`, `create_by`,`update_date`, `update_by`)
+        VALUES (#{payment_number}, #{bank_account_id}, #{bank_account_name},#{payment_date},#{amount}, #{payment_type}, #{vendor_id}, #{description}, #{create_date}, #{create_by}, #{update_date}, #{update_by});
+    </insert>
+
+    <update id="updateApPaymentById" parameterType="Map">
+        update ap_payment
+        <trim prefix="set" suffixOverrides=",">
+            <if test="payment_number!=null">payment_number=#{payment_number},</if>
+            <if test="bank_account_id!=null">bank_account_id=#{bank_account_id},</if>
+            <if test="bank_account_name!=null">bank_account_name=#{bank_account_name},</if>
+            <if test="payment_date!=null">payment_date=#{payment_date},</if>
+            <if test="amount!=null">amount=#{amount},</if>
+            <if test="payment_type!=null">payment_type=#{payment_type},</if>
+            <if test="vendor_id!=null">vendor_id=#{vendor_id},</if>
+            <if test="description!=null">description=#{description},</if>
+            <if test="create_date!=null">create_date=#{create_date},</if>
+            <if test="create_by!=null">create_by=#{create_by},</if>
+            <if test="update_date!=null">update_date=#{update_date},</if>
+            <if test="update_by!=null">update_by=#{update_by},</if>
+        </trim>
+        where payment_id=#{payment_id}
+    </update>
+
+
+    <delete id="deleteApPaymentByIds" parameterType="Map">
+        delete from ap_payment where payment_id in (${ids})
+    </delete>
+
+
+    <select id="getApPaymentListByPage" resultType="Map" parameterType="Map">
+        SELECT ap.*,mv.vendor_name from ap_payment ap
+        LEFT JOIN mdm_vendors mv on ap.vendor_id = mv.vendor_id
+        where 1=1
+        <if test="payment_number != null and payment_number!=''">  and ap.payment_number like '%${payment_number}%' </if>
+        <if test="bank_account_id != null and bank_account_id!=''">  and ap.bank_account_id=#{bank_account_id} </if>
+        <if test="payment_date_start != null and payment_date_start != '' ">and ap.payment_date <![CDATA[>=]]> #{payment_date_start}</if>
+        <if test="payment_date_end != null and payment_date_end != '' ">and ap.payment_date <![CDATA[<=]]> #{payment_date_end}</if>
+        <if test="amount != null and amount!=''">  and ap.amount like '%${amount}%' </if>
+        <if test="payment_type != null and payment_type!=''">  and ap.payment_type=#{payment_type} </if>
+        <if test="vendor_id != null and vendor_id!=''">  and ap.vendor_id=#{vendor_id} </if>
+        <if test="description != null and description!=''">  and ap.description like '%${description}%' </if>
+        <if test="create_date_start != null and create_date_start != '' ">and ap.create_date <![CDATA[>=]]> #{create_date_start}</if>
+        <if test="create_date_end != null and create_date_end != '' ">and ap.create_date <![CDATA[<=]]> #{create_date_end}\</if>
+        <if test="create_by != null and create_by!=''">  and ap.create_by=#{create_by} </if>
+        <if test="update_date_start != null and update_date_start != '' "> and ap.update_date <![CDATA[>=]]> #{update_date_start} </if>
+        <if test="update_date_end != null and update_date_end != '' "> and ap.update_date <![CDATA[<=]]> #{update_date_end} </if>
+        <if test="update_by != null and update_by!=''">  and ap.update_by=#{update_by} </if>
+        ORDER BY update_date desc
+
+    </select>
+
+    <select id="getApPaymentById" resultType="Map" parameterType="Map">
+        SELECT ap.*,mv.vendor_name from ap_payment ap
+        LEFT JOIN mdm_vendors mv on ap.vendor_id = mv.vendor_id
+        where ap.payment_id = #{payment_id}
+    </select>
+
+
+</mapper>
+
