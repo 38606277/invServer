@@ -166,9 +166,8 @@ public class ApPaymentControl extends RO {
             mainData.put("create_date", DateUtil.getCurrentTimm());
             mainData.put("update_date", DateUtil.getCurrentTimm());
 
-
-//            String billCode = sqlSession.selectOne("fnd_order_number_setting.getOrderNumber","po_order");
-//            mainData.put("header_code", billCode);
+            String billCode = sqlSession.selectOne("fnd_order_number_setting.getOrderNumber","payment");
+            mainData.put("payment_number", billCode);
 
             //保存主数据
             long id = apPaymentService.saveApPayment(sqlSession,mainData);
