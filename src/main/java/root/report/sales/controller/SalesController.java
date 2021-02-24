@@ -87,6 +87,24 @@ public class SalesController extends RO {
         }
     }
 
+    @RequestMapping(value = "/getListPage", produces = "text/plain;charset=UTF-8")
+    public String getListPage(@RequestBody JSONObject pJson) {
+        try {
+            Map<String,Object> map=new HashMap();
+            map.put("startIndex",pJson.getString("pageNum"));
+            map.put("perPage",pJson.getString("perPage"));
+            map.put("header_code",pJson.getString("header_code"));
+            map.put("inv_org_name",pJson.getString("inv_org_id"));
+            map.put("vendor_name",pJson.getString("vendor_name"));
+            map.put("item_description",pJson.getString("item_description"));
+            Map<String,Object> map1 = salesService.getListPage(map);
+            return SuccessMsg("", map1);
+        } catch (Exception ex){
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+
     /********************添加商品*****************/
 
     @RequestMapping(value = "/addCategory", produces = "text/plain;charset=UTF-8")

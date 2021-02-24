@@ -12,9 +12,13 @@
         LEFT JOIN fnd_org fo on ibh.inv_org_id = fo.org_id
         LEFT JOIN mdm_vendors mv on ibh.customer_id = mv.vendor_id
         LEFT JOIN fnd_user fu on ibh.sales_id = fu._id
-        where 1=1
-        <if test="so_type != null and so_type!=''">  and so_type=#{so_type} </if>
-        <if test="sales_id != null and sales_id!=''">  and (sales_id=#{sales_id} or create_by =#{create_by}) </if>
+        where 1=1  and type=#{type}
+        <if test="header_code != null and header_code!=''"> and ibh.header_code like '%${header_code}%' </if>
+        <if test="inv_org_name != null and inv_org_name!=''"> and fo.org_name like '%${inv_org_name}%' </if>
+        <if test="so_type != null and so_type!=''">  and ibh.so_type=#{so_type} </if>
+        <if test="vendor_name != null and vendor_name!=''">  and mv.vendor_name like '%${vendor_name}%' </if>
+        <if test="sales_id != null and sales_id!=''">  and ibh.sales_id=#{sales_id} </if>
+        <if test="create_by != null and create_by!=''"> and ibh.create_by =#{create_by} </if>
         ORDER BY create_date desc
     </select>
 
@@ -65,7 +69,11 @@
     </delete>
 
     <select id="getSalesOrderBystatusAndSalesId" resultType="map" parameterType="map">
-        select *  FROM so_headers so where status=#{status} and sales_id=#{sales_id} and type=#{type}
+       select so.*,fo.org_name as inv_org_name,fu.USER_NAME
+        FROM so_headers so
+        LEFT JOIN fnd_org fo on so.inv_org_id=fo.org_id
+        LEFT JOIN fnd_user fu on so.sales_id=fu._id
+        where so.status=#{status} and so.sales_id=#{sales_id} and so.type=#{type}
     </select>
 
     <select id="getSalesOrderByheaderId" parameterType="java.lang.Integer" resultType="java.lang.Integer">

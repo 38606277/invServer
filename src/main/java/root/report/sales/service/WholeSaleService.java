@@ -77,6 +77,7 @@ public class WholeSaleService {
             }
             int id = SysContext.getId();//用户的表id
             pJson.put("create_by",id);
+            pJson.put("type",1);
             List<Map<String, Object>> resultList = DbSession.selectList("whole_sale_header.getWholeSaleListByPage", pJson, bounds);
             Long totalSize = 0L;
             if (pJson != null && pJson.size() != 0) {

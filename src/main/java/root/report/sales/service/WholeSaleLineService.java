@@ -3,19 +3,22 @@ package root.report.sales.service;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import root.report.common.DbSession;
+import root.report.itemCategory.service.ItemCategoryService;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 行数据
  */
 @Service
 public class WholeSaleLineService {
+
+    @Autowired
+    public ItemCategoryService itemCategoryService;
 
     /**
      * 批量插入行数据
@@ -35,6 +38,48 @@ public class WholeSaleLineService {
         Map<String,Object> param = new HashMap<>();
         param.put("header_id",headerId);
        return  DbSession.selectList("whole_sale_lines.getBillLinesByHeaderId",param);
+    }
+
+    public List<Map> getSoLinesByHeaderId(String headerId){
+        Map<String,Object> param = new HashMap<>();
+        param.put("header_id",headerId);
+        List<Map> list= DbSession.selectList("whole_sale_lines.getBillLinesByHeaderId",param);
+        Set<String> itemcate = new HashSet<>();
+        Map<String,Object> ppmap = new HashMap();
+        for(int i=0;i<list.size();i++) {
+            Map tempmap = list.get(i);
+            String mkeyRes="", skeyRes="";
+            List<Map> mlist=null, slist=null;
+            String catid=tempmap.get("item_category_id").toString();
+            if(!itemcate.contains(catid)) {
+                Map msmap = new HashMap();
+                mlist= itemCategoryService.getItemCategorySegmentByCatIdAndKey(catid,"mkey");
+                slist= itemCategoryService.getItemCategorySegmentByCatIdAndKey(catid,"skey");
+                msmap.put("mkey",mlist);
+                msmap.put("skey",slist);
+                ppmap.put(catid,msmap);
+                itemcate.add(catid);
+            }else{
+                Map m= (Map) ppmap.get(catid);
+                mlist = (List<Map>) m.get("mkey");
+                slist = (List<Map>) m.get("skey");
+            }
+            if(null!=mlist) {
+                for (int ii = 0; ii < mlist.size(); ii++) {
+                    String segment = mlist.get(ii).get("segment").toString();
+                    mkeyRes = tempmap.get(segment)+ " " + mkeyRes;
+                }
+            }
+            if(null!=slist) {
+                for (int iii = 0; iii < slist.size(); iii++) {
+                    String segment = slist.get(iii).get("segment").toString();
+                    skeyRes = tempmap.get(segment)+ " " + skeyRes;
+                }
+            }
+            tempmap.put("mkeyRes",mkeyRes);
+            tempmap.put("skeyRes",skeyRes);
+        }
+        return list;
     }
 
     /**

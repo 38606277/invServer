@@ -10,6 +10,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import root.report.common.DbSession;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
 import root.report.sys.SysContext;
@@ -166,7 +167,7 @@ public class SalesService {
 
     public Map getCarSalesByID(String sales_id, String status, JSONObject pJson) {
         Map resmap=new HashMap();
-        List<Map<String,Object>> lists=new ArrayList<>();
+        List<Map> lists=new ArrayList<>();
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         Map map=new HashMap();
         map.put("sales_id",sales_id);
@@ -175,11 +176,51 @@ public class SalesService {
         Map m= sqlSession.selectOne("whole_sale_header.getSalesOrderBystatusAndSalesId",map);
         if(null!=m) {
             String headerId = m.get("so_header_id").toString();
-            lists =   wholeSaleLineService.getBillLinesByHeaderId(headerId);
+            lists =   wholeSaleLineService.getSoLinesByHeaderId(headerId);
         }
         resmap.put("maindata",m);
         resmap.put("lines",lists);
         return resmap;
 
+    }
+
+    public Map<String, Object> getListPage(Map<String, Object> pJson) {
+        Map<String,Object> map1=new HashMap<>();
+
+        try {
+            RowBounds bounds = null;
+            if (pJson == null) {
+                bounds = RowBounds.DEFAULT;
+            } else {
+                int currentPage = Integer.valueOf(pJson.get("startIndex").toString());
+                int perPage = Integer.valueOf(pJson.get("perPage").toString());
+                if (1 == currentPage || 0 == currentPage) {
+                    currentPage = 0;
+                } else {
+                    currentPage = (currentPage - 1) * perPage;
+                }
+
+                pJson.put("startIndex",currentPage);
+                pJson.put("perPage",perPage);
+                bounds = new PageRowBounds(currentPage, perPage);
+            }
+            int id = SysContext.getId();//用户的表id
+            pJson.put("create_by",id);
+            pJson.put("type",0);
+            List<Map<String, Object>> resultList = DbSession.selectList("whole_sale_header.getWholeSaleListByPage", pJson, bounds);
+            Long totalSize = 0L;
+            if (pJson != null && pJson.size() != 0) {
+                totalSize = ((PageRowBounds) bounds).getTotal();
+            } else {
+                totalSize = Long.valueOf(resultList.size());
+            }
+
+            map1.put("list", resultList);
+            map1.put("total", totalSize);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return map1;
     }
 }
