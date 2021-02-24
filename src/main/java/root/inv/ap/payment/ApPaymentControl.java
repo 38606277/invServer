@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import root.inv.ap.invoice.ApInvoiceService;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
@@ -32,8 +33,10 @@ public class ApPaymentControl extends RO {
     @Autowired
     ApPaymentLinesService apPaymentLinesService;
 
+
     @Autowired
-    public ItemCategoryService itemCategoryService;
+    ApInvoiceService apInvoiceService;
+
 
     //查询所有订单
     @RequestMapping(value = "/getPaymentListByPage", produces = "text/plain;charset=UTF-8")
@@ -65,46 +68,6 @@ public class ApPaymentControl extends RO {
         return SuccessMsg(lines, lines.size());
     }
 
-    @RequestMapping(value = "/getApPaymentLinesColumnById", produces = "text/plain;charset=UTF-8")
-    public String getApPaymentLinesColumnById(@RequestBody JSONObject pJson){
-        String headId = String.valueOf(pJson.get("payment_id"));
-        List<Map<String,Object>> lines =  apPaymentLinesService.getApPaymentLinesByPaymentId(headId);
-        Map<String,List<Map>> columnMap = new HashMap<>();
-        Map<String,String> categoryNameMap = new HashMap<>();
-        for(Map<String,Object> map : lines){
-            String itemCategoryId = String.valueOf(map.get("item_category_id"));
-            String itemCategoryName = String.valueOf(map.get("category_name"));
-            if(!columnMap.containsKey(itemCategoryId)){
-                Map<String,Object> params = new HashMap<>();
-                params.put("category_id",itemCategoryId);
-
-                //动态列
-                List<Map> columnList = itemCategoryService.getItemCategorySegmentByPid(params);
-                for(Map columnItemMap :columnList ){
-                    columnItemMap.put("title",columnItemMap.get("segment_name"));
-                    columnItemMap.put("dataIndex",columnItemMap.get("segment"));
-                }
-                columnMap.put(itemCategoryId,columnList);
-                categoryNameMap.put(itemCategoryId,itemCategoryName);
-                //行数据
-                List<Map> lineList = new ArrayList<>();
-                lineList.add(map);
-            }
-        }
-
-        JSONArray jsonArray = new JSONArray();
-        for(String key : columnMap.keySet()){
-            List<Map> column  = columnMap.get(key);
-            String categoryName =  categoryNameMap.get(key);
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("columnList",column);
-            jsonObject.put("categoryName",categoryName);
-            jsonObject.put("categoryId",key);
-            jsonArray.add(jsonObject);
-        }
-
-        return SuccessMsg("查询成功",jsonArray);
-    }
 
 
     //更新
@@ -181,6 +144,11 @@ public class ApPaymentControl extends RO {
                 for(int i = 0; i < jsonArray.size(); i++){
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     jsonObject.put("payment_id",id);
+                    //修改发票付款的金额
+                    HashMap hashMap = new HashMap();
+                    hashMap.put("invoice_id",jsonObject.get("invoice_id"));
+                    hashMap.put("amount_paid",jsonObject.get("amount"));
+                    apInvoiceService.updateApAmountPaid(sqlSession,hashMap);
                 }
                 apPaymentLinesService.insertApPaymentLinesAll(sqlSession,jsonArray);
             }

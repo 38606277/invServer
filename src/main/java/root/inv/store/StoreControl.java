@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import root.inv.pd.PdOrderLinesService;
 import root.inv.po.PoLinesService;
+import root.inv.task.FndTaskService;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
@@ -42,8 +43,7 @@ public class StoreControl extends RO {
     PoLinesService poLinesService;
 
     @Autowired
-    PdOrderLinesService pdOrderLinesService;
-
+    FndTaskService fndTaskService;
 
     @Autowired
     public ItemCategoryService itemCategoryService;
@@ -68,6 +68,22 @@ public class StoreControl extends RO {
         int total = storeService.getStoreListByPageCount(pJson);
         return SuccessMsg(list, total);
     }
+
+    //查询详情
+    @RequestMapping(value = "/getStoreByIdOld", produces = "text/plain;charset=UTF-8")
+    public String getStoreByIdOld(@RequestBody JSONObject pJson){
+        Map<String, Object> mainData = storeService.getStoreById(pJson);
+        if(mainData == null || mainData.isEmpty()){
+            return ErrorMsg("2000","数据不存在");
+        }
+        String headerId = String.valueOf(pJson.get("bill_id"));
+        List<Map<String,Object>> lines =  invBillLineService.getBillLinesByHeaderId(headerId);
+        Map<String,Object> result = new HashMap<>();
+        result.put("mainData",mainData);
+        result.put("linesData",lines);
+        return SuccessMsg("获取成功", result);
+    }
+
 
     //查询详情
     @RequestMapping(value = "/getStoreById", produces = "text/plain;charset=UTF-8")
@@ -199,6 +215,7 @@ public class StoreControl extends RO {
             String billType = mainData.getString("bill_type");
             String invOrgId =  mainData.getString("inv_org_id");
             String targetInvOrgId =  mainData.getString("target_inv_org_id");
+
             int billStatus = mainData.getIntValue("bill_status");
             JSONArray jsonArray = pJson.getJSONArray("linesData");
 
@@ -238,10 +255,67 @@ public class StoreControl extends RO {
             }
             boolean isLinesSaveSuccess = invBillLineService.insertBillLinesAll(sqlSession,jsonArray);
 
-            sqlSession.getConnection().commit();
+
             if(!isLinesSaveSuccess){
+                sqlSession.getConnection().commit();
                 return  ErrorMsg("2000","行数据保存失败");
             }
+
+            String billTypeName = null;
+            int assignerId = -1;
+            String func_url = null;
+            if("store_other".equals(billType)){ //其他入库
+                billTypeName = "其他入库";
+                assignerId = userId;
+                func_url = "/transation/store/other/edit/" + billId;
+            } else if("deliver_other".equals(billType)){//出库
+                billTypeName= "其他出库";
+                assignerId = userId;
+                func_url = "/transation/deliver/other/edit/" + billId;
+            }else if("transfer".equals(billType)){
+                int operator = mainData.getInteger("operator");
+                billTypeName = "调拨出库";
+                assignerId = operator;
+                func_url = "/transation/transfer/out/edit/" + billId;
+            }else if("deliver_sales".equals(billType)){//销售出库
+                billTypeName= "销售出库";
+                assignerId = userId;
+                func_url = "/sales/sales/edit/" + billId;
+            }else if("deliver_wholesales".equals(billType)){//批发出库
+                billTypeName = "批发出库";
+                assignerId = userId;
+                func_url = "/sales/sales/edit/" + billId;
+            }else if("count".equals(billType)){//盘点
+                int operator = mainData.getInteger("operator");
+                billTypeName = "盘点";
+                assignerId = operator;
+                func_url = "/transation/count/edit/" + billId;
+            }
+
+            if(billTypeName!=null){
+                HashMap taskMap = new HashMap<String,Object>();
+                taskMap.put("task_name","您有一条新的"+ billTypeName + "任务");
+                taskMap.put("owner_id",userId);
+                taskMap.put("assigner_id",assignerId);
+                taskMap.put("assign_date",DateUtil.getCurrentTimm());
+                taskMap.put("receive_date",null);
+                taskMap.put("last_update_date",DateUtil.getCurrentTimm());
+                taskMap.put("complete_date",null);
+                taskMap.put("task_status",0);
+                taskMap.put("task_type","store");
+                taskMap.put("func_url",func_url);
+                taskMap.put("func_param",null);
+                taskMap.put("task_description",billTypeName);
+                taskMap.put("task_level",0);
+                taskMap.put("source_id",billId);
+
+                //创建任务
+                fndTaskService.saveFndTask(sqlSession,taskMap);
+            }
+
+
+
+            sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",billId);
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
@@ -329,7 +403,39 @@ public class StoreControl extends RO {
                         }
                     }
                 }
+
+
+
+                //更新任务
+                HashMap taskMap = new HashMap<String,Object>();
+                taskMap.put("last_update_date",DateUtil.getCurrentTimm());
+                taskMap.put("complete_date",DateUtil.getCurrentTimm());
+                taskMap.put("task_status",2);
+                taskMap.put("task_type","store");
+                taskMap.put("source_id",billId);
+                fndTaskService.updateFndTaskBySourceIdAndTaskType(sqlSession,taskMap);
+
+                if("transfer".equals(billType) && 1 == billStatus){
+                    HashMap createTaskMap = new HashMap<String,Object>();
+                    createTaskMap.put("task_name","您有一条新的调拨入库任务");
+                    createTaskMap.put("owner_id",mainObj.get("create_by"));
+                    createTaskMap.put("assigner_id",mainObj.get("target_operator"));
+                    createTaskMap.put("assign_date",DateUtil.getCurrentTimm());
+                    createTaskMap.put("receive_date",null);
+                    createTaskMap.put("last_update_date",DateUtil.getCurrentTimm());
+                    createTaskMap.put("complete_date",null);
+                    createTaskMap.put("task_status",0);
+                    createTaskMap.put("task_type","store");
+                    createTaskMap.put("func_url","/transation/transfer/in/edit/" + billId);
+                    createTaskMap.put("func_param",null);
+                    createTaskMap.put("task_description","调拨入库");
+                    createTaskMap.put("task_level",0);
+                    createTaskMap.put("source_id",billId);
+                    //创建任务
+                    fndTaskService.saveFndTask(sqlSession,createTaskMap);
+                }
             }
+
             sqlSession.getConnection().commit();
             return SuccessMsg("过账成功","");
         } catch (Exception ex){

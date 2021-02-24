@@ -62,5 +62,12 @@
     </select>
 
 
+
+    <update id="updateApAmountPaid" parameterType="Map">
+        update ap_invoice
+        set amount_paid=(amount_paid+#{amount_paid})
+        where invoice_id=#{invoice_id}
+    </update>
+
 </mapper>
 

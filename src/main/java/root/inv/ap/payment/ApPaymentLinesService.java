@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import root.inv.ap.invoice.ApInvoiceService;
 import root.report.common.DbSession;
 
 import java.util.HashMap;
@@ -15,6 +17,9 @@ import java.util.Map;
 public class ApPaymentLinesService {
 
     private static Logger log = Logger.getLogger(ApPaymentLinesService.class);
+
+
+
 
     /**
      * 批量插入行数据
@@ -64,15 +69,6 @@ public class ApPaymentLinesService {
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);
         sqlSession.update("ap_payment_lines.deleteByIds",map);
-    }
-
-
-    public void updateApPaymentLinesRcvQuantity(SqlSession sqlSession, String headerId,String itemId,double rcvQuantity){
-        Map<String,Object> map = new HashMap<>();
-        map.put("payment_id",headerId);
-        map.put("item_id",itemId);
-        map.put("rcv_quantity",rcvQuantity);
-        sqlSession.update("ap_payment_lines.updateApPaymentLinesRcvQuantity",map);
     }
 
 }

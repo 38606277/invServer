@@ -46,8 +46,5 @@
         where line_id=#{line_id}
     </update>
 
-
-
-
 </mapper>
 

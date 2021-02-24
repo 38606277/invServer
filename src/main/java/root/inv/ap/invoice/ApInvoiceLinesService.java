@@ -65,14 +65,4 @@ public class ApInvoiceLinesService {
         map.put("ids",ids);
         sqlSession.update("ap_invoice_lines.deleteByIds",map);
     }
-
-
-    public void updateApInvoiceLinesRcvQuantity(SqlSession sqlSession, String headerId,String itemId,double rcvQuantity){
-        Map<String,Object> map = new HashMap<>();
-        map.put("invoice_id",headerId);
-        map.put("item_id",itemId);
-        map.put("rcv_quantity",rcvQuantity);
-        sqlSession.update("ap_invoice_lines.updateApInvoiceLinesRcvQuantity",map);
-    }
-
 }

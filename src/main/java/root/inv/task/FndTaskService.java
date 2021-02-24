@@ -1,4 +1,4 @@
-package root.inv.ap.invoice;
+package root.inv.task;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageRowBounds;
@@ -7,20 +7,18 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 import root.report.common.DbSession;
-import root.report.db.DbFactory;
-import root.report.sys.SysContext;
+import root.report.util.DateUtil;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
-public class ApInvoiceService {
+public class FndTaskService {
 
-    private static Logger log = Logger.getLogger(ApInvoiceService.class);
+    private static Logger log = Logger.getLogger(FndTaskService.class);
 
-    public  Map<String,Object> getApInvoiceListByPage(Map<String,Object> map){
+    public  Map<String,Object> getFndTaskListByPage(Map<String,Object> map){
         Map<String,Object> map1=new HashMap<>();
 
         try {
@@ -37,7 +35,7 @@ public class ApInvoiceService {
                 }
                 bounds = new PageRowBounds(startIndex, perPage);
             }
-            List<Map<String, Object>> resultList = DbSession.selectList("ap_invoice.getApInvoiceListByPage", map, bounds);
+            List<Map<String, Object>> resultList = DbSession.selectList("fnd_task.getFndTaskListByPage", map, bounds);
             Long totalSize = 0L;
             if (map != null && map.size() != 0) {
                 totalSize = ((PageRowBounds) bounds).getTotal();
@@ -54,33 +52,30 @@ public class ApInvoiceService {
         return map1;
     }
 
-    public Map<String,Object> getApInvoiceById(Map<String,Object> params){
-        return DbSession.selectOne("ap_invoice.getApInvoiceById",params);
-    }
 
-    public long saveApInvoice(SqlSession sqlSession,Map<String,Object> params){
-        sqlSession.insert("ap_invoice.saveApInvoice",params);
-        if(params.containsKey("invoice_id")){
-            return  Long.parseLong(params.get("invoice_id").toString());
+    public long saveFndTask(SqlSession sqlSession,Map<String,Object> params){
+        sqlSession.insert("fnd_task.saveFndTask",params);
+        if(params.containsKey("bank_account_id")){
+            return  Long.parseLong(params.get("bank_account_id").toString());
         }
         return  -1;
     }
 
-    public void updateApInvoiceById(SqlSession sqlSession,JSONObject params){
-        sqlSession.update("ap_invoice.updateApInvoiceById",params);
+    public void updateFndTaskById(SqlSession sqlSession,Map<String,Object> params){
+        sqlSession.update("fnd_task.updateFndTaskById",params);
+    }
+
+    public void updateFndTaskBySourceIdAndTaskType(SqlSession sqlSession,Map<String,Object> params){
+        sqlSession.update("fnd_task.updateFndTaskBySourceIdAndTaskType",params);
     }
 
 
-    public void deleteApInvoiceByIds(SqlSession sqlSession,String ids){
+    public void deleteFndTaskByIds(SqlSession sqlSession,String ids){
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);
-        sqlSession.update("ap_invoice.deleteApInvoiceByIds",map);
+        sqlSession.update("fnd_task.deleteFndTaskByIds",map);
     }
 
-    public void updateApAmountPaid(SqlSession sqlSession,HashMap params){
-        sqlSession.update("ap_invoice.updateApAmountPaid",params);
-
-    }
-
+  
 
 }

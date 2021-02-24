@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatiio.org//DTD Mapper 3.0//EN"
+        "http://mybatiio.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fnd_task">
+
+    <insert id="saveFndTask" parameterType="Map" keyColumn="task_id" keyProperty="task_id" useGeneratedKeys="true">
+        INSERT INTO fnd_task( `task_name`, `owner_id`, `assigner_id`,`assign_date`,`receive_date`, `last_update_date`, `complete_date`,  `task_status`, `task_type`,`func_url`, `func_param`, `task_description`, `task_level`,`source_id`)
+        VALUES (#{task_name}, #{owner_id}, #{assigner_id},#{assign_date},#{receive_date}, #{last_update_date}, #{complete_date}, #{task_status}, #{task_type}, #{func_url}, #{func_param},#{task_description},#{task_level},#{source_id});
+    </insert>
+
+
+    <update id="updateFndTaskBySourceIdAndTaskType" parameterType="Map">
+        update fnd_task
+        <trim prefix="set" suffixOverrides=",">
+            <if test="last_update_date!=null">last_update_date=#{last_update_date},</if>
+            <if test="complete_date!=null">complete_date=#{complete_date},</if>
+            <if test="task_status!=null">task_status=#{task_status},</if>
+        </trim>
+        where task_type=#{task_type} and source_id=#{source_id}
+    </update>
+
+    <update id="updateFndTaskById" parameterType="Map">
+        update fnd_task
+        <trim prefix="set" suffixOverrides=",">
+            <if test="task_name!=null">task_name=#{task_name},</if>
+            <if test="owner_id!=null">owner_id=#{owner_id},</if>
+            <if test="assigner_id!=null">assigner_id=#{assigner_id},</if>
+            <if test="assign_date!=null">assign_date=#{assign_date},</if>
+            <if test="receive_date!=null">receive_date=#{receive_date},</if>
+            <if test="last_update_date!=null">last_update_date=#{last_update_date},</if>
+            <if test="complete_date!=null">complete_date=#{complete_date},</if>
+            <if test="task_status!=null">task_status=#{task_status},</if>
+            <if test="task_type!=null">task_type=#{task_type},</if>
+            <if test="func_url!=null">func_url=#{func_url},</if>
+            <if test="func_param!=null">func_param=#{func_param},</if>
+            <if test="task_description!=null">task_description=#{task_description},</if>
+            <if test="task_level!=null">task_level=#{task_level},</if>
+        </trim>
+        where task_id=#{task_id}
+    </update>
+
+
+    <delete id="deleteFndTask" parameterType="Map">
+        delete from fnd_task where task_id in (${ids})
+    </delete>
+
+
+    <select id="getFndTaskListByPage" resultType="Map" parameterType="Map">
+        select ft.* ,fu1.USER_NAME as owner_name,fu2.USER_NAME as assigner_name FROM fnd_task ft
+        LEFT JOIN fnd_user fu1 on  ft.owner_id = fu1._id
+        LEFT JOIN fnd_user fu2 on  ft.assigner_id = fu2._id
+        where 1=1
+
+        <if test="task_name != null and task_name!=''">  and ft.task_name like '%${task_name}%' </if>
+        <if test="owner_id != null and owner_id!=''">  and ft.owner_id=#{owner_id} </if>
+        <if test="assigner_id != null and assigner_id!=''">  and ft.assigner_id=#{assigner_id} </if>
+
+        <if test="assign_date_start != null and assign_date_start != '' ">and ft.assign_date <![CDATA[>=]]> #{assign_date_start}</if>
+        <if test="assign_date_end != null and assign_date_end != '' ">and ft.assign_date <![CDATA[<=]]> #{assign_date_end}</if>
+        <if test="receive_date_start != null and receive_date_start != '' ">and ft.receive_date <![CDATA[>=]]> #{receive_date_start}</if>
+        <if test="receive_date_end != null and receive_date_end != '' ">and ft.receive_date <![CDATA[<=]]> #{receive_date_end}</if>
+        <if test="last_update_date_start != null and last_update_date_start != '' ">and ft.last_update_date <![CDATA[>=]]> #{last_update_date_start}</if>
+        <if test="last_update_date_end != null and last_update_date_end != '' ">and ft.last_update_date <![CDATA[<=]]> #{last_update_date_end}</if>
+        <if test="complete_date_start != null and complete_date_start != '' ">and ft.complete_date <![CDATA[>=]]> #{complete_date_start}</if>
+        <if test="complete_date_end != null and complete_date_end != '' ">and ft.complete_date <![CDATA[<=]]> #{complete_date_end}</if>
+
+        <if test="task_status != null and task_status!=''">  and ft.task_status=#{invoice_type} </if>
+        <if test="task_type != null and task_type!=''">  and ft.task_type=#{task_type} </if>
+        <if test="task_description != null and task_description!=''">  and ft.task_description like '%${task_description}%' </if>
+        <if test="task_level != null and task_level!=''">  and ft.task_level=#{task_level} </if>
+
+        ORDER BY ft.last_update_date desc
+
+    </select>
+
+</mapper>
+
