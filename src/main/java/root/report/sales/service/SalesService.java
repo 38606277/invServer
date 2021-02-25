@@ -196,8 +196,8 @@ public class SalesService {
         map.put("sales_id",sales_id);
         map.put("status",status);
         map.put("type",1);
-        String amountAll="";
-        String countnum="";
+        String amountAll="0";
+        String countnum="0";
         Map m= sqlSession.selectOne("whole_sale_header.getSalesOrderBystatusAndSalesId",map);
         if(null!=m) {
             String headerId = m.get("so_header_id").toString();
