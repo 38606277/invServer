@@ -22,6 +22,11 @@
         order by line_number asc
     </select>
 
+    <select id="getSalesOrderItemByheaderIdItemId" resultType="map" parameterType="map">
+        SELECT ibl.* FROM so_lines ibl
+        where ibl.header_id=#{header_id} and ibl.item_id = ${item_id}
+    </select>
+
     <delete id="deleteByIds" parameterType="Map">
         delete from so_lines where so_line_id in (${ids})
     </delete>

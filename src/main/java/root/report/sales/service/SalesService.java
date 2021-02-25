@@ -16,6 +16,7 @@ import root.report.itemCategory.service.ItemCategoryService;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service
@@ -123,7 +124,24 @@ public class SalesService {
             jsonObject.put("create_date", DateUtil.getCurrentTimm());
             jsonObject.put("line_type_id",1);
             jsonArray.add(jsonObject);
-            boolean isLinesSaveSuccess = wholeSaleLineService.insertBillLinesAll(sqlSession,jsonArray);
+            String item_id=  jsonObject.getString("item_id");
+            Map  itmCheckMap = new HashMap();
+            itmCheckMap.put("item_id",item_id);
+            itmCheckMap.put("header_id",header_id);
+            Map mp = sqlSession.selectOne("whole_sale_lines.getSalesOrderItemByheaderIdItemId",itmCheckMap);
+            if(null!=mp){
+
+                BigDecimal num1 = new BigDecimal(1);
+                BigDecimal  quantity= new BigDecimal(mp.get("quantity").toString());
+                BigDecimal quantityRes = quantity.add(num1);
+                mp.put("quantity",quantityRes);
+                BigDecimal price = jsonObject.getBigDecimal("retail_price");
+                BigDecimal priceRes = price.multiply(quantityRes);
+                mp.put("amount", priceRes);
+                sqlSession.update("whole_sale_lines.updateBillLinesById",mp);
+            }else {
+                wholeSaleLineService.insertBillLinesAll(sqlSession, jsonArray);
+            }
         }else{
 
             try {
@@ -155,8 +173,10 @@ public class SalesService {
                     jsonObject.put("header_id", header_id);
                     jsonObject.put("create_date", DateUtil.getCurrentTimm());
                     jsonObject.put("line_type_id", 1);
+                    jsonObject.put("quantity", 1);
+                    jsonObject.put("amount", jsonObject.get("retail_price"));
                     jsonArray.add(jsonObject);
-                    boolean isLinesSaveSuccess = wholeSaleLineService.insertBillLinesAll(sqlSession, jsonArray);
+                    wholeSaleLineService.insertBillLinesAll(sqlSession, jsonArray);
                 }
             } catch (Exception ex){
                 ex.printStackTrace();
