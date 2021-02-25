@@ -31,6 +31,10 @@
         delete from so_lines where so_line_id in (${ids})
     </delete>
 
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from so_lines where so_line_id=#{id}
+    </delete>
+
     <update id="updateBillLinesById" parameterType="Map">
         update so_lines
         <trim prefix="set" suffixOverrides=",">
@@ -55,4 +59,7 @@
         SELECT sum(ibl.amount) as  total,count(1) as countnum FROM so_lines ibl where ibl.header_id=#{header_id}
     </select>
 
+    <select id="getSalesOrderItemByLineId" parameterType="java.lang.String" resultType="map">
+        select * from so_lines where so_line_id=#{so_line_id}
+    </select>
 </mapper>

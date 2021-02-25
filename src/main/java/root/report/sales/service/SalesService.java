@@ -123,7 +123,9 @@ public class SalesService {
             jsonObject.put("header_id",header_id);
             jsonObject.put("create_date", DateUtil.getCurrentTimm());
             jsonObject.put("line_type_id",1);
+            jsonObject.put("quantity",1);
             jsonObject.put("price", jsonObject.getBigDecimal("retail_price"));
+            jsonObject.put("amount", jsonObject.getBigDecimal("retail_price"));
             jsonArray.add(jsonObject);
             String item_id=  jsonObject.getString("item_id");
             Map  itmCheckMap = new HashMap();
@@ -186,6 +188,19 @@ public class SalesService {
             }
         }
         return m;
+    }
+
+    public Map updateSalesOrderQuantityByLineID(String lineId,String tempquantity) {
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        Map mp = sqlSession.selectOne("whole_sale_lines.getSalesOrderItemByLineId",lineId);
+        if(null!=mp){
+            mp.put("quantity",tempquantity);
+            BigDecimal price =new BigDecimal(mp.get("price").toString());
+            BigDecimal priceRes = price.multiply(new BigDecimal(tempquantity));
+            mp.put("amount", priceRes);
+            sqlSession.update("whole_sale_lines.updateBillLinesById",mp);
+        }
+        return mp;
     }
 
     public Map getCarSalesByID(String sales_id, String status, JSONObject pJson) {
@@ -252,5 +267,9 @@ public class SalesService {
             e.printStackTrace();
         }
         return map1;
+    }
+
+    public void deleteLineById(Map lineId) {
+        DbSession.delete("whole_sale_lines.deleteById",lineId);
     }
 }

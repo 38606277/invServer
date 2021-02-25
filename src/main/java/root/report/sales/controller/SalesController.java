@@ -120,6 +120,39 @@ public class SalesController extends RO {
             return ExceptionMsg(ex.getMessage());
         }
     }
+
+    /**减少*/
+    @RequestMapping(value = "/updateQuantity", produces = "text/plain;charset=UTF-8")
+    public String updateQuantity(@RequestBody JSONObject pJson) {
+        try{
+            Map map = new HashMap();
+            String lineId=pJson.getString("lineId");
+            String tempquantity=pJson.getString("quantity");
+            Map m = salesService.updateSalesOrderQuantityByLineID(lineId,tempquantity);
+
+            return SuccessMsg("查询成功",map);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+    /**删除*/
+    @RequestMapping(value = "/deleteLineById", produces = "text/plain;charset=UTF-8")
+    public String deleteLineById(@RequestBody JSONObject pJson) {
+        try{
+            Map map = new HashMap();
+            String lineId=pJson.getString("lineId");
+            map.put("id",lineId);
+            salesService.deleteLineById(map);
+
+            return SuccessMsg("删除成功",map);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
     @RequestMapping(value = "/getCarSales", produces = "text/plain;charset=UTF-8")
     public String getCarSales() {
         try{
