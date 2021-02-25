@@ -218,8 +218,10 @@ public class SalesService {
             String headerId = m.get("so_header_id").toString();
             lists =   wholeSaleLineService.getSoLinesByHeaderId(headerId);
             Map mp = sqlSession.selectOne("whole_sale_lines.countSalesOrderByheaderId",headerId);
-            amountAll=mp.get("total").toString();
-            countnum = mp.get("countnum").toString();
+            if(null!=mp) {
+                amountAll = mp.get("total").toString();
+                countnum = mp.get("countnum").toString();
+            }
         }
         resmap.put("maindata",m);
         resmap.put("lines",lists);
