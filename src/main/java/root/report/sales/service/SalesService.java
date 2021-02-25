@@ -123,6 +123,7 @@ public class SalesService {
             jsonObject.put("header_id",header_id);
             jsonObject.put("create_date", DateUtil.getCurrentTimm());
             jsonObject.put("line_type_id",1);
+            jsonObject.put("price", jsonObject.getBigDecimal("retail_price"));
             jsonArray.add(jsonObject);
             String item_id=  jsonObject.getString("item_id");
             Map  itmCheckMap = new HashMap();
@@ -138,6 +139,7 @@ public class SalesService {
                 BigDecimal price = jsonObject.getBigDecimal("retail_price");
                 BigDecimal priceRes = price.multiply(quantityRes);
                 mp.put("amount", priceRes);
+
                 sqlSession.update("whole_sale_lines.updateBillLinesById",mp);
             }else {
                 wholeSaleLineService.insertBillLinesAll(sqlSession, jsonArray);
@@ -175,6 +177,7 @@ public class SalesService {
                     jsonObject.put("line_type_id", 1);
                     jsonObject.put("quantity", 1);
                     jsonObject.put("amount", jsonObject.get("retail_price"));
+                    jsonObject.put("price", jsonObject.getBigDecimal("retail_price"));
                     jsonArray.add(jsonObject);
                     wholeSaleLineService.insertBillLinesAll(sqlSession, jsonArray);
                 }
@@ -193,13 +196,20 @@ public class SalesService {
         map.put("sales_id",sales_id);
         map.put("status",status);
         map.put("type",1);
+        String amountAll="";
+        String countnum="";
         Map m= sqlSession.selectOne("whole_sale_header.getSalesOrderBystatusAndSalesId",map);
         if(null!=m) {
             String headerId = m.get("so_header_id").toString();
             lists =   wholeSaleLineService.getSoLinesByHeaderId(headerId);
+            Map mp = sqlSession.selectOne("whole_sale_lines.countSalesOrderByheaderId",headerId);
+            amountAll=mp.get("total").toString();
+            countnum = mp.get("countnum").toString();
         }
         resmap.put("maindata",m);
         resmap.put("lines",lists);
+        resmap.put("amountAll",amountAll);
+        resmap.put("countnum",countnum);
         return resmap;
 
     }

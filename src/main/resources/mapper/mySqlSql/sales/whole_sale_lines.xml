@@ -51,4 +51,8 @@
 
     </update>
 
+    <select id="countSalesOrderByheaderId" parameterType="java.lang.String" resultType="map">
+        SELECT sum(ibl.amount) as  total,count(1) as countnum FROM so_lines ibl where ibl.header_id=#{header_id}
+    </select>
+
 </mapper>
