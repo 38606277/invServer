@@ -28,4 +28,13 @@
 
     </select>
 
+
+
+	<select id="getAllPage2" resultType="Map" parameterType="Map">
+		${sql}
+	</select>
+
+
+
+
 </mapper>

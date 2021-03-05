@@ -247,6 +247,23 @@ public class ItemCategoryService {
         return list;
     }
 
+    //获取类别的某个segment 字典值
+
+
+
+
+
+    /**
+     * 获取需要横排的字典值
+     * */
+    public List<Map> getItemCategorySegmentByPId(Map m) {
+        List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentByPId", m);
+        return list;
+    }
+
+
+
+
     /**
      * 批量 segment
      * 限定词

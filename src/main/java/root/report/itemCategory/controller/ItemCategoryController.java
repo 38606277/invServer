@@ -29,6 +29,9 @@ public class ItemCategoryController extends RO {
     @Autowired
     public ItemCategoryService itemCategoryService;
 
+    @Autowired
+    public MdmDictService mdmDictService;
+
     /**
      * 功能描述: 接收JSON格式参数，往func_dict跟func_dict_out 中插入相关数据
      */
@@ -170,6 +173,113 @@ public class ItemCategoryController extends RO {
             return ExceptionMsg(ex.getMessage());
         }
     }
+
+
+    /**
+     * 获取列，传入需要横排的segment
+     * @param obj
+     * @return
+     */
+    @RequestMapping(value = "/getItemCategoryById2", produces = "text/plain;charset=UTF-8")
+    public String getItemCategoryById2(@RequestBody JSONObject obj) {
+        String categoryId = String.valueOf(obj.get("category_id"));
+        String segment = String.valueOf(obj.get("segment"));
+
+        Map<String,Object> map  = new HashMap<>();
+        map.put("category_id",categoryId);
+
+        //获取类别对应的segment
+        List<Map> segmentList = itemCategoryService.getItemCategorySegmentByPId(map);
+        List<Map<String,Object>> columnList = new ArrayList<>();
+
+        //生成列结构
+        for(Map segmentItem : segmentList){
+            Map<String,Object> columnMap = new HashMap<>();
+            columnMap.put("title",String.valueOf(segmentItem.get("segment_name")));
+            columnMap.put("dataIndex",String.valueOf(segmentItem.get("segment")));
+
+            if(segment.equals( segmentItem.get("segment"))){
+                //需要查询的segment值
+                List<Map> dictValueList  = mdmDictService.getDictValueListByDictId(String.valueOf(segmentItem.get("dict_id")));
+
+                List<Map<String,Object>> childrenColumnList = new ArrayList<>();
+                for(Map dictValueMap : dictValueList){
+                    Map<String,Object> childrenColumnMap = new HashMap<>();
+                    childrenColumnMap.put("title",String.valueOf(dictValueMap.get("value_name")));
+                    childrenColumnMap.put("dataIndex",String.valueOf(dictValueMap.get("value_name")));
+                    childrenColumnList.add(childrenColumnMap);
+                }
+                columnMap.put("children",childrenColumnList);
+            }
+            columnList.add(columnMap);
+        }
+        try{
+
+            return SuccessMsg("查询成功",columnList);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+    /**
+     *
+     * @param segmentList segment列表
+     * @param filterSegment 需要过滤的segment
+     * @return
+     */
+    private String[] buildSegmentSql( List<Map> segmentList ,String filterSegment){
+        StringBuilder stringBuilder  = new StringBuilder();//
+        for(Map map:segmentList){
+            String segmentName = String.valueOf(map.get("segment"));
+            if(!segmentName.equals(filterSegment)){//过滤掉横向的segment
+               String sql = "a." + segmentName;
+                stringBuilder.append(sql).append(",");
+            }
+        }
+        if(0 < stringBuilder.length()){
+            stringBuilder.delete(stringBuilder.length()-1,stringBuilder.length());
+        }
+
+        String outSql = stringBuilder.toString();
+        String inSql = outSql.replace("a.","mi.");
+
+        return new String[]{outSql,inSql};
+    }
+
+
+    /**
+     * 构建segment的sum
+     * @param dictValueList
+     * @param segment
+     * @return
+     */
+    private String[] buildSumSql(List<Map> dictValueList , String segment){
+        StringBuilder stringBuilderOut  = new StringBuilder();//外层sum
+        StringBuilder stringBuilderIn  = new StringBuilder();//内存sum
+
+        for(Map map:dictValueList){
+            String valueName = String.valueOf(map.get("value_name"));
+            String sqlOut = "sum( a."+valueName+" ) as "+valueName;
+            stringBuilderOut.append(sqlOut).append(",");
+            String sqlIn = "sum(( CASE mi."+segment+" WHEN '"+valueName+"' THEN iio.on_hand_quantity ELSE 0 END)) as "+ valueName;
+            stringBuilderIn.append(sqlIn).append(",");
+        }
+
+        //删除最后的逗号
+        if(0 < stringBuilderIn.length()){
+            stringBuilderOut.delete(stringBuilderOut.length()-1,stringBuilderOut.length());
+            stringBuilderIn.delete(stringBuilderIn.length()-1,stringBuilderIn.length());
+        }
+
+
+        return new String[]{stringBuilderOut.toString(),stringBuilderIn.toString()};
+
+    }
+
+
+
+
 
 
 
