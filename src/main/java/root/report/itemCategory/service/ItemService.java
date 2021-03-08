@@ -143,7 +143,6 @@ public class ItemService {
             mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
             mapVal.put("image_url", jsonObjectVal.getString("image_url"));
             mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
-            mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
             mapVal.put("vendor_id", jsonObjectVal.getString("vendor_id"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
@@ -243,7 +242,6 @@ public class ItemService {
             mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
             mapVal.put("image_url", jsonObjectVal.getString("image_url"));
             mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
-            mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
             mapVal.put("vendor_id", jsonObjectVal.getString("vendor_id"));
             for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                 System.out.println("key值=" + entry.getKey());
@@ -345,7 +343,6 @@ public class ItemService {
                     mapVal.put("cost_price", jsonObjectVal.getString("cost_price"));
                     mapVal.put("image_url", jsonObjectVal.getString("image_url"));
                     mapVal.put("bar_code", jsonObjectVal.getString("bar_code"));
-                    mapVal.put("iot_code", jsonObjectVal.getString("iot_code"));
                     mapVal.put("vendor_id", jsonObjectVal.getString("vendor_id"));
                     for (Map.Entry<String, Object> entry : jsonObjectVal.entrySet()) {
                         System.out.println("key值=" + entry.getKey());

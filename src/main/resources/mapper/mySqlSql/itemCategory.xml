@@ -5,16 +5,16 @@
 
 	<!--  创建func_dict信息  -->
 	<insert id="createMdmItemCategory" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
-		insert into mdm_item_category(category_id,category_name,category_pid,category_code)
+		insert into mdm_item_category(category_id,category_name,category_pid,category_code,cost_method)
 		values (#{category_id},'${category_name}',
 		<if  test="category_pid == null">NULL</if>
-		<if  test="category_pid != null">#{category_pid}</if>,'${category_code}'
+		<if  test="category_pid != null">#{category_pid}</if>,'${category_code}',#{cost_method}
 		)
 	</insert>
 
 	<!-- 修改 func_dict 表的信息 -->
 	<update id="updateMdmItemCategory" parameterType="Map">
-		update mdm_item_category set category_name='${category_name}',category_code='${category_code}'
+		update mdm_item_category set category_name='${category_name}',category_code='${category_code}',cost_method=#{cost_method}
 		 where category_id=#{category_id}
 	</update>
 
@@ -142,6 +142,9 @@
 		</if>
 		<if  test="dict_name != null and dict_name!='' ">
 			and  u.category_name like '%${category_name}%'
+		</if>
+		<if  test="category_pid != null and category_pid!='' ">
+			or  u.category_id='${category_pid}'
 		</if>
     </select>
 

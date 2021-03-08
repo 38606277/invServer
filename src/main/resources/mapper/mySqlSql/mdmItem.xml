@@ -8,7 +8,7 @@
 		insert into mdm_item(item_id,item_category_id,item_description,uom,segment1,segment2,segment3,
 		segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2,attribute3,attribute4
 		,attribute5,attribute6,attribute7,attribute8,attribute9,attribute10,retail_price,factory_price,promotion_price,
-		cost_price,image_url,bar_code,iot_code,vendor_id)
+		cost_price,image_url,bar_code,vendor_id)
 		values (#{item_id},'${item_category_id}','${item_description}','${uom}',
 		<if  test="segment1 == null">NULL</if> <if  test="segment1 != null">#{segment1}</if>,
 		<if  test="segment2 == null">NULL</if> <if  test="segment2 != null">#{segment2}</if>,
@@ -36,7 +36,6 @@
 		<if  test="cost_price == null">NULL</if> <if  test="cost_price != null">#{cost_price}</if>,
 		<if  test="image_url == null">NULL</if> <if  test="image_url != null">#{image_url}</if>,
 		<if  test="bar_code == null">NULL</if> <if  test="bar_code != null">#{bar_code}</if>,
-		<if  test="iot_code == null">NULL</if> <if  test="iot_code != null">#{iot_code}</if>,
 		<if  test="vendor_id == null">NULL</if> <if  test="vendor_id != null">#{vendor_id}</if>
 		)
 	</insert>
@@ -102,8 +101,6 @@
 		<if  test="image_url != null">image_url=#{image_url}</if>,
 		<if  test="bar_code == null">bar_code=NULL</if>
 		<if  test="bar_code != null">bar_code=#{bar_code}</if>,
-		<if  test="iot_code == null">iot_code=NULL</if>
-		<if  test="iot_code != null">iot_code=#{iot_code}</if>,
 		<if  test="vendor_id == null">vendor_id=NULL</if>
 		<if  test="vendor_id != null">vendor_id=#{vendor_id}</if>
 		 where item_id=#{item_id}
