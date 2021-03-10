@@ -118,6 +118,7 @@ public class SalesService {
             Integer header_id = (Integer) m.get("so_header_id");
             JSONArray jsonArray = new JSONArray();
             Integer i= sqlSession.selectOne("whole_sale_header.getSalesOrderByheaderId",header_id);
+            i=i==null?1:i;
             jsonObject.put("line_number",i);
             jsonObject.put("create_by",userId);
             jsonObject.put("header_id",header_id);
