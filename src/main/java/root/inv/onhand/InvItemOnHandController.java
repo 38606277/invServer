@@ -71,4 +71,17 @@ public class InvItemOnHandController extends RO {
     }
 
 
+
+    /**
+     * 获取仓库类别种类
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/getItemOnHandCategoryByPage", produces = "text/plain;charset=UTF-8")
+    public String getItemOnHandCategoryByPage(@RequestBody JSONObject pJson) {
+        Map map = invItemOnHandService.getItemOnHandCategoryByPage(pJson);
+        return SuccessMsg("", map);
+    }
+
+
 }

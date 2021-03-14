@@ -48,6 +48,7 @@
         <if test="amount != null and amount!=''">  and amount=#{amount} </if>
         <if test="min != null and min!=''">  and min=#{min} </if>
         <if test="max != null and max!=''">  and max=#{max} </if>
+
     </select>
 
 
@@ -101,5 +102,33 @@
     <delete id="deleteOnHandItemByID" parameterType="java.lang.Integer">
         delete from inv_item_onhand where item_id=#{item_id}
     </delete>
+
+
+    <select id="getItemOnHandCategoryByPage" resultType="Map" parameterType="Map">
+        select category_id,category_name FROM inv_item_onhand  iio
+        left join mdm_item mi on iio.item_id = mi.item_id
+        left join mdm_item_category mic on mi.item_category_id = mic.category_id
+        where iio.org_id =#{org_id} and 0 &lt; iio.on_hand_quantity  and iio.on_hand_quantity &lt;&gt; ''
+        GROUP BY category_id
+        ORDER By category_id
+    </select>
+
+    <select id="getItemOnHandInventoryItemByOrgId" resultType="Map" parameterType="Map">
+        select iio.item_id,iio.on_hand_quantity as 'quantity',iio.price,iio.amount, mi.uom FROM inv_item_onhand  iio
+        left join mdm_item mi on iio.item_id = mi.item_id
+        where iio.org_id =#{org_id} and 0 &lt; iio.on_hand_quantity  and iio.on_hand_quantity &lt;&gt; ''
+    </select>
+
+
+    <select id="getItemOnHandInventoryItemByOrgIdAndCategoryId" resultType="Map" parameterType="Map">
+        select iio.item_id,iio.on_hand_quantity as 'quantity',iio.price,iio.amount, mi.uom FROM inv_item_onhand  iio
+        left join mdm_item mi on iio.item_id = mi.item_id
+        where iio.org_id =#{org_id} and 0 &lt; iio.on_hand_quantity  and iio.on_hand_quantity &lt;&gt; ''
+        and item_category_id = #{item_category_id}
+    </select>
+
+
+
+
 
 </mapper>

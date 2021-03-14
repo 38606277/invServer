@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import root.report.common.RO;
 import root.report.db.DbFactory;
+import root.report.itemCategory.service.ItemCategoryService;
 import root.report.itemCategory.service.ItemService;
 
 import java.sql.SQLException;
@@ -26,6 +27,10 @@ public class ItemController extends RO {
 
     @Autowired
     public ItemService itemService;
+
+    @Autowired
+    public ItemCategoryService itemCategoryService;
+
 
     /**
      * 单个数据进行保存
@@ -151,5 +156,133 @@ public class ItemController extends RO {
             return ExceptionMsg(ex.getMessage());
         }
     }
+
+    /**
+     * 快速添加 获取行和列数据
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/getItemRowAndColumn", produces = "text/plain;charset=UTF-8")
+    public String getItemRowAndColumn(@RequestBody JSONObject pJson) {
+        try {
+
+            //传入类别id  主信息等
+
+            String itemCategoryId = pJson.getString("item_category_id");
+
+            if("-1".equals(itemCategoryId) || itemCategoryId == null){
+                return ErrorMsg("2000","物料类别不存在");
+            }
+
+            //获取行和列的segment字段名
+            List<Map> rowAndCol = itemCategoryService.getRowAndColumnByCategoryId(itemCategoryId);
+
+            if(rowAndCol==null || rowAndCol.size() < 2){
+                return ErrorMsg("2000","请配置行和列信息");
+            }
+
+            //拼接查询条件
+            StringBuilder segmentFilter = new StringBuilder();
+            segmentFilter.append(" where item_category_id = ").append("'").append(itemCategoryId).append("'");
+           for(String key: pJson.keySet()){
+               String value =  pJson.getString(key);
+               if(key.startsWith("segment")){//只包含segment的条件
+                   segmentFilter.append(" and ").append(key).append("=").append("'").append(value).append("'");
+               }
+           }
+
+            Map<String,Object> resultMap = new HashMap<>();
+            for(Map rc :  rowAndCol){
+                String spreadMode =  String.valueOf(rc.get("spread_mode"));//作为键返回
+                String segment = String.valueOf(rc.get("segment"));
+                String segmentName = String.valueOf(rc.get("segment_name"));
+
+                String selectSqlFormat = "SELECT %s from mdm_item %s GROUP BY %s";
+                String selectSql = String.format(selectSqlFormat,segment,segmentFilter.toString(),segment);
+                List rcList =  itemService.paramStringSql(selectSql);
+
+                Map<String,Object> listData = new HashMap<String,Object>();
+                listData.put("segment", segment);
+                listData.put("segmentName", segmentName);
+                listData.put("list", rcList);
+                resultMap.put(spreadMode,listData);
+            }
+
+            if(resultMap.size() < 2){
+                return ErrorMsg("2000","请配置行和列信息");
+            }
+
+            return SuccessMsg("", resultMap);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+
+    /**
+     * 快速添加 获取行和列数据
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/getItemRowAndColumn2", produces = "text/plain;charset=UTF-8")
+    public String getItemRowAndColumn2(@RequestBody JSONObject pJson) {
+        try {
+
+            //传入类别id  主信息等
+
+            String itemCategoryId = pJson.getString("item_category_id");
+
+            if("-1".equals(itemCategoryId) || itemCategoryId == null){
+                return ErrorMsg("2000","物料类别不存在");
+            }
+
+            //获取行和列的segment字段名
+            List<Map> rowAndCol = itemCategoryService.getRowAndColumnByCategoryId(itemCategoryId);
+
+            if(rowAndCol==null || rowAndCol.size() < 2){
+                return ErrorMsg("2000","请配置行和列信息");
+            }
+
+            //拼接查询条件
+            StringBuilder segmentFilter = new StringBuilder();
+            segmentFilter.append(" where item_category_id = ").append("'").append(itemCategoryId).append("'");
+            for(String key: pJson.keySet()){
+                String value =  pJson.getString(key);
+                if(key.startsWith("segment")){//只包含segment的条件
+                    segmentFilter.append(" and ").append(key).append("=").append("'").append(value).append("'");
+                }
+            }
+
+            Map<String,Object> resultMap = new HashMap<>();
+            for(Map rc :  rowAndCol){
+                String spreadMode =  String.valueOf(rc.get("spread_mode"));//作为键返回
+                String segment = String.valueOf(rc.get("segment"));
+                String segmentName = String.valueOf(rc.get("segment_name"));
+
+                String selectSqlFormat = "SELECT %s from mdm_item %s GROUP BY %s";
+                String selectSql = String.format(selectSqlFormat,segment,segmentFilter.toString(),segment);
+                List rcList =  itemService.paramStringSql(selectSql);
+
+                Map<String,Object> listData = new HashMap<String,Object>();
+                listData.put("segment", segment);
+                listData.put("segmentName", segmentName);
+                listData.put("list", rcList);
+                resultMap.put(spreadMode,listData);
+            }
+
+            if(resultMap.size() < 2){
+                return ErrorMsg("2000","请配置行和列信息");
+            }
+
+            return SuccessMsg("", resultMap);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+
+
 
 }

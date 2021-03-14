@@ -2,6 +2,8 @@ package root.inv.onhand;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageRowBounds;
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Service;
 import root.report.common.DbSession;
@@ -114,5 +116,67 @@ public class InvItemOnHandService {
     public Map<String,Object> getItemOnHandByParams(Map<String,Object> map){
         return  DbSession.selectOne("inv_item_on_hand.getItemOnHandByParams",map);
     }
+
+    /**
+     *  查询大于0的存量，条件： 仓库id
+     * @param map
+     * @return
+     */
+    public List<Map<String,Object>> getItemOnHandInventoryItemByOrgId(Map<String,Object> map){
+        return  DbSession.selectList("inv_item_on_hand.getItemOnHandInventoryItemByOrgId",map);
+    }
+
+    /**
+     *  查询大于0的存量，条件： 仓库id ,类别id
+     * @param map
+     * @return
+     */
+    public List<Map<String,Object>> getItemOnHandInventoryItemByOrgIdAndCategoryId(Map<String,Object> map){
+        return  DbSession.selectList("inv_item_on_hand.getItemOnHandInventoryItemByOrgIdAndCategoryId",map);
+    }
+
+
+
+
+    /**
+     * 查询库存类别
+     * @param map
+     * @return
+     */
+    public  Map<String,Object> getItemOnHandCategoryByPage(Map<String,Object> map){
+        Map<String,Object> map1=new HashMap<>();
+
+        try {
+            RowBounds bounds = null;
+            if (map == null) {
+                bounds = RowBounds.DEFAULT;
+            } else {
+                Integer startIndex = Integer.parseInt(map.get("pageNum").toString());
+                Integer perPage = Integer.parseInt(String.valueOf(map.get("perPage")));
+                if (startIndex == 1 || startIndex == 0) {
+                    startIndex = 0;
+                } else {
+                    startIndex = (startIndex - 1) * perPage;
+                }
+                bounds = new PageRowBounds(startIndex, perPage);
+            }
+            List<Map<String, Object>> resultList = DbSession.selectList("inv_item_on_hand.getItemOnHandCategoryByPage", map, bounds);
+            Long totalSize = 0L;
+            if (map != null && map.size() != 0) {
+                totalSize = ((PageRowBounds) bounds).getTotal();
+            } else {
+                totalSize = Long.valueOf(resultList.size());
+            }
+
+            map1.put("list", resultList);
+            map1.put("total", totalSize);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return map1;
+    }
+
+
 
 }

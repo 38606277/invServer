@@ -388,4 +388,19 @@ public class ItemCategoryService {
     public List<Map> getAll() {
        return DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getAll");
     }
+
+
+    public List<Map> getRowAndColumnByCategoryId(String category_id) {
+        Map<String,Object> map=new HashMap();
+        map.put("category_id",category_id);
+        return DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getRowAndColumnByCategoryId",map);
+    }
+
+    public List<Map> getMKeySegmentByCategoryId(String category_id) {
+        Map<String,Object> map=new HashMap();
+        map.put("category_id",category_id);
+        return DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getMKeySegmentByCategoryId",map);
+    }
+
+
 }

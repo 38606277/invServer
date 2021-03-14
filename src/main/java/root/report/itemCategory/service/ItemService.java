@@ -474,4 +474,8 @@ public class ItemService {
            DbFactory.Open(DbFactory.FORM).update("mdmItem.batchUpdateItem", parammap);
         }
     }
+
+    public List<Map> paramStringSql(String sql){
+        return  DbFactory.Open(DbFactory.FORM).selectList("mdmItem.paramStringSql", sql);
+    }
 }

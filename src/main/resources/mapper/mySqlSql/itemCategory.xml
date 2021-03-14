@@ -183,4 +183,15 @@
 	<select id="getAll" resultType="map">
 		SELECT * from mdm_item_category ORDER BY category_id asc
 	</select>
+
+	<select id="getRowAndColumnByCategoryId" resultType="map" >
+		SELECT * FROM mdm_item_category_segment where category_id= #{category_id} and (spread_mode = 'r' or spread_mode='c')
+	</select>
+
+	<select id="getMKeySegmentByCategoryId" resultType="map" >
+		SELECT * FROM mdm_item_category_segment where category_id= #{category_id}  and qualifier = 'mkey'
+	</select>
+
+
+
 </mapper>

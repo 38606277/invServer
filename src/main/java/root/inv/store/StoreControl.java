@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import root.inv.onhand.InvItemOnHandService;
 import root.inv.pd.PdOrderLinesService;
 import root.inv.po.PoLinesService;
 import root.inv.task.FndTaskService;
@@ -47,6 +48,10 @@ public class StoreControl extends RO {
 
     @Autowired
     public ItemCategoryService itemCategoryService;
+
+    @Autowired
+    public InvItemOnHandService invItemOnHandService;
+
 
 
     //查询所有事物
@@ -217,10 +222,32 @@ public class StoreControl extends RO {
             String targetInvOrgId =  mainData.getString("target_inv_org_id");
 
             int billStatus = mainData.getIntValue("bill_status");
-            JSONArray jsonArray = pJson.getJSONArray("linesData");
+
+
+            List jsonArray = pJson.getJSONArray("linesData");
+
+            //盘点的行信息可能需要额外查询
+            if("count".equals(billType)){
+               String inventoryType =   mainData.getString("inventory_type");
+                Map<String,Object>   inventoryItemMap = new HashMap<>();
+                inventoryItemMap.put("org_id",invOrgId);
+
+                if("all".equals(inventoryType)){ // 全库盘查
+                    jsonArray = invItemOnHandService.getItemOnHandInventoryItemByOrgId(inventoryItemMap);
+                }else if("single".equals(inventoryType)){
+                    inventoryItemMap.put("item_category_id",mainData.getString("item_category_id"));
+                    jsonArray = invItemOnHandService.getItemOnHandInventoryItemByOrgIdAndCategoryId(inventoryItemMap);
+                }
+            }
 
             for(int i = 0; i < jsonArray.size(); i++){
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                JSONObject jsonObject;
+                Object obj = jsonArray.get(i);
+                if(obj instanceof JSONObject){
+                    jsonObject = (JSONObject)jsonArray.get(i);
+                }else {
+                    jsonObject = new JSONObject((Map<String, Object>) jsonArray.get(i));
+                }
                 jsonObject.put("line_number",i);
                 jsonObject.put("create_by",userId);
                 jsonObject.put("header_id",billId);

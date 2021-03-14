@@ -358,4 +358,13 @@ public class ItemCategoryController extends RO {
         return null;
     }
 
+
+    @RequestMapping(value = "/getMKeySegmentByCategoryId", produces = "text/plain;charset=UTF-8")
+    public String getMKeySegmentByCategoryId(@RequestBody JSONObject pJson) {
+        String categoryId =  String.valueOf(pJson.get("item_category_id"));
+        List list = itemCategoryService.getMKeySegmentByCategoryId(categoryId);
+        return SuccessMsg("", list);
+    }
+
+
 }
