@@ -159,5 +159,21 @@ public class DictController extends RO {
         }
     }
 
+    //返回数据
+    @RequestMapping(value = "/getDictValueByDictId", produces = "text/plain;charset=UTF-8")
+    public String getDictValueByDictId(@RequestBody String pjson) {
+        JSONObject obj=JSON.parseObject(pjson);
+        try{
+            Map map = new HashMap();
+            map.put("dict_id",obj.get("dict_id"));
+
+            List<Map> list = this.mdmDictService.getDictValueByDictId(map);
+
+            return SuccessMsg("查询成功",list);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
 
 }

@@ -12,6 +12,7 @@ import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
 import root.report.itemCategory.service.ItemService;
+import root.report.mdmDict.service.MdmDictService;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,6 +31,11 @@ public class ItemController extends RO {
 
     @Autowired
     public ItemCategoryService itemCategoryService;
+
+    @Autowired
+    public MdmDictService mdmDictService;
+
+
 
 
     /**
@@ -230,7 +236,6 @@ public class ItemController extends RO {
         try {
 
             //传入类别id  主信息等
-
             String itemCategoryId = pJson.getString("item_category_id");
 
             if("-1".equals(itemCategoryId) || itemCategoryId == null){
@@ -244,6 +249,22 @@ public class ItemController extends RO {
                 return ErrorMsg("2000","请配置行和列信息");
             }
 
+            Map<String,Object> resultMap = new HashMap<>();
+
+            //获取行和列segment对应的字典值
+            for(Map rc :  rowAndCol){
+                String spreadMode =  String.valueOf(rc.get("spread_mode"));//作为键返回
+                String segment = String.valueOf(rc.get("segment"));
+                String segmentName = String.valueOf(rc.get("segment_name"));
+                String segmentDictId = String.valueOf(rc.get("dict_id"));
+                List rcList =  mdmDictService.getDictValueListByDictId(segmentDictId);
+                Map<String,Object> listData = new HashMap<String,Object>();
+                listData.put("segment", segment);
+                listData.put("segmentName", segmentName);
+                listData.put("list", rcList);
+                resultMap.put(spreadMode,listData);
+            }
+
             //拼接查询条件
             StringBuilder segmentFilter = new StringBuilder();
             segmentFilter.append(" where item_category_id = ").append("'").append(itemCategoryId).append("'");
@@ -253,26 +274,14 @@ public class ItemController extends RO {
                     segmentFilter.append(" and ").append(key).append("=").append("'").append(value).append("'");
                 }
             }
+            String selectSqlFormat = "SELECT * from mdm_item %s ";
+            String selectSql = String.format(selectSqlFormat,segmentFilter.toString());
+            List itemList =  itemService.paramStringSql(selectSql);
 
-            Map<String,Object> resultMap = new HashMap<>();
-            for(Map rc :  rowAndCol){
-                String spreadMode =  String.valueOf(rc.get("spread_mode"));//作为键返回
-                String segment = String.valueOf(rc.get("segment"));
-                String segmentName = String.valueOf(rc.get("segment_name"));
+            resultMap.put("itemList",itemList);
 
-                String selectSqlFormat = "SELECT %s from mdm_item %s GROUP BY %s";
-                String selectSql = String.format(selectSqlFormat,segment,segmentFilter.toString(),segment);
-                List rcList =  itemService.paramStringSql(selectSql);
-
-                Map<String,Object> listData = new HashMap<String,Object>();
-                listData.put("segment", segment);
-                listData.put("segmentName", segmentName);
-                listData.put("list", rcList);
-                resultMap.put(spreadMode,listData);
-            }
-
-            if(resultMap.size() < 2){
-                return ErrorMsg("2000","请配置行和列信息");
+            if(itemList.size() < 1){
+                return ErrorMsg("2000","请配置物料信息");
             }
 
             return SuccessMsg("", resultMap);
