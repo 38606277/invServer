@@ -63,6 +63,11 @@
 
     </update>
 
+    <!-- 获取为接收完的数量-->
+    <select id="getNotRcvCountByHeaderId" resultType="int" parameterType="Map">
+        SELECT count(1) FROM po_lines pl where pl.quantity != pl.rcv_quantity  and header_id=#{header_id}
+    </select>
+
 
 
 </mapper>

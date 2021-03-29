@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import root.inv.onhand.InvItemOnHandService;
 import root.inv.pd.PdOrderLinesService;
+import root.inv.po.PoHeadersService;
 import root.inv.po.PoLinesService;
 import root.inv.task.FndTaskService;
 import root.report.common.RO;
@@ -32,25 +33,29 @@ public class StoreControl extends RO {
 
 
     @Autowired
-    public StoreService storeService;
+    private StoreService storeService;
 
     @Autowired
-    InvBillLineService invBillLineService;
+    private InvBillLineService invBillLineService;
 
     @Autowired
-    InvItemTransactionService invItemTransactionService;
+    private InvItemTransactionService invItemTransactionService;
+
 
     @Autowired
-    PoLinesService poLinesService;
+    private PoHeadersService poHeadersService;
 
     @Autowired
-    FndTaskService fndTaskService;
+    private PoLinesService poLinesService;
 
     @Autowired
-    public ItemCategoryService itemCategoryService;
+    private FndTaskService fndTaskService;
 
     @Autowired
-    public InvItemOnHandService invItemOnHandService;
+    private ItemCategoryService itemCategoryService;
+
+    @Autowired
+    private InvItemOnHandService invItemOnHandService;
 
 
 
@@ -282,11 +287,23 @@ public class StoreControl extends RO {
             }
             boolean isLinesSaveSuccess = invBillLineService.insertBillLinesAll(sqlSession,jsonArray);
 
-
             if(!isLinesSaveSuccess){
                 sqlSession.getConnection().commit();
                 return  ErrorMsg("2000","行数据保存失败");
             }
+
+
+            if("store_po".equals(billType)){//修改订单状态 更新为入库完成状态
+                //获取订单id
+                String sourceId =  mainData.getString("source_id");
+                //查询未完成行的数量
+                int count =  poLinesService.getNotRcvCountByHeaderId(sqlSession,sourceId);
+                //小于1 则全部完成 更新订单状态
+                if(count<1){
+                    poHeadersService.updatePoHeadersStatusByIds(sqlSession,sourceId,"2");
+                }
+            }
+
 
             String billTypeName = null;
             int assignerId = -1;

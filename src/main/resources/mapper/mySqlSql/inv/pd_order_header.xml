@@ -74,10 +74,12 @@
     <select id="getPdOrderHeaderById" resultType="Map" parameterType="Map">
         SELECT  poh.*,
         fu_create.USER_NAME as create_name,
-        fu_update.USER_NAME as update_name
+        fu_update.USER_NAME as update_name,
+        mc.customer_name as manufactory_name
         FROM pd_order_header poh
         LEFT JOIN fnd_user fu_create on  poh.create_by = fu_create._id -- 创建人
         LEFT JOIN fnd_user fu_update on  poh.update_by = fu_update._id -- 更新人
+        left join mdm_customers mc on poh.manufactory_id = mc.customer_id -- 制造商
         where pd_header_id=#{pd_header_id}
     </select>
 

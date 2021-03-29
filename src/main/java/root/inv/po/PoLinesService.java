@@ -77,4 +77,12 @@ public class PoLinesService {
         sqlSession.update("po_lines.updatePoLinesRcvQuantity",map);
     }
 
+    public int getNotRcvCountByHeaderId(SqlSession sqlSession, String headerId){
+        Map<String,Object> map = new HashMap<>();
+        map.put("header_id",headerId);
+        return sqlSession.selectOne("po_lines.getNotRcvCountByHeaderId",map);
+    }
+
+
+
 }

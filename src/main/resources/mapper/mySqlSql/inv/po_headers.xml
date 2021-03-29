@@ -47,7 +47,7 @@
         LEFT JOIN fnd_user fu_update on ph.update_by = fu_update._id -- 更新人
         LEFT JOIN mdm_customers mc on ph.vendor_id = mc.customer_id -- 供应商
         LEFT JOIN mdm_dict md on md.dict_code = 'order_po' -- 获取对应类型的数据字典
-        LEFT JOIN mdm_dict_value mdv on  md.dict_id =  mdv.dict_id and  ph.po_type = mdv.value_id -- 获取数据字典的值
+        LEFT JOIN mdm_dict_value mdv on  md.dict_id =  mdv.dict_id and  ph.po_type = mdv.value_code -- 获取数据字典的值
         where 1=1
         <if test="header_code != null and header_code!=''">  and ph.header_code like '%${header_code}%' </if>
         <if test="po_type != null and po_type!=''">  and ph.po_type=#{po_type} </if>
@@ -96,7 +96,7 @@
         LEFT JOIN fnd_user fu_update on ph.update_by = fu_update._id -- 更新人
         LEFT JOIN mdm_customers mc on ph.vendor_id = mc.customer_id -- 供应商
         LEFT JOIN mdm_dict md on md.dict_code = 'order_po' -- 获取对应类型的数据字典
-        LEFT JOIN mdm_dict_value mdv on  md.dict_id =  mdv.dict_id and  ph.po_type = mdv.value_id -- 获取数据字典的值
+        LEFT JOIN mdm_dict_value mdv on  md.dict_id =  mdv.dict_id and  ph.po_type = mdv.value_code -- 获取数据字典的值
         where 1=1
         <if test="header_code != null and header_code!=''">  and ph.header_code like '%${header_code}%' </if>
         <if test="po_type != null and po_type!=''">  and ph.po_type=#{po_type} </if>
@@ -147,6 +147,7 @@
         LEFT JOIN mdm_customers mc on ph.vendor_id = mc.customer_id -- 供应商
         where po_header_id=#{po_header_id}
     </select>
+
 
 
 </mapper>
