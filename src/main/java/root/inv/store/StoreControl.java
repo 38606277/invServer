@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import root.inv.onhand.InvItemOnHandService;
+import root.inv.pd.PdOrderHeaderService;
 import root.inv.pd.PdOrderLinesService;
 import root.inv.po.PoHeadersService;
 import root.inv.po.PoLinesService;
@@ -41,12 +42,17 @@ public class StoreControl extends RO {
     @Autowired
     private InvItemTransactionService invItemTransactionService;
 
-
     @Autowired
     private PoHeadersService poHeadersService;
 
     @Autowired
     private PoLinesService poLinesService;
+
+    @Autowired
+    private PdOrderHeaderService pdOrderHeaderService;
+
+    @Autowired
+    private PdOrderLinesService pdOrderLinesService;
 
     @Autowired
     private FndTaskService fndTaskService;
@@ -270,7 +276,12 @@ public class StoreControl extends RO {
                     String sourceId =  mainData.getString("source_id");
                     //接收数量
                     double rcvQuantity = jsonObject.getDouble("quantity");
-                    poLinesService.updatePoLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
+
+                    if("store_po".equals(billType)){
+                        poLinesService.updatePoLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
+                    }else if("store_pd".equals(billType) ){
+                        pdOrderLinesService.updatePdLinesRcvQuantity(sqlSession,sourceId,itemId,rcvQuantity);
+                    }
                 }
 
                 if(0 < billStatus){
@@ -292,7 +303,6 @@ public class StoreControl extends RO {
                 return  ErrorMsg("2000","行数据保存失败");
             }
 
-
             if("store_po".equals(billType)){//修改订单状态 更新为入库完成状态
                 //获取订单id
                 String sourceId =  mainData.getString("source_id");
@@ -301,6 +311,16 @@ public class StoreControl extends RO {
                 //小于1 则全部完成 更新订单状态
                 if(count<1){
                     poHeadersService.updatePoHeadersStatusByIds(sqlSession,sourceId,"2");
+                }
+            }else if("store_pd".equals(billType)){
+                //获取订单id
+                String sourceId =  mainData.getString("source_id");
+                //查询未完成行的数量
+
+                int count =  pdOrderLinesService.getNotRcvCountByHeaderId(sqlSession,sourceId);
+                //小于1 则全部完成 更新订单状态
+                if(count<1){
+                    pdOrderHeaderService.updatePoHeadersStatusByIds(sqlSession,sourceId,"2");
                 }
             }
 

@@ -55,5 +55,10 @@
         where header_id=#{header_id} and item_id=#{item_id}
     </update>
 
+    <!-- 获取为接收完的数量-->
+    <select id="getNotRcvCountByHeaderId" resultType="int" parameterType="Map">
+        SELECT count(1) FROM pd_order_lines pol where pol.quantity != pol.rcv_quantity and pol.item_type = '0'  and pol.header_id=#{header_id}
+    </select>
+
 </mapper>
 

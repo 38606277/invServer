@@ -53,6 +53,14 @@ public class PdOrderHeaderService {
         sqlSession.update("pd_order_header.updatePdOrderHeaderById",params);
     }
 
+    public void updatePoHeadersStatusByIds(SqlSession sqlSession,String ids,String status){
+        Map<String,String> map = new HashMap<>();
+        map.put("ids",ids);
+        map.put("status",status);
+        sqlSession.update("pd_order_header.updatePdOrderHeaderStatusByIds",map);
+    }
+
+
 
     public void deletePdOrderHeaderByIds(SqlSession sqlSession,String ids){
         Map<String,String> map = new HashMap<>();

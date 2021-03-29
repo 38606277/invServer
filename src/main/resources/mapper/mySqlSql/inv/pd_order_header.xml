@@ -4,8 +4,8 @@
 <mapper namespace="pd_order_header">
 
     <insert id="savePdOrderHeader" parameterType="Map" keyColumn="pd_header_id" keyProperty="pd_header_id" useGeneratedKeys="true">
-        INSERT INTO pd_order_header(`pd_header_code`, `pd_header_name`, `manufactory_id`, `begin_date`,`end_date`,`create_by`, `create_date`, `update_by`, `update_date`)
-        VALUES (#{pd_header_code},#{pd_header_name}, #{manufactory_id}, #{begin_date},#{end_date},#{create_by}, #{create_date}, #{update_by}, #{update_date});
+        INSERT INTO pd_order_header(`pd_header_code`, `pd_header_name`,`status`, `manufactory_id`, `begin_date`,`end_date`,`create_by`, `create_date`, `update_by`, `update_date`)
+        VALUES (#{pd_header_code},#{pd_header_name},#{status}, #{manufactory_id}, #{begin_date},#{end_date},#{create_by}, #{create_date}, #{update_by}, #{update_date});
     </insert>
 
     <update id="updatePdOrderHeaderById" parameterType="Map">
@@ -37,6 +37,7 @@
         SELECT count(1) FROM pd_order_header  poh
         LEFT JOIN fnd_user fu_create on  poh.create_by = fu_create._id -- 创建人
         LEFT JOIN fnd_user fu_update on  poh.update_by = fu_update._id -- 更新人
+        LEFT JOIN mdm_customers mc on poh.manufactory_id = mc.customer_id -- 制造商
         where 1=1
         <if test="pd_header_name != null and pd_header_name!=''">  and  poh.pd_header_name like '%${pd_header_name}%' </if>
         <if test="po_type != null and po_type!=''">  and  poh.po_type=#{po_type} </if>
@@ -44,7 +45,8 @@
             and (
                 fu_create.USER_NAME like '%${keyword}%' or
                 fu_update.USER_NAME like '%${keyword}%' or
-                 poh.pd_header_name like '%${keyword}%'
+                 poh.pd_header_name like '%${keyword}%' or
+                mc.customer_name like '%${keyword}%'
             )
         </if>
 
@@ -53,10 +55,12 @@
     <select id="getPdOrderHeaderListByPage" resultType="Map" parameterType="Map">
         SELECT  poh.*,
         fu_create.USER_NAME as create_name,
-        fu_update.USER_NAME as update_name
+        fu_update.USER_NAME as update_name,
+        mc.customer_name as manufactory_name
         FROM pd_order_header  poh
         LEFT JOIN fnd_user fu_create on  poh.create_by = fu_create._id -- 创建人
         LEFT JOIN fnd_user fu_update on  poh.update_by = fu_update._id -- 更新人
+        LEFT JOIN mdm_customers mc on poh.manufactory_id = mc.customer_id -- 制造商
         where 1=1
         <if test="pd_header_name != null and pd_header_name!=''">  and  poh.pd_header_name like '%${pd_header_name}%' </if>
         <if test="po_type != null and po_type!=''">  and  poh.po_type=#{po_type} </if>
@@ -64,7 +68,8 @@
             and (
             fu_create.USER_NAME like '%${keyword}%' or
             fu_update.USER_NAME like '%${keyword}%' or
-             poh.pd_header_name like '%${keyword}%'
+            poh.pd_header_name like '%${keyword}%' or
+            mc.customer_name like '%${keyword}%'
             )
         </if>
         ORDER BY update_date desc
@@ -79,7 +84,7 @@
         FROM pd_order_header poh
         LEFT JOIN fnd_user fu_create on  poh.create_by = fu_create._id -- 创建人
         LEFT JOIN fnd_user fu_update on  poh.update_by = fu_update._id -- 更新人
-        left join mdm_customers mc on poh.manufactory_id = mc.customer_id -- 制造商
+        LEFT JOIN mdm_customers mc on poh.manufactory_id = mc.customer_id -- 制造商
         where pd_header_id=#{pd_header_id}
     </select>
 

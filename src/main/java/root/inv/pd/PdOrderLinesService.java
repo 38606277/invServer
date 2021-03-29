@@ -138,4 +138,11 @@ public class PdOrderLinesService {
         sqlSession.update("pd_order_lines.updatePdLinesRcvQuantity",map);
     }
 
+    public int getNotRcvCountByHeaderId(SqlSession sqlSession, String headerId){
+        Map<String,Object> map = new HashMap<>();
+        map.put("header_id",headerId);
+        return sqlSession.selectOne("pd_order_lines.getNotRcvCountByHeaderId",map);
+    }
+
+
 }
