@@ -69,6 +69,7 @@ public class ItemCategoryService {
         map.put("category_pid",jsonObject.getString("category_pid"));
         map.put("category_code",jsonObject.getString("category_code"));
         map.put("cost_method",jsonObject.getString("cost_method"));
+        map.put("unit",jsonObject.getString("unit"));
         JSONArray segmentList = jsonObject.getJSONArray("lineForm");
         JSONArray attributeList = jsonObject.getJSONArray("lineForm2");
 

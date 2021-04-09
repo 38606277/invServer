@@ -5,16 +5,16 @@
 
 	<!--  创建func_dict信息  -->
 	<insert id="createMdmItemCategory" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
-		insert into mdm_item_category(category_id,category_name,category_pid,category_code,cost_method)
+		insert into mdm_item_category(category_id,category_name,category_pid,category_code,cost_method,unit)
 		values (#{category_id},'${category_name}',
 		<if  test="category_pid == null">NULL</if>
-		<if  test="category_pid != null">#{category_pid}</if>,'${category_code}',#{cost_method}
+		<if  test="category_pid != null">#{category_pid}</if>,'${category_code}',#{cost_method},#{unit}
 		)
 	</insert>
 
 	<!-- 修改 func_dict 表的信息 -->
 	<update id="updateMdmItemCategory" parameterType="Map">
-		update mdm_item_category set category_name='${category_name}',category_code='${category_code}',cost_method=#{cost_method}
+		update mdm_item_category set category_name='${category_name}',category_code='${category_code}',cost_method=#{cost_method},unit=#{unit}
 		 where category_id=#{category_id}
 	</update>
 
