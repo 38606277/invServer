@@ -34,7 +34,7 @@ public class ItemService {
                 bounds = RowBounds.DEFAULT;
             } else {
                 Integer startIndex = Integer.parseInt(map.get("startIndex").toString());
-                Integer perPage = Integer.parseInt(map.get("perPage"));
+                    Integer perPage = Integer.parseInt(map.get("perPage"));
                 if (startIndex == 1 || startIndex == 0) {
                     startIndex = 0;
                 } else {
@@ -475,7 +475,52 @@ public class ItemService {
         }
     }
 
+    /**
+     * 直接执行sql语句
+     * @param sql
+     * @return
+     */
     public List<Map> paramStringSql(String sql){
         return  DbFactory.Open(DbFactory.FORM).selectList("mdmItem.paramStringSql", sql);
     }
+
+
+
+
+    public Map<String,Object> getItemPageBySegment(Map<String,Object> map) {
+        Map<String,Object> map1=new HashMap<>();
+
+        try {
+            SqlSession sqlSession = DbFactory.Open(DbFactory.FORM);
+            RowBounds bounds = null;
+            if (map == null) {
+                bounds = RowBounds.DEFAULT;
+            } else {
+                Integer startIndex = Integer.parseInt(map.get("startIndex").toString());
+                Integer perPage = Integer.parseInt(String.valueOf(map.get("perPage")));
+                if (startIndex == 1 || startIndex == 0) {
+                    startIndex = 0;
+                } else {
+                    startIndex = (startIndex - 1) * perPage;
+                }
+                bounds = new PageRowBounds(startIndex, perPage);
+            }
+
+            List<Map<String, Object>> resultList = sqlSession.selectList("mdmItem.getItemPageBySegment", map, bounds);
+            Long totalSize = 0L;
+            if (map != null && map.size() != 0) {
+                totalSize = ((PageRowBounds) bounds).getTotal();
+            } else {
+                totalSize = Long.valueOf(resultList.size());
+            }
+
+            map1.put("list", resultList);
+            map1.put("total", totalSize);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return map1;
+    }
+
+
 }

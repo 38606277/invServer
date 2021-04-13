@@ -292,6 +292,17 @@ public class ItemController extends RO {
     }
 
 
+    /**
+     * 通过segment查询item
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/getItemPageBySegment", produces = "text/plain;charset=UTF-8")
+    public String getItemPageBySegment(@RequestBody JSONObject pJson) {
+        Map<String,Object> result =  itemService.getItemPageBySegment(pJson);
+        return SuccessMsg("查询成功",result);
+    }
+
 
 
 }

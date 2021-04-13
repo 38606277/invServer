@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import root.inv.approval.ApprovalRuleService;
+import root.inv.task.FndTaskService;
 import root.report.common.DbSession;
 import root.report.common.RO;
 import root.report.db.DbFactory;
@@ -34,32 +36,25 @@ import java.util.Map;
 public class PoControl extends RO {
 
     @Autowired
-    PoHeadersService poHeadersService;
+    private PoHeadersService poHeadersService;
 
     @Autowired
-    PoLinesService poLinesService;
+    private PoLinesService poLinesService;
 
     @Autowired
-    public ItemCategoryService itemCategoryService;
+    private ItemCategoryService itemCategoryService;
+
+    @Autowired
+    private FndTaskService fndTaskService;
+
+    @Autowired
+    private ApprovalRuleService approvalRuleService;
 
     //查询所有订单
     @RequestMapping(value = "/getPoListByPage", produces = "text/plain;charset=UTF-8")
     public String getPoListByPage(@RequestBody JSONObject pJson) {
-
-        int currentPage = Integer.valueOf(pJson.getString("pageNum"));
-        int perPage = Integer.valueOf(pJson.getString("perPage"));
-        if (1 == currentPage || 0 == currentPage) {
-            currentPage = 0;
-        } else {
-            currentPage = (currentPage - 1) * perPage;
-        }
-
-        pJson.put("startIndex",currentPage);
-        pJson.put("perPage",perPage);
-
-        List<Map<String, Object>> list = poHeadersService.getPoHeadersListByPage(pJson);
-        int total = poHeadersService.getPoHeadersListByPageCount(pJson);
-        return SuccessMsg(list, total);
+        Map<String,Object> result = poHeadersService.getPoHeadersListByPage(pJson);
+        return SuccessMsg("查询成功",result);
     }
 
     //查询详情
@@ -169,14 +164,8 @@ public class PoControl extends RO {
             jsonArray.add(jsonObject);
         }
 
-
         return SuccessMsg("查询成功",jsonArray);
     }
-
-
-
-
-
 
     //更新
     @RequestMapping(value = "/updatePoById", produces = "text/plain;charset=UTF-8")
@@ -190,7 +179,6 @@ public class PoControl extends RO {
             JSONObject mainData = pJson.getJSONObject("mainData");
 
             poHeadersService.updatePoHeadersById(sqlSession,mainData);
-
 
             //删除行数据
             String deleteIds  = pJson.getString("deleteData");
@@ -228,6 +216,7 @@ public class PoControl extends RO {
     @RequestMapping(value = "/createPo", produces = "text/plain; charset=utf-8")
     public String createPo(@RequestBody JSONObject pJson) throws SQLException{
         int userId = SysContext.getId();
+
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         try {
 
@@ -262,6 +251,16 @@ public class PoControl extends RO {
                 poLinesService.insertPoLinesAll(sqlSession,jsonArray);
             }
 
+            //状态为1表示提交
+             if( pJson.containsKey("status") &&  "1".equals(pJson.get("status"))){
+                 //获取审批人
+                 long assignerId =  approvalRuleService.getApprovalUser(String.valueOf(userId),"po");
+                 if(assignerId < 0){
+                     return ErrorMsg("提交失败","审批人未配置");
+                 }
+
+                 fndTaskService.savaTask(sqlSession,"po","po",id,userId,assignerId);
+             }
             sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",id);
         } catch (Exception ex){
@@ -299,46 +298,72 @@ public class PoControl extends RO {
         }
     }
 
-
     @RequestMapping(value = "/updatePoStatusByIds", produces = "text/plain;charset=UTF-8")
     public String updatePoStatusByIds(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         String deleteIds  = pJson.getString("ids");
         String status = pJson.getString("bill_status");
         if(deleteIds ==null || deleteIds.isEmpty()){
-            return ErrorMsg("过账失败","请选择过账项");
+            return ErrorMsg("处理失败","请选择处理项");
         }
 
         try {
             sqlSession.getConnection().setAutoCommit(false);
             //批量过账
             poHeadersService.updatePoHeadersStatusByIds(sqlSession,deleteIds,status);
-//            String[] billIdArr =  deleteIds.split(",");
-//            for(String billId : billIdArr){
-//                //获取主信息
-//                Map<String,Object> billParams = new HashMap<>();
-//                billParams.put("bill_id",billId);
-//                Map<String,Object> mainObj = storeService.getPoById(billParams);
-//                String billType =  String.valueOf(mainObj.get("bill_type"));
-//                String invOrgId =  String.valueOf(mainObj.get("inv_org_id"));
-//
-//                //获取子信息
-//                List<Map<String,Object>> billLines = invBillLineService.getBillLinesById(billParams);
-//
-//                for(Map<String,Object> billLine : billLines){
-//                    billLine.put("bill_type",billType);
-//                    billLine.put("org_id",invOrgId);
-//
-//                    if("store".equals(billType)){ //入库为新增
-//                        invItemTransactionService.weightedMean(sqlSession,billLine,true);
-//                    }else if("deliver".equals(billType)){ //出库为减少
-//                        invItemTransactionService.weightedMean(sqlSession,billLine,false);
-//                    }
-//
-//                }
-//            }
             sqlSession.getConnection().commit();
-            return SuccessMsg("过账成功","");
+            return SuccessMsg("处理成功","");
+        } catch (Exception ex){
+            sqlSession.getConnection().rollback();
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }finally {
+            sqlSession.getConnection().setAutoCommit(true);
+        }
+    }
+
+
+    @RequestMapping(value = "/updatePoStatusById", produces = "text/plain;charset=UTF-8")
+    public String updatePoStatusById(@RequestBody JSONObject pJson)throws SQLException{
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+
+        String taskType = "po";
+
+        if(!pJson.containsKey("bill_id")){
+            return ErrorMsg("提交失败","id不存在或已删除");
+        }
+
+        int updateId  = pJson.getInteger("bill_id");
+        String status = pJson.getString("bill_status");
+        int userId = SysContext.getId();
+
+        if("1".equals(status)){ //提交
+
+
+            //获取审批人
+            long assignerId =  approvalRuleService.getApprovalUser(String.valueOf(userId),taskType);
+            if(assignerId < 0){
+                return ErrorMsg("提交失败","审批人未配置");
+            }
+
+            Map<String,Object> updateMap = new HashMap<>();
+            updateMap.put("po_header_id",updateId);
+            updateMap.put("approval_id",assignerId);
+            poHeadersService.updatePoHeadersById(sqlSession,updateMap);//更新审批人
+
+            fndTaskService.savaTask(sqlSession,taskType,taskType,updateId,userId,assignerId);
+
+        }else if("2".equals(status)){ //审批
+            //更新任务,将待办任务修改为完成状态
+            fndTaskService.completeTask(sqlSession,taskType,updateId);
+        }
+
+        try {
+            sqlSession.getConnection().setAutoCommit(false);
+            //批量过账
+            poHeadersService.updatePoHeadersStatusByIds(sqlSession,String.valueOf(updateId),status);
+            sqlSession.getConnection().commit();
+            return SuccessMsg("处理成功","");
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
             ex.printStackTrace();

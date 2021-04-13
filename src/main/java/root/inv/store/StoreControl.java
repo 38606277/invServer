@@ -310,7 +310,7 @@ public class StoreControl extends RO {
                 int count =  poLinesService.getNotRcvCountByHeaderId(sqlSession,sourceId);
                 //小于1 则全部完成 更新订单状态
                 if(count<1){
-                    poHeadersService.updatePoHeadersStatusByIds(sqlSession,sourceId,"2");
+                    poHeadersService.updatePoHeadersStatusByIds(sqlSession,sourceId,"3");
                 }
             }else if("store_pd".equals(billType)){
                 //获取订单id
@@ -325,59 +325,23 @@ public class StoreControl extends RO {
             }
 
 
-            String billTypeName = null;
+
             int assignerId = -1;
-            String func_url = null;
             if("store_other".equals(billType)){ //其他入库
-                billTypeName = "其他入库";
                 assignerId = userId;
-                func_url = "/transation/store/other/edit/" + billId;
             } else if("deliver_other".equals(billType)){//出库
-                billTypeName= "其他出库";
                 assignerId = userId;
-                func_url = "/transation/deliver/other/edit/" + billId;
             }else if("transfer".equals(billType)){
-                int operator = mainData.getInteger("operator");
-                billTypeName = "调拨出库";
-                assignerId = operator;
-                func_url = "/transation/transfer/out/edit/" + billId;
+                assignerId = mainData.getInteger("operator");
             }else if("deliver_sales".equals(billType)){//销售出库
-                billTypeName= "销售出库";
                 assignerId = userId;
-                func_url = "/sales/sales/edit/" + billId;
             }else if("deliver_wholesales".equals(billType)){//批发出库
-                billTypeName = "批发出库";
                 assignerId = userId;
-                func_url = "/sales/sales/edit/" + billId;
             }else if("count".equals(billType)){//盘点
-                int operator = mainData.getInteger("operator");
-                billTypeName = "盘点";
-                assignerId = operator;
-                func_url = "/transation/count/edit/" + billId;
+                assignerId = mainData.getInteger("operator");
             }
 
-            if(billTypeName!=null){
-                HashMap taskMap = new HashMap<String,Object>();
-                taskMap.put("task_name","您有一条新的"+ billTypeName + "任务");
-                taskMap.put("owner_id",userId);
-                taskMap.put("assigner_id",assignerId);
-                taskMap.put("assign_date",DateUtil.getCurrentTimm());
-                taskMap.put("receive_date",null);
-                taskMap.put("last_update_date",DateUtil.getCurrentTimm());
-                taskMap.put("complete_date",null);
-                taskMap.put("task_status",0);
-                taskMap.put("task_type","store");
-                taskMap.put("func_url",func_url);
-                taskMap.put("func_param",null);
-                taskMap.put("task_description",billTypeName);
-                taskMap.put("task_level",0);
-                taskMap.put("source_id",billId);
-
-                //创建任务
-                fndTaskService.saveFndTask(sqlSession,taskMap);
-            }
-
-
+            fndTaskService.savaTask(sqlSession,"store",billType,billId,userId,assignerId);
 
             sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",billId);
@@ -423,7 +387,7 @@ public class StoreControl extends RO {
         String deleteIds  = pJson.getString("ids");
         int billStatus = pJson.getIntValue("bill_status");
         if(deleteIds ==null || deleteIds.isEmpty()){
-            return ErrorMsg("过账失败","请选择过账项");
+            return ErrorMsg("处理失败","请选择处理项");
         }
 
         try {
@@ -501,7 +465,7 @@ public class StoreControl extends RO {
             }
 
             sqlSession.getConnection().commit();
-            return SuccessMsg("过账成功","");
+            return SuccessMsg("处理成功","");
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
             ex.printStackTrace();

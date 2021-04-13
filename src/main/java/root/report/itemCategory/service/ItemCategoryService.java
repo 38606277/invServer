@@ -256,7 +256,7 @@ public class ItemCategoryService {
 
 
     /**
-     * 获取需要横排的字典值
+     * 获取类别对应的segment
      * */
     public List<Map> getItemCategorySegmentByPId(Map m) {
         List<Map> list = DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategorySegmentByPId", m);

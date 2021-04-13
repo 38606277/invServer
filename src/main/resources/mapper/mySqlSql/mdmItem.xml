@@ -184,4 +184,19 @@
 		where item_id=#{item_id}
 	</update>
 
+	<select id="getItemPageBySegment" parameterType="map" resultType="map">
+		select * from mdm_item
+		where  1=1
+		<if test="segment1!=null and segment1!='' "> and segment1 like '%${segment1}%' </if>
+		<if test="segment2!=null and segment2!='' "> and segment2 like '%${segment2}%' </if>
+		<if test="segment3!=null and segment3!='' "> and segment3 like '%${segment3}%' </if>
+		<if test="segment4!=null and segment4!='' "> and segment4 like '%${segment4}%' </if>
+		<if test="segment5!=null and segment5!='' "> and segment5 like '%${segment5}%' </if>
+		<if test="segment6!=null and segment6!='' "> and segment6 like '%${segment6}%' </if>
+		<if test="segment7!=null and segment7!='' "> and segment7 like '%${segment7}%' </if>
+		<if test="segment8!=null and segment8!='' "> and segment8 like '%${segment8}%' </if>
+		<if test="segment9!=null and segment9!='' "> and segment9 like '%${segment9}%' </if>
+		<if test="segment10!=null and segment10!='' "> and segment10 like '%${segment10}%' </if>
+	</select>
+
 </mapper>

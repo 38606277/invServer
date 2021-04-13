@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
+import root.inv.BaseService;
 import root.report.common.DbSession;
 import root.report.service.DictService;
 import root.report.sys.SysContext;
@@ -14,23 +15,17 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class PoHeadersService {
+public class PoHeadersService extends BaseService {
 
     private static Logger log = Logger.getLogger(PoHeadersService.class);
 
-    public List<Map<String,Object>> getPoHeadersListByPage(Map<String,Object> params){
+    public Map<String,Object> getPoHeadersListByPage(Map<String,Object> params){
         int id = SysContext.getId();//id
         params.put("create_by",id);
+        params.put("approval_id",id);
 
-        List<Map<String,Object>> resultList = new ArrayList<Map<String,Object>>();
-        try
-        {
-            resultList = DbSession.selectList("po_headers.getPoHeaderListByPage",params);
-            return resultList;
-        }catch (Exception ex){
+        return getDataListByPage("po_headers.getPoHeaderListByPage",params);
 
-            throw  ex;
-        }
     }
 
     public int getPoHeadersListByPageCount(Map<String,Object> params){
@@ -50,7 +45,7 @@ public class PoHeadersService {
         return  -1;
     }
 
-    public void updatePoHeadersById(SqlSession sqlSession,JSONObject params){
+    public void updatePoHeadersById(SqlSession sqlSession,Map<String,Object> params){
         sqlSession.update("po_headers.updatePoHeaderById",params);
     }
 
@@ -67,5 +62,7 @@ public class PoHeadersService {
         map.put("status",status);
         sqlSession.update("po_headers.updatePoHeaderStatusByIds",map);
     }
+
+
 
 }
