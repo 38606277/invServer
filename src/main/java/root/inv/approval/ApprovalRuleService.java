@@ -37,6 +37,12 @@ public class ApprovalRuleService extends BaseService {
         return  0 < result;
     }
 
+    public boolean approvalRuleIsExist(Map<String,Object> map){
+        Integer result = DbSession.selectOne("approval_rule.approvalRuleIsExist",map);
+        return  0 < result;
+    }
+
+
     /**
      * 获取审批规则列表
      * @param map
@@ -45,6 +51,17 @@ public class ApprovalRuleService extends BaseService {
     public  Map<String,Object> getApprovalRuleListByPage(Map<String,Object> map){
         return getDataListByPage("approval_rule.getApprovalRuleListByPage",map);
     }
+
+    /**saveApprovalRule
+     * 通过id获取审批规则
+     * @param map
+     * @return
+     */
+    public  Map<String,Object> getApprovalRuleListById(Map<String,Object> map){
+        return DbSession.selectOne("approval_rule.getApprovalRuleListById",map);
+    }
+
+
 
     /**
      * 获取审批人

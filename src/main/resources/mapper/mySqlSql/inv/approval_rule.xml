@@ -11,9 +11,9 @@
     <update id="updateApprovalRuleById" parameterType="Map">
         update approval_rule
         <trim prefix="set" suffixOverrides=",">
-            <if test="create_user!=null">invoice_date=#{create_user},</if>
-            <if test="approval_user!=null">vendor_id=#{approval_user},</if>
-            <if test="type!=null">invoice_num=#{type},</if>
+            <if test="create_user!=null">create_user=#{create_user},</if>
+            <if test="approval_user!=null">approval_user=#{approval_user},</if>
+            <if test="type!=null">type=#{type},</if>
         </trim>
         where id=#{id}
     </update>
@@ -27,11 +27,21 @@
         LEFT JOIN fnd_user fu1  on ar.create_user = fu1._id
         LEFT JOIN fnd_user fu2  on ar.approval_user = fu2._id
         where 1=1
-        <if test="create_user_name != null and create_user_name != '' ">and fu1.create_user_name like '%${create_user_name}%'</if>
-        <if test="approval_user_name != null and approval_user_name != '' ">and fu2.approval_user like '%${approval_user}%'</if>
+        <if test="create_user_name != null and create_user_name != '' ">and fu1.USER_NAME like '%${create_user_name}%'</if>
+        <if test="approval_user_name != null and approval_user_name != '' ">and fu2.USER_NAME like '%${approval_user_name}%'</if>
         <if test="type != null and type!=''">  and ar.type=#{type} </if>
         ORDER BY ar.id desc
     </select>
+
+
+
+    <select id="getApprovalRuleListById" resultType="Map" parameterType="Map">
+        SELECT ar.* ,fu1.USER_NAME as create_user_name ,fu2.USER_NAME as approval_user_name  FROM approval_rule ar
+        LEFT JOIN fnd_user fu1  on ar.create_user = fu1._id
+        LEFT JOIN fnd_user fu2  on ar.approval_user = fu2._id
+        where ar.id = #{id}
+    </select>
+
 
     <select id="getApprovalUser" resultType="Map" parameterType="Map">
         SELECT ar.* FROM approval_rule ar
@@ -43,6 +53,10 @@
         where ar.create_user ='default' and ar.type=#{type}
     </select>
 
+    <select id="approvalRuleIsExist" resultType="Integer" parameterType="Map">
+        SELECT count(1) FROM approval_rule ar
+        where ar.create_user =#{create_user} and ar.type=#{type}
+    </select>
 
 </mapper>
 

@@ -19,7 +19,7 @@ import java.util.Map;
  * 审批规则
  */
 @RestController
-@RequestMapping(value = "/reportServer/approval")
+@RequestMapping(value = "/reportServer/approvalRule")
 public class ApprovalRuleControl extends RO {
 
     @Autowired
@@ -31,9 +31,25 @@ public class ApprovalRuleControl extends RO {
         return SuccessMsg("", result);
     }
 
+    @RequestMapping(value = "/getApprovalRuleListById", produces = "text/plain;charset=UTF-8")
+    public String getApprovalRuleListById(@RequestBody JSONObject pJson) {
+        Map<String,Object> result = approvalRuleService.getApprovalRuleListById(pJson);
+        return SuccessMsg("", result);
+    }
+
+
+
+
+
     @RequestMapping(value = "/saveApprovalRule", produces = "text/plain; charset=utf-8")
     public String saveApprovalRule(@RequestBody JSONObject pJson) throws SQLException {
+
+        if(approvalRuleService.approvalRuleIsExist(pJson)){
+            return ErrorMsg("2000","创建失败,审批关系已存在");
+        }
+
         long id = approvalRuleService.saveApprovalRule(pJson);
+
         if(id < 0){
             return ErrorMsg("2000","创建失败");
         }
