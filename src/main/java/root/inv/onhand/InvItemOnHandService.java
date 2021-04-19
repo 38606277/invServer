@@ -6,6 +6,7 @@ import com.github.pagehelper.PageRowBounds;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Service;
+import root.inv.BaseService;
 import root.report.common.DbSession;
 
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import java.util.Map;
  * 存量表
  */
 @Service
-public class InvItemOnHandService {
+public class InvItemOnHandService extends BaseService {
 
     /**
      * 批量存量表
@@ -41,14 +42,23 @@ public class InvItemOnHandService {
             sqlSession.insert("inv_item_on_hand.saveItemOnHand",params);
     }
 
+    /**
+     * 更新 存量表
+     * @param
+     * @param params
+     */
+    public boolean updateItemOnHand( Map<String,Object> params){
+        return 0 < DbSession.update("inv_item_on_hand.updateItemOnHand",params);
+    }
 
     /**
      * 更新 存量表
      * @param sqlSession
      * @param params
      */
-    public void updateItemOnHand(SqlSession sqlSession, Map<String,Object> params){
-            sqlSession.update("inv_item_on_hand.updateItemOnHand",params);
+    public boolean updateItemOnHand(SqlSession sqlSession, Map<String,Object> params){
+        return 0 < sqlSession.update("inv_item_on_hand.updateItemOnHand",params);
+
     }
 
     /**
@@ -135,48 +145,22 @@ public class InvItemOnHandService {
         return  DbSession.selectList("inv_item_on_hand.getItemOnHandInventoryItemByOrgIdAndCategoryId",map);
     }
 
-
-
-
     /**
      * 查询库存类别
      * @param map
      * @return
      */
     public  Map<String,Object> getItemOnHandCategoryByPage(Map<String,Object> map){
-        Map<String,Object> map1=new HashMap<>();
-
-        try {
-            RowBounds bounds = null;
-            if (map == null) {
-                bounds = RowBounds.DEFAULT;
-            } else {
-                Integer startIndex = Integer.parseInt(map.get("pageNum").toString());
-                Integer perPage = Integer.parseInt(String.valueOf(map.get("perPage")));
-                if (startIndex == 1 || startIndex == 0) {
-                    startIndex = 0;
-                } else {
-                    startIndex = (startIndex - 1) * perPage;
-                }
-                bounds = new PageRowBounds(startIndex, perPage);
-            }
-            List<Map<String, Object>> resultList = DbSession.selectList("inv_item_on_hand.getItemOnHandCategoryByPage", map, bounds);
-            Long totalSize = 0L;
-            if (map != null && map.size() != 0) {
-                totalSize = ((PageRowBounds) bounds).getTotal();
-            } else {
-                totalSize = Long.valueOf(resultList.size());
-            }
-
-            map1.put("list", resultList);
-            map1.put("total", totalSize);
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return map1;
+        return getDataListByPage("inv_item_on_hand.getItemOnHandCategoryByPage",map);
     }
 
-
+    /**
+     * 更具仓库id和itemId 查询设置
+     * @param map
+     * @return
+     */
+    public Map<String,Object> getItemOnHandSettingByOrgIdAndItemId(Map<String,Object> map){
+        return  DbSession.selectOne("inv_item_on_hand.getItemOnHandSettingByOrgIdAndItemId",map);
+    }
 
 }

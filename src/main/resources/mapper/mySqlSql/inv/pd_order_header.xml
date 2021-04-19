@@ -19,6 +19,7 @@
             <if test="create_date!=null">create_date=#{create_date},</if>
             <if test="update_by!=null">update_by=#{update_by},</if>
             <if test="update_date!=null">update_date=#{update_date},</if>
+            <if test="approval_id!=null">approval_id=#{approval_id},</if>
         </trim>
         where pd_header_id=#{pd_header_id}
     </update>
@@ -32,25 +33,6 @@
     <delete id="updatePdOrderHeaderStatusByIds" parameterType="Map">
         update pd_order_header set status=#{status} where pd_header_id in (${ids})
     </delete>
-    
-    <select id="getPdOrderHeaderListByPageCount" resultType="int" parameterType="Map">
-        SELECT count(1) FROM pd_order_header  poh
-        LEFT JOIN fnd_user fu_create on  poh.create_by = fu_create._id -- 创建人
-        LEFT JOIN fnd_user fu_update on  poh.update_by = fu_update._id -- 更新人
-        LEFT JOIN mdm_customers mc on poh.manufactory_id = mc.customer_id -- 制造商
-        where 1=1
-        <if test="pd_header_name != null and pd_header_name!=''">  and  poh.pd_header_name like '%${pd_header_name}%' </if>
-        <if test="po_type != null and po_type!=''">  and  poh.po_type=#{po_type} </if>
-        <if test="keyword != null and keyword!=''">
-            and (
-                fu_create.USER_NAME like '%${keyword}%' or
-                fu_update.USER_NAME like '%${keyword}%' or
-                 poh.pd_header_name like '%${keyword}%' or
-                mc.customer_name like '%${keyword}%'
-            )
-        </if>
-
-    </select>
 
     <select id="getPdOrderHeaderListByPage" resultType="Map" parameterType="Map">
         SELECT  poh.*,
@@ -61,9 +43,10 @@
         LEFT JOIN fnd_user fu_create on  poh.create_by = fu_create._id -- 创建人
         LEFT JOIN fnd_user fu_update on  poh.update_by = fu_update._id -- 更新人
         LEFT JOIN mdm_customers mc on poh.manufactory_id = mc.customer_id -- 制造商
-        where 1=1
+        where 1=1 and (poh.create_by=#{create_by} or poh.approval_id=#{approval_id})
         <if test="pd_header_name != null and pd_header_name!=''">  and  poh.pd_header_name like '%${pd_header_name}%' </if>
         <if test="po_type != null and po_type!=''">  and  poh.po_type=#{po_type} </if>
+        <if test="status != null and status!=''">  and  poh.status in (${status}) </if>
         <if test="keyword != null and keyword!=''">
             and (
             fu_create.USER_NAME like '%${keyword}%' or
@@ -73,7 +56,6 @@
             )
         </if>
         ORDER BY update_date desc
-        limit #{startIndex},#{perPage}
     </select>
 
     <select id="getPdOrderHeaderById" resultType="Map" parameterType="Map">

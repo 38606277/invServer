@@ -320,11 +320,9 @@ public class StoreControl extends RO {
                 int count =  pdOrderLinesService.getNotRcvCountByHeaderId(sqlSession,sourceId);
                 //小于1 则全部完成 更新订单状态
                 if(count<1){
-                    pdOrderHeaderService.updatePoHeadersStatusByIds(sqlSession,sourceId,"2");
+                    pdOrderHeaderService.updatePdHeadersStatusByIds(sqlSession,sourceId,"3");
                 }
             }
-
-
 
             int assignerId = -1;
             if("store_other".equals(billType)){ //其他入库

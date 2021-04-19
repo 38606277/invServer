@@ -20,7 +20,12 @@ public class RO {
 			SerializerFeature.WriteDateUseDateFormat, SerializerFeature.WriteNullListAsEmpty,
 			SerializerFeature.DisableCircularReferenceDetect
 	};
-	
+
+	public  String SuccessMsg(Object data)
+	{
+		return SuccessMsg("获取成功",data);
+	}
+
 	public  String SuccessMsg(String message,Object data)
 	{
 		JSONObject jsonObject=new JSONObject();
@@ -39,6 +44,10 @@ public class RO {
 	}
 
 
+	public  String ErrorMsg(String message){
+		return ErrorMsg("2000",message);
+	}
+
 	public  String ErrorMsg(String resultCode,String message)
 	{
 		JSONObject jsonObject=new JSONObject();
@@ -46,6 +55,7 @@ public class RO {
 		jsonObject.put("message", message);
 		return JSON.toJSONString(jsonObject,features);
 	}
+
 	public  String ExceptionMsg(String message)
 	{
 		JSONObject jsonObject=new JSONObject();

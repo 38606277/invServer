@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import root.inv.approval.ApprovalRuleService;
+import root.inv.task.FndTaskService;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
@@ -27,32 +29,27 @@ import java.util.Map;
 @RequestMapping(value = "/reportServer/pd")
 public class PdControl extends RO {
 
-    @Autowired
-    PdOrderHeaderService pdOrderHeaderService;
+    public static final String  TASK_TYPE_PD = "pd";
 
     @Autowired
-    PdOrderLinesService pdOrderLinesService;
+    private PdOrderHeaderService pdOrderHeaderService;
 
     @Autowired
-    public ItemCategoryService itemCategoryService;
+    private PdOrderLinesService pdOrderLinesService;
+
+    @Autowired
+    private ItemCategoryService itemCategoryService;
+
+    @Autowired
+    private FndTaskService fndTaskService;
+
+    @Autowired
+    private ApprovalRuleService approvalRuleService;
 
     @RequestMapping(value = "/getListByPage", produces = "text/plain;charset=UTF-8")
     public String getPdListByPage(@RequestBody JSONObject pJson) {
-
-        int currentPage = Integer.valueOf(pJson.getString("pageNum"));
-        int perPage = Integer.valueOf(pJson.getString("perPage"));
-        if (1 == currentPage || 0 == currentPage) {
-            currentPage = 0;
-        } else {
-            currentPage = (currentPage - 1) * perPage;
-        }
-
-        pJson.put("startIndex",currentPage);
-        pJson.put("perPage",perPage);
-
-        List<Map<String, Object>> list = pdOrderHeaderService.getPdOrderHeaderListByPage(pJson);
-        int total = pdOrderHeaderService.getPdOrderHeaderListByPageCount(pJson);
-        return SuccessMsg(list, total);
+        Map<String,Object> result = pdOrderHeaderService.getPdOrderHeaderListByPage(pJson);
+        return SuccessMsg("查询成功",result);
     }
 
     //查询详情
@@ -219,5 +216,51 @@ public class PdControl extends RO {
         }
     }
 
+
+    @RequestMapping(value = "/updatePdStatusById", produces = "text/plain;charset=UTF-8")
+    public String updatePdStatusById(@RequestBody JSONObject pJson)throws SQLException{
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+
+        if(!pJson.containsKey("bill_id")){
+            return ErrorMsg("提交失败,id不存在或已删除");
+        }
+
+        int updateId  = pJson.getInteger("bill_id");
+        String status = pJson.getString("bill_status");
+        int userId = SysContext.getId();
+
+        if("1".equals(status)){ //提交
+            //获取审批人
+            long assignerId =  approvalRuleService.getApprovalUser(String.valueOf(userId),TASK_TYPE_PD);
+            if(assignerId < 0){
+                return ErrorMsg("提交失败,审批人未配置");
+            }
+
+            Map<String,Object> updateMap = new HashMap<>();
+            updateMap.put("pd_header_id",updateId);
+            updateMap.put("approval_id",assignerId);
+            pdOrderHeaderService.updatePdOrderHeaderById(sqlSession,updateMap);//更新审批人
+
+            fndTaskService.savaTask(sqlSession,TASK_TYPE_PD,TASK_TYPE_PD,updateId,userId,assignerId);
+
+        }else if("2".equals(status)){ //审批
+            //更新任务,将待办任务修改为完成状态
+            fndTaskService.completeTask(sqlSession,TASK_TYPE_PD,updateId);
+        }
+
+        try {
+            sqlSession.getConnection().setAutoCommit(false);
+            //批量过账
+            pdOrderHeaderService.updatePdHeadersStatusByIds(sqlSession,String.valueOf(updateId),status);
+            sqlSession.getConnection().commit();
+            return SuccessMsg("处理成功","");
+        } catch (Exception ex){
+            sqlSession.getConnection().rollback();
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }finally {
+            sqlSession.getConnection().setAutoCommit(true);
+        }
+    }
 
 }

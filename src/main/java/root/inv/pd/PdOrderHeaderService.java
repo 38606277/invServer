@@ -1,41 +1,30 @@
 package root.inv.pd;
 
-import com.alibaba.fastjson.JSONObject;
+
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Service;
+import root.inv.BaseService;
 import root.report.common.DbSession;
 import root.report.sys.SysContext;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * 生产订单
  */
 @Service
-public class PdOrderHeaderService {
-    
-    public  List<Map<String,Object>> getPdOrderHeaderListByPage(Map<String, Object> params){
+public class PdOrderHeaderService extends BaseService {
+
+    public  Map<String,Object> getPdOrderHeaderListByPage(Map<String, Object> params){
         int id = SysContext.getId();//id
         params.put("create_by",id);
-
-        List<Map<String,Object>> resultList = new ArrayList<>();
-        try
-        {
-            resultList = DbSession.selectList("pd_order_header.getPdOrderHeaderListByPage",params);
-            return resultList;
-        }catch (Exception ex){
-
-            throw  ex;
-        }
+        params.put("approval_id",id);
+        return getDataListByPage("pd_order_header.getPdOrderHeaderListByPage",params);
     }
 
     public int getPdOrderHeaderListByPageCount(Map<String,Object> params){
         return DbSession.selectOne("pd_order_header.getPdOrderHeaderListByPageCount",params);
     }
-
 
     public Map<String,Object> getPdOrderHeaderById(Map<String,Object> params){
         return DbSession.selectOne("pd_order_header.getPdOrderHeaderById",params);
@@ -49,22 +38,20 @@ public class PdOrderHeaderService {
         return  -1;
     }
 
-    public void updatePdOrderHeaderById(SqlSession sqlSession,JSONObject params){
+    public void updatePdOrderHeaderById(SqlSession sqlSession,Map<String,Object> params){
         sqlSession.update("pd_order_header.updatePdOrderHeaderById",params);
     }
 
-    public void updatePoHeadersStatusByIds(SqlSession sqlSession,String ids,String status){
+    public void updatePdHeadersStatusByIds(SqlSession sqlSession,String ids,String status){
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);
         map.put("status",status);
         sqlSession.update("pd_order_header.updatePdOrderHeaderStatusByIds",map);
     }
 
-
-
     public void deletePdOrderHeaderByIds(SqlSession sqlSession,String ids){
         Map<String,String> map = new HashMap<>();
         map.put("ids",ids);
-        sqlSession.update("pd_order_header.deletePdOrderHeaderByIds",map);
+        sqlSession.delete("pd_order_header.deletePdOrderHeaderByIds",map);
     }
 }

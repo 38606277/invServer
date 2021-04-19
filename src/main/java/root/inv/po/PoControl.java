@@ -35,6 +35,8 @@ import java.util.Map;
 @RequestMapping(value = "/reportServer/po")
 public class PoControl extends RO {
 
+    public static final String  TASK_TYPE_PO = "po";
+
     @Autowired
     private PoHeadersService poHeadersService;
 
@@ -221,7 +223,6 @@ public class PoControl extends RO {
         try {
 
             sqlSession.getConnection().setAutoCommit(false);
-
             JSONObject mainData = pJson.getJSONObject("mainData");
             mainData.put("create_by",userId);
             mainData.put("update_by",userId);
@@ -250,17 +251,6 @@ public class PoControl extends RO {
                 }
                 poLinesService.insertPoLinesAll(sqlSession,jsonArray);
             }
-
-            //状态为1表示提交
-             if( pJson.containsKey("status") &&  "1".equals(pJson.get("status"))){
-                 //获取审批人
-                 long assignerId =  approvalRuleService.getApprovalUser(String.valueOf(userId),"po");
-                 if(assignerId < 0){
-                     return ErrorMsg("提交失败","审批人未配置");
-                 }
-
-                 fndTaskService.savaTask(sqlSession,"po","po",id,userId,assignerId);
-             }
             sqlSession.getConnection().commit();
             return SuccessMsg("创建成功",id);
         } catch (Exception ex){
@@ -327,8 +317,6 @@ public class PoControl extends RO {
     public String updatePoStatusById(@RequestBody JSONObject pJson)throws SQLException{
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
 
-        String taskType = "po";
-
         if(!pJson.containsKey("bill_id")){
             return ErrorMsg("提交失败","id不存在或已删除");
         }
@@ -338,10 +326,8 @@ public class PoControl extends RO {
         int userId = SysContext.getId();
 
         if("1".equals(status)){ //提交
-
-
             //获取审批人
-            long assignerId =  approvalRuleService.getApprovalUser(String.valueOf(userId),taskType);
+            long assignerId =  approvalRuleService.getApprovalUser(String.valueOf(userId),TASK_TYPE_PO);
             if(assignerId < 0){
                 return ErrorMsg("提交失败","审批人未配置");
             }
@@ -351,11 +337,11 @@ public class PoControl extends RO {
             updateMap.put("approval_id",assignerId);
             poHeadersService.updatePoHeadersById(sqlSession,updateMap);//更新审批人
 
-            fndTaskService.savaTask(sqlSession,taskType,taskType,updateId,userId,assignerId);
+            fndTaskService.savaTask(sqlSession,TASK_TYPE_PO,TASK_TYPE_PO,updateId,userId,assignerId);
 
         }else if("2".equals(status)){ //审批
             //更新任务,将待办任务修改为完成状态
-            fndTaskService.completeTask(sqlSession,taskType,updateId);
+            fndTaskService.completeTask(sqlSession,TASK_TYPE_PO,updateId);
         }
 
         try {

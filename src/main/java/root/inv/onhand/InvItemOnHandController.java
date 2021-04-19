@@ -80,8 +80,35 @@ public class InvItemOnHandController extends RO {
     @RequestMapping(value = "/getItemOnHandCategoryByPage", produces = "text/plain;charset=UTF-8")
     public String getItemOnHandCategoryByPage(@RequestBody JSONObject pJson) {
         Map map = invItemOnHandService.getItemOnHandCategoryByPage(pJson);
-        return SuccessMsg("", map);
+        return SuccessMsg(map);
     }
+
+
+    /**
+     * 获取设置
+     * @return
+     */
+    @RequestMapping(value = "/getItemOnHandSettingByOrgIdAndItemId", produces = "text/plain;charset=UTF-8")
+    public String getItemOnHandSettingByOrgIdAndItemId(@RequestBody JSONObject pJson){
+        Map<String,Object> data =  invItemOnHandService.getItemOnHandSettingByOrgIdAndItemId(pJson);
+        if(data == null){
+            return ErrorMsg("2000","数据不存在或已删除");
+        }
+        return SuccessMsg(data);
+    }
+
+    @RequestMapping(value = "/updateItemOnHand", produces = "text/plain;charset=UTF-8")
+    public String updateItemOnHand(@RequestBody JSONObject pJson){
+        boolean boo  = invItemOnHandService.updateItemOnHand(pJson);
+        if(boo){
+            return SuccessMsg("更新成功","");
+        }
+        return ErrorMsg("更新失败");
+    }
+
+
+
+
 
 
 }

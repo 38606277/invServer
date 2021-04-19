@@ -74,9 +74,12 @@ public class FndTaskService {
             billTypeName = "盘点";
             func_url = "/transation/count/edit/" + billId;
         } else if ("po".equals(billType)) {
-            billTypeName = "采购";
+            billTypeName = "采购订单";
             func_url = "/order/po/edit/" + billId;
 
+        }else if("pd".equals(billType)){
+            billTypeName = "生产订单";
+            func_url = "/order/pd/edit/" + billId;
         }
 
         if(billTypeName!=null) {

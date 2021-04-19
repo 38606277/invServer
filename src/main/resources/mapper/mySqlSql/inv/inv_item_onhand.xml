@@ -128,6 +128,10 @@
     </select>
 
 
+    <select id="getItemOnHandSettingByOrgIdAndItemId" resultType="Map" parameterType="Map">
+        select iio.`org_id` ,iio.`item_id` ,iio.`min` ,iio.`max` FROM inv_item_onhand  iio
+        where iio.org_id =#{org_id} and iio.item_id=#{item_id}
+    </select>
 
 
 
