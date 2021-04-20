@@ -137,6 +137,7 @@ public class ItemService {
             mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
             mapVal.put("item_description", jsonObjectVal.getString("item_description"));
             mapVal.put("uom", jsonObjectVal.getString("uom"));
+            mapVal.put("sku", jsonObjectVal.getString("sku"));
             mapVal.put("retail_price", jsonObjectVal.getString("retail_price"));
             mapVal.put("factory_price", jsonObjectVal.getString("factory_price"));
             mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
@@ -236,6 +237,7 @@ public class ItemService {
             mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
             mapVal.put("item_description", jsonObjectVal.getString("item_description"));
             mapVal.put("uom", jsonObjectVal.getString("uom"));
+            mapVal.put("sku", jsonObjectVal.getString("sku"));
             mapVal.put("retail_price", jsonObjectVal.getString("retail_price"));
             mapVal.put("factory_price", jsonObjectVal.getString("factory_price"));
             mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));
@@ -337,6 +339,7 @@ public class ItemService {
                     mapVal.put("item_category_id", jsonObjectVal.getString("item_category_id"));
                     mapVal.put("item_description", jsonObjectVal.getString("item_description"));
                     mapVal.put("uom", jsonObjectVal.getString("uom"));
+                    mapVal.put("sku", jsonObjectVal.getString("sku"));
                     mapVal.put("retail_price", jsonObjectVal.getString("retail_price"));
                     mapVal.put("factory_price", jsonObjectVal.getString("factory_price"));
                     mapVal.put("promotion_price", jsonObjectVal.getString("promotion_price"));

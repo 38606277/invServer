@@ -5,11 +5,12 @@
 
 	<!--  创建func_dict信息  -->
 	<insert id="createMdmItem" parameterType="Map" useGeneratedKeys="true" keyProperty="id">
-		insert into mdm_item(item_id,item_category_id,item_description,uom,segment1,segment2,segment3,
+		insert into mdm_item(item_id,item_category_id,item_description,uom,sku,segment1,segment2,segment3,
 		segment4,segment5,segment6,segment7,segment8,segment9,segment10,attribute1,attribute2,attribute3,attribute4
 		,attribute5,attribute6,attribute7,attribute8,attribute9,attribute10,retail_price,factory_price,promotion_price,
 		cost_price,image_url,bar_code,vendor_id)
 		values (#{item_id},'${item_category_id}','${item_description}','${uom}',
+		<if  test="sku == null">NULL</if> <if  test="sku != null">#{sku}</if>,
 		<if  test="segment1 == null">NULL</if> <if  test="segment1 != null">#{segment1}</if>,
 		<if  test="segment2 == null">NULL</if> <if  test="segment2 != null">#{segment2}</if>,
 		<if  test="segment3 == null">NULL</if> <if  test="segment3 != null">#{segment3}</if>,
@@ -49,6 +50,8 @@
 		<if  test="item_description != null">item_description=#{item_description}</if>,
 		<if  test="uom == null">uom=NULL</if>
 		<if  test="uom != null">uom=#{uom}</if>,
+		<if  test="sku == null">sku=NULL</if>
+		<if  test="sku != null">sku=#{sku}</if>,
 		<if  test="segment1 == null">segment1=NULL</if>
 		<if  test="segment1 != null">segment1=#{segment1}</if>,
 		<if  test="segment2 == null">segment2=NULL</if>
