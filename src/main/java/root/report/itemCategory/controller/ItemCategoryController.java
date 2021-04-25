@@ -184,42 +184,8 @@ public class ItemCategoryController extends RO {
     public String getItemCategoryById2(@RequestBody JSONObject obj) {
         String categoryId = String.valueOf(obj.get("category_id"));
         String segment = String.valueOf(obj.get("segment"));
-
-        Map<String,Object> map  = new HashMap<>();
-        map.put("category_id",categoryId);
-
-        //获取类别对应的segment
-        List<Map> segmentList = itemCategoryService.getItemCategorySegmentByPId(map);
-        List<Map<String,Object>> columnList = new ArrayList<>();
-
-        //生成列结构
-        for(Map segmentItem : segmentList){
-            Map<String,Object> columnMap = new HashMap<>();
-            columnMap.put("title",String.valueOf(segmentItem.get("segment_name")));
-            columnMap.put("dataIndex",String.valueOf(segmentItem.get("segment")));
-
-            if(segment.equals( segmentItem.get("segment"))){
-                //需要查询的segment值
-                List<Map> dictValueList  = mdmDictService.getDictValueListByDictId(String.valueOf(segmentItem.get("dict_id")));
-
-                List<Map<String,Object>> childrenColumnList = new ArrayList<>();
-                for(Map dictValueMap : dictValueList){
-                    Map<String,Object> childrenColumnMap = new HashMap<>();
-                    childrenColumnMap.put("title",String.valueOf(dictValueMap.get("value_name")));
-                    childrenColumnMap.put("dataIndex",String.valueOf(dictValueMap.get("value_name")));
-                    childrenColumnList.add(childrenColumnMap);
-                }
-                columnMap.put("children",childrenColumnList);
-            }
-            columnList.add(columnMap);
-        }
-        try{
-
-            return SuccessMsg("查询成功",columnList);
-        }catch (Exception ex){
-            ex.printStackTrace();
-            return ExceptionMsg(ex.getMessage());
-        }
+        List<Map<String,Object>> columnList = itemCategoryService.getItemCategoryById2(categoryId,segment);
+        return SuccessMsg("查询成功",columnList);
     }
 
     /**
@@ -358,13 +324,78 @@ public class ItemCategoryController extends RO {
         return null;
     }
 
+    /**
+     * 根据pid获取类别
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/getItemCategoryByPid", produces = "text/plain;charset=UTF-8")
+    public String getItemCategoryByPid(@RequestBody JSONObject pJson) {
+        String categoryId =  String.valueOf(pJson.get("category_pid"));
+        List list = itemCategoryService.getItemCategoryByPid(categoryId);
+        return SuccessMsg("", list);
+    }
 
+
+
+    /**
+     * 获取列，传入类别id和需要横排的segment
+     * @param obj
+     * @return
+     */
+    @RequestMapping(value = "/getColumnListByCategoryId", produces = "text/plain;charset=UTF-8")
+    public String getColumnListByCategoryId(@RequestBody JSONObject obj) {
+        String categoryId = String.valueOf(obj.get("category_id"));
+        String segment = String.valueOf(obj.get("segment"));
+
+        Map<String,Object> map  = new HashMap<>();
+        map.put("category_id",categoryId);
+
+        //获取类别对应的segment
+        List<Map> segmentList = itemCategoryService.getItemCategorySegmentByPId(map);
+        List<Map<String,Object>> columnList = new ArrayList<>();
+
+        //生成列结构
+        for(Map segmentItem : segmentList){
+            Map<String,Object> columnMap = new HashMap<>();
+            columnMap.put("title",String.valueOf(segmentItem.get("segment_name")));
+            columnMap.put("dataIndex",String.valueOf(segmentItem.get("segment")));
+
+            if(segment.equals(segmentItem.get("segment"))){
+                //需要查询的segment值
+                List<Map> dictValueList  = mdmDictService.getDictValueListByDictId(String.valueOf(segmentItem.get("dict_id")));
+
+                List<Map<String,Object>> childrenColumnList = new ArrayList<>();
+                for(Map dictValueMap : dictValueList){
+                    Map<String,Object> childrenColumnMap = new HashMap<>();
+                    childrenColumnMap.put("title",String.valueOf(dictValueMap.get("value_name")));
+                    childrenColumnMap.put("dataIndex",String.valueOf(dictValueMap.get("value_name")));
+                    childrenColumnList.add(childrenColumnMap);
+                }
+                columnMap.put("children",childrenColumnList);
+            }
+            columnList.add(columnMap);
+        }
+        try{
+
+            return SuccessMsg("查询成功",columnList);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
+    /**
+     * @param pJson
+     * @return
+     */
     @RequestMapping(value = "/getMKeySegmentByCategoryId", produces = "text/plain;charset=UTF-8")
     public String getMKeySegmentByCategoryId(@RequestBody JSONObject pJson) {
         String categoryId =  String.valueOf(pJson.get("item_category_id"));
         List list = itemCategoryService.getMKeySegmentByCategoryId(categoryId);
         return SuccessMsg("", list);
     }
+
 
 
 }

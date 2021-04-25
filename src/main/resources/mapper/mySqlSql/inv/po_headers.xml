@@ -4,8 +4,8 @@
 <mapper namespace="po_headers">
 
     <insert id="savePoHeader" parameterType="Map" keyColumn="po_header_id" keyProperty="po_header_id" useGeneratedKeys="true">
-        INSERT INTO po_headers( `header_code`, `po_type`, `agent_id`,`vendor_id`,`po_date`,`po_date_end`, `bill_to_location`, `ship_to_location`, `status`, `contract_code`, `contract_name`, `contract_file`, `comments`,`create_date`,`create_by`,`update_by`,`update_date`)
-        VALUES (#{header_code}, #{po_type}, #{agent_id},#{vendor_id},#{po_date},#{po_date_end}, #{bill_to_location}, #{ship_to_location}, #{status}, #{contract_code}, #{contract_name}, #{contract_file}, #{comments},#{create_date},#{create_by},#{update_by},#{update_date});
+        INSERT INTO po_headers( `header_code`, `po_type`, `agent_id`,`vendor_id`,`po_date`,`po_date_end`, `bill_to_location`, `ship_to_location`, `status`, `contract_code`, `contract_name`, `contract_file`, `comments`,`create_date`,`create_by`,`update_by`,`update_date`,`category_id`)
+        VALUES (#{header_code}, #{po_type}, #{agent_id},#{vendor_id},#{po_date},#{po_date_end}, #{bill_to_location}, #{ship_to_location}, #{status}, #{contract_code}, #{contract_name}, #{contract_file}, #{comments},#{create_date},#{create_by},#{update_by},#{update_date},#{category_id});
     </insert>
 
     <update id="updatePoHeaderById" parameterType="Map">
@@ -99,12 +99,14 @@
         fu_agent.USER_NAME as agent_name,
         fu_create.USER_NAME as create_name,
         fu_update.USER_NAME as update_name ,
-        mc.customer_name as vendor_name
+        mc.customer_name as vendor_name,
+        mic.category_name
         FROM po_headers ph
         LEFT JOIN fnd_user fu_agent on ph.agent_id = fu_agent._id -- 采购人
         LEFT JOIN fnd_user fu_create on ph.create_by = fu_create._id -- 创建人
         LEFT JOIN fnd_user fu_update on ph.update_by = fu_update._id -- 更新人
         LEFT JOIN mdm_customers mc on ph.vendor_id = mc.customer_id -- 供应商
+        LEFT JOIN mdm_item_category  mic ON ph.category_id = mic.category_id
         where po_header_id=#{po_header_id}
     </select>
 

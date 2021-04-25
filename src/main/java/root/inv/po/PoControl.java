@@ -16,8 +16,11 @@ import root.report.common.DbSession;
 import root.report.common.RO;
 import root.report.db.DbFactory;
 import root.report.itemCategory.service.ItemCategoryService;
+import root.report.itemCategory.service.ItemService;
+import root.report.mdmDict.service.MdmDictService;
 import root.report.sys.SysContext;
 import root.report.util.DateUtil;
+import root.report.util.StringUtil;
 import root.report.util.UUIDUtil;
 
 import java.io.File;
@@ -51,6 +54,13 @@ public class PoControl extends RO {
 
     @Autowired
     private ApprovalRuleService approvalRuleService;
+
+    @Autowired
+    private ItemService itemService;
+
+    @Autowired
+    public MdmDictService mdmDictService;
+
 
     //查询所有订单
     @RequestMapping(value = "/getPoListByPage", produces = "text/plain;charset=UTF-8")
@@ -359,4 +369,313 @@ public class PoControl extends RO {
         }
     }
 
+
+    /**
+     * 新增事物
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/createPoNew", produces = "text/plain; charset=utf-8")
+    public String createPoNew(@RequestBody JSONObject pJson) throws SQLException{
+        int userId = SysContext.getId();
+
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        try {
+
+            sqlSession.getConnection().setAutoCommit(false);
+            String expendSegment = pJson.getString("expendSegment");
+            JSONObject mainData = pJson.getJSONObject("mainData");
+            mainData.put("create_by",userId);
+            mainData.put("update_by",userId);
+            mainData.put("create_date", DateUtil.getCurrentTimm());
+            mainData.put("update_date", DateUtil.getCurrentTimm());
+
+            String billCode = sqlSession.selectOne("fnd_order_number_setting.getOrderNumber","po_order");
+            mainData.put("header_code", billCode);
+
+            Object categoryId = mainData.get("category_id");
+
+            //保存主数据
+            long id = poHeadersService.savePoHeaders(sqlSession,mainData);
+
+            if(id < 0){
+                return ErrorMsg("2000","创建失败");
+            }
+
+            JSONArray jsonArray = pJson.getJSONArray("linesData");
+            int line_number = 0;
+            //通过货号 查出所有item  segment 列表 用于匹配itemId
+            if(jsonArray !=null && 0 <jsonArray.size()){
+
+                List<Map<String,Object>> lineList = new ArrayList<>();
+
+                for(int i = 0; i < jsonArray.size(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    String priceStr = jsonObject.getString("price");
+                    int price = StringUtil.isEmptyOrNULL(priceStr)? 0: Integer.parseInt(priceStr);
+
+                    String sku = jsonObject.getString("sku");
+                    List<Map<String,Object>> skuItemList =  itemService.getItemBySKU(sku);
+
+                    for(Map<String,Object> skuItem : skuItemList){
+                        Map<String,Object> lineMap = new HashMap<>();
+                        line_number+=1;
+                        lineMap.put("line_number",line_number);
+                        lineMap.put("create_by",userId);
+                        lineMap.put("header_id",id);
+                        lineMap.put("rcv_quantity",0);
+                        lineMap.put("cancel_flag",0);
+                        lineMap.put("category_id",categoryId);
+                        lineMap.put("line_type_id",jsonObject.get("line_type_id"));
+                        lineMap.put("price",priceStr);
+
+                        String itemId = String.valueOf(skuItem.get("item_id"));
+                        String segmentValue = String.valueOf(skuItem.get(expendSegment));
+                        String quantityStr = String.valueOf(jsonObject.get(segmentValue));
+                        int quantity = StringUtil.isEmptyOrNULL(quantityStr)? 0: Integer.parseInt(quantityStr);
+                        lineMap.put("quantity",quantity);
+                        lineMap.put("amount" ,quantity * price);
+                        lineMap.put("item_id",itemId);
+                        lineList.add(lineMap);
+                    }
+
+                }
+                poLinesService.insertPoLinesAll(sqlSession,lineList);
+            }
+            sqlSession.getConnection().commit();
+            return SuccessMsg("创建成功",id);
+        } catch (Exception ex){
+            sqlSession.getConnection().rollback();
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }finally {
+            sqlSession.getConnection().setAutoCommit(true);
+        }
+    }
+
+    //更新
+    @RequestMapping(value = "/updatePoByIdNew", produces = "text/plain;charset=UTF-8")
+    public String updatePoByIdNew(@RequestBody JSONObject pJson)throws SQLException {
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        int userId = SysContext.getId();
+        try {
+            sqlSession.getConnection().setAutoCommit(false);
+
+            String expendSegment = pJson.getString("expendSegment");
+            //更新主实体
+            JSONObject mainData = pJson.getJSONObject("mainData");
+            poHeadersService.updatePoHeadersById(sqlSession,mainData);
+
+            String id = String.valueOf(mainData.get("po_header_id"));
+            Object categoryId = mainData.get("category_id");
+
+            //删除所有的line信息
+            poLinesService.deletePoLinesByHeaderIds(sqlSession,id);
+
+            //重新添加行信息
+            JSONArray jsonArray = pJson.getJSONArray("linesData");
+            int line_number = 0;
+            //通过货号 查出所有item  segment 列表 用于匹配itemId
+            if(jsonArray !=null && 0 <jsonArray.size()){
+
+                List<Map<String,Object>> lineList = new ArrayList<>();
+
+                for(int i = 0; i < jsonArray.size(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    String priceStr = jsonObject.getString("price");
+                    int price = StringUtil.isEmptyOrNULL(priceStr)? 0: Integer.parseInt(priceStr);
+
+                    String sku = jsonObject.getString("sku");
+                    List<Map<String,Object>> skuItemList =  itemService.getItemBySKU(sku);
+
+                    for(Map<String,Object> skuItem : skuItemList){
+                        Map<String,Object> lineMap = new HashMap<>();
+                        line_number+=1;
+                        lineMap.put("line_number",line_number);
+                        lineMap.put("create_by",userId);
+                        lineMap.put("header_id",id);
+                        lineMap.put("rcv_quantity",0);
+                        lineMap.put("cancel_flag",0);
+                        lineMap.put("category_id",categoryId);
+                        lineMap.put("line_type_id",jsonObject.get("line_type_id"));
+                        lineMap.put("price",priceStr);
+
+                        String itemId = String.valueOf(skuItem.get("item_id"));
+                        String segmentValue = String.valueOf(skuItem.get(expendSegment));
+                        String quantityStr = String.valueOf(jsonObject.get(segmentValue));
+                        int quantity = StringUtil.isEmptyOrNULL(quantityStr)? 0: Integer.parseInt(quantityStr);
+                        lineMap.put("quantity",quantity);
+                        lineMap.put("amount" ,quantity * price);
+                        lineMap.put("item_id",itemId);
+                        lineList.add(lineMap);
+                    }
+
+                }
+                poLinesService.insertPoLinesAll(sqlSession,lineList);
+            }
+
+            sqlSession.getConnection().commit();
+            return SuccessMsg("保存成功",mainData.get("po_header_id"));
+        } catch (Exception ex){
+            sqlSession.getConnection().rollback();
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }finally {
+            sqlSession.getConnection().setAutoCommit(true);
+        }
+    }
+
+
+        @RequestMapping(value = "/getPoByIdNew", produces = "text/plain;charset=UTF-8")
+        public String getPoByIdNew(@RequestBody JSONObject obj) {
+            try {
+
+                Map<String, Object> mainData = poHeadersService.getPoHeadersById(obj);
+                if(mainData == null || mainData.isEmpty()){
+                    return ErrorMsg("2000","数据不存在");
+                }
+                String poHeaderId  = String.valueOf(mainData.get("po_header_id"));
+                String categoryId = String.valueOf(mainData.get("category_id"));
+
+                String segment = String.valueOf(obj.get("segment"));
+
+                Map<String,Object> map  = new HashMap<>();
+                map.put("category_id",categoryId);
+
+                Map<String,Object> segmentMap = null;
+                //获取类别对应的segment
+                List<Map> segmentList = itemCategoryService.getItemCategorySegmentByPId(map);
+
+                for(Map segmentItem : segmentList){
+                    if(segment.equals(segmentItem.get("segment"))){
+                        segmentMap = segmentItem;
+                        break;
+                    }
+                }
+
+                //需要查询的segment值
+                List<Map> dictValueList  = mdmDictService.getDictValueListByDictId(String.valueOf(segmentMap.get("dict_id")));
+
+                //拼接语句
+                //拼接需要查询的字段
+                String segmentSql = buildSegmentSql(segmentList,segment);
+                String segmentSqlA = segmentSql.replace("base.","a.");
+                String segmentSqlMI = segmentSql.replace("base.","mi.");
+                String segmentSqlTemp = segmentSql.replace("base.","temp.");
+
+                String[] sumSqlArr = buildSumSql(dictValueList,segment);
+                //统计数量语句
+                String countSql = "SELECT a.sku," + segmentSqlA + "," + sumSqlArr[0] + " FROM (SELECT mi.sku," + segmentSqlMI + "," +sumSqlArr[1] + " FROM "
+                        + " mdm_item mi "
+                        + " INNER JOIN mdm_item_category ic ON mi.item_category_id = ic.category_id "
+                        + " INNER JOIN po_lines pl ON mi.item_id = pl.item_id "
+                        + " WHERE 1 = 1 "
+                        + " AND mi.item_category_id = '" + categoryId +"'"
+                        + " AND pl.header_id = '" + poHeaderId +"'"
+                        + " GROUP BY mi.sku,"
+                        + segmentSqlMI
+                        + ") a"
+                        +" GROUP BY a.sku,"
+                        + segmentSqlA;
+
+                System.out.println("getPoByIdNew - 统计数量语句  " + countSql);
+
+                String selectColumn = "pl.price,pl.remark,temp.sku," + segmentSqlTemp +  "," + buildDictValue(dictValueList);
+
+                String sql = "select " + selectColumn +
+                        " from po_lines pl " +
+                        " LEFT JOIN mdm_item  mi on mi.item_id = pl.item_id " +
+                        " LEFT JOIN ("+ countSql +") temp  on temp.sku = mi.sku " +
+                        " where pl.header_id = " + poHeaderId +
+                        " group by " + selectColumn;
+
+                obj.put("sql",sql);
+
+                List<Map> dataList = DbSession.selectList("po_lines.selectBySQL",obj);
+
+                System.out.println("getPoByIdNew - 结果语句  " + countSql);
+
+                Map<String,Object> resultMap = new HashMap<>();
+                resultMap.put("mainData",mainData);
+                resultMap.put("linesData",dataList);
+
+                List<Map<String,Object>> columnList = itemCategoryService.getItemCategoryById2(categoryId,segment);
+                resultMap.put("columnData",columnList);
+                return SuccessMsg(resultMap);
+            } catch (Exception ex){
+                return ExceptionMsg(ex.getMessage());
+            }
+        }
+
+    /**
+     *
+     * @param segmentList segment列表
+     * @param filterSegment 需要过滤的segment
+     * @return
+     */
+    private String buildSegmentSql( List<Map> segmentList ,String filterSegment){
+        StringBuilder stringBuilder  = new StringBuilder();//
+        for(Map map:segmentList){
+            String segmentName = String.valueOf(map.get("segment"));
+            if(!segmentName.equals(filterSegment)){//过滤掉横向的segment
+                String sql = "base." + segmentName;
+                stringBuilder.append(sql).append(",");
+            }
+        }
+        if(0 < stringBuilder.length()){
+            stringBuilder.delete(stringBuilder.length()-1,stringBuilder.length());
+        }
+        return stringBuilder.toString();
+    }
+
+
+    /**
+     * 构建segment的sum
+     * @param dictValueList
+     * @param segment
+     * @return
+     */
+    private String[] buildSumSql(List<Map> dictValueList , String segment){
+        StringBuilder stringBuilderOut  = new StringBuilder();//外层sum
+        StringBuilder stringBuilderIn  = new StringBuilder();//内存sum
+
+        for(Map map:dictValueList){
+            String valueName = String.valueOf(map.get("value_name"));
+            String sqlOut = "sum( a."+valueName+" ) as "+valueName;
+            stringBuilderOut.append(sqlOut).append(",");
+            String sqlIn = "sum(( CASE mi."+segment+" WHEN '"+valueName+"' THEN pl.quantity ELSE 0 END)) as "+ valueName;
+            stringBuilderIn.append(sqlIn).append(",");
+        }
+
+        //删除最后的逗号
+        if(0 < stringBuilderIn.length()){
+            stringBuilderOut.delete(stringBuilderOut.length()-1,stringBuilderOut.length());
+            stringBuilderIn.delete(stringBuilderIn.length()-1,stringBuilderIn.length());
+        }
+        return new String[]{stringBuilderOut.toString(),stringBuilderIn.toString()};
+
+    }
+
+    /**
+     * 构建字典值字段
+     * @param dictValueList
+     * @return
+     */
+    private String buildDictValue(List<Map> dictValueList){
+        StringBuilder stringBuilderOut  = new StringBuilder();
+
+        for(Map map:dictValueList){
+            String valueName = String.valueOf(map.get("value_name"));
+            String sqlOut = "temp."+ valueName;
+            stringBuilderOut.append(sqlOut).append(",");
+        }
+        //删除最后的逗号
+        if(0 < stringBuilderOut.length()){
+            stringBuilderOut.delete(stringBuilderOut.length()-1,stringBuilderOut.length());
+        }
+        return stringBuilderOut.toString();
+
+    }
 }

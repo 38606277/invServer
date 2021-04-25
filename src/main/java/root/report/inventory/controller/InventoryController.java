@@ -97,7 +97,7 @@ public class InventoryController extends RO {
                     +" GROUP BY "
                     + segmentSqlArr[0];
 
-            System.out.println("getItemCategoryByID2  " + sql);
+            System.out.println("getAllPage2  " + sql);
 
             obj.put("sql",sql);
 

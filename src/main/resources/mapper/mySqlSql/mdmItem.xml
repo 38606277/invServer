@@ -202,4 +202,8 @@
 		<if test="segment10!=null and segment10!='' "> and segment10 like '%${segment10}%' </if>
 	</select>
 
+	<select id="getItemBySKU" parameterType="map" resultType="map">
+		select * from mdm_item where sku = #{sku}
+	</select>
+
 </mapper>

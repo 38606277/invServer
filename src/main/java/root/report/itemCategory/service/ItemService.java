@@ -525,5 +525,17 @@ public class ItemService {
         return map1;
     }
 
+    /**
+     * 通过sku查询 item
+     * @param sku
+     * @return
+     */
+    public List<Map<String,Object>> getItemBySKU(String sku){
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("sku",sku);
+        return  DbFactory.Open(DbFactory.FORM).selectList("mdmItem.getItemBySKU", map);
+    }
+
+
 
 }

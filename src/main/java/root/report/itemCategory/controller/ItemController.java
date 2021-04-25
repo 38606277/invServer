@@ -226,8 +226,10 @@ public class ItemController extends RO {
     }
 
 
+
+
     /**
-     * 快速添加 获取行和列数据
+     * 快速添加 获取行和列数据 通过segment
      * @param pJson
      * @return
      */
@@ -291,6 +293,67 @@ public class ItemController extends RO {
         }
     }
 
+    /**
+     * 快速添加 获取行和列数据 通过sku
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/getItemRowAndColumnBySku", produces = "text/plain;charset=UTF-8")
+    public String getItemRowAndColumnBySku(@RequestBody JSONObject pJson) {
+        try {
+
+            //传入类别id  主信息等
+            String itemCategoryId = pJson.getString("item_category_id");
+            String sku = pJson.getString("sku");
+            if("-1".equals(itemCategoryId) || itemCategoryId == null){
+                return ErrorMsg("2000","物料类别不存在");
+            }
+
+            //获取行和列的segment字段名
+            List<Map> rowAndCol = itemCategoryService.getRowAndColumnByCategoryId(itemCategoryId);
+
+            if(rowAndCol==null || rowAndCol.size() < 2){
+                return ErrorMsg("2000","请配置行和列信息");
+            }
+
+            Map<String,Object> resultMap = new HashMap<>();
+
+            //获取行和列segment对应的字典值
+            for(Map rc :  rowAndCol){
+                String spreadMode =  String.valueOf(rc.get("spread_mode"));//作为键返回
+                String segment = String.valueOf(rc.get("segment"));
+                String segmentName = String.valueOf(rc.get("segment_name"));
+                String segmentDictId = String.valueOf(rc.get("dict_id"));
+                List rcList =  mdmDictService.getDictValueListByDictId(segmentDictId);
+                Map<String,Object> listData = new HashMap<String,Object>();
+                listData.put("segment", segment);
+                listData.put("segmentName", segmentName);
+                listData.put("list", rcList);
+                resultMap.put(spreadMode,listData);
+            }
+
+            //拼接查询条件
+            StringBuilder segmentFilter = new StringBuilder();
+            segmentFilter.append(" where item_category_id = ").append("'").append(itemCategoryId).append("'");
+            segmentFilter.append(" and sku = ").append("'").append(sku).append("'");
+            String selectSqlFormat = "SELECT * from mdm_item %s ";
+            String selectSql = String.format(selectSqlFormat,segmentFilter.toString());
+            System.out.println(selectSql);
+            List itemList =  itemService.paramStringSql(selectSql);
+
+            resultMap.put("itemList",itemList);
+
+            if(itemList.size() < 1){
+                return ErrorMsg("2000","请配置物料信息");
+            }
+
+            return SuccessMsg("", resultMap);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }
+    }
+
 
     /**
      * 通过segment查询item
@@ -302,6 +365,52 @@ public class ItemController extends RO {
         Map<String,Object> result =  itemService.getItemPageBySegment(pJson);
         return SuccessMsg("查询成功",result);
     }
+
+    @RequestMapping(value = "/getColumnListBySKU", produces = "text/plain;charset=UTF-8")
+    public String getItemBySKU(@RequestBody JSONObject pJson) {
+
+        //获取segment 加上 attribute 减去需要展开的segment 加上展开的字典字段
+
+        String itemCategoryId = pJson.getString("item_category_id");
+        String sku = pJson.getString("sku");
+        String segment = pJson.getString("segment");
+
+        List<Map> segmentList  = itemCategoryService.getItemCategorySegmentByCatId(itemCategoryId);
+
+        List<Map> attributeList  = itemCategoryService.getItemCategoryAttributeByCatId(itemCategoryId);
+
+        String sqlBase = "select DISTINCT sku,item_category_id";
+        String whereStr = " from mdm_item where sku like '%"+sku+"%' and item_category_id = '"+itemCategoryId+"'";
+
+
+        StringBuilder stringBase = new StringBuilder();
+        stringBase.append(sqlBase);
+
+        for(Map map :segmentList){
+            String seg= String.valueOf(map.get("segment"));
+            if(!seg.equals(segment)){
+                stringBase.append(",").append(seg);
+            }
+
+        }
+        for(Map map :attributeList){
+            String attr = String.valueOf(map.get("attribute"));
+            if(!attr.equals(segment)){
+                stringBase.append(",").append(attr);
+            }
+        }
+        stringBase.append(whereStr);
+        String sql = stringBase.toString();
+
+        log.debug(sql);
+
+        List<Map> result = itemService.paramStringSql(sql);
+
+
+        return SuccessMsg("查询成功",result);
+    }
+
+
 
 
 

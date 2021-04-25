@@ -25,6 +25,9 @@ public class ItemCategoryService {
     @Autowired
     private MdmDictService mdmDictService;
 
+    @Autowired
+    public ItemCategoryService itemCategoryService;
+
     public Map<String,Object> getAllPage(Map<String,String> map) {
         Map<String,Object> map1=new HashMap<>();
 
@@ -401,6 +404,53 @@ public class ItemCategoryService {
         Map<String,Object> map=new HashMap();
         map.put("category_id",category_id);
         return DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getMKeySegmentByCategoryId",map);
+    }
+
+    public List<Map> getItemCategoryByPid(String category_pid){
+        Map<String,Object> map=new HashMap();
+        map.put("category_pid",category_pid);
+        return DbFactory.Open(DbFactory.FORM).selectList("itemCategory.getItemCategoryByPid",map);
+    }
+
+
+    /**
+     * 返回横排展示的segment
+     * @param categoryId 类别id
+     * @param segment 需要横排的segment
+     * @return
+     */
+    public List<Map<String,Object>> getItemCategoryById2(String categoryId,String segment){
+
+        Map<String,Object> map  = new HashMap<>();
+        map.put("category_id",categoryId);
+
+        //获取类别对应的segment
+        List<Map> segmentList = itemCategoryService.getItemCategorySegmentByPId(map);
+        List<Map<String,Object>> columnList = new ArrayList<>();
+
+        //生成列结构
+        for(Map segmentItem : segmentList){
+            Map<String,Object> columnMap = new HashMap<>();
+            columnMap.put("title",String.valueOf(segmentItem.get("segment_name")));
+            columnMap.put("dataIndex",String.valueOf(segmentItem.get("segment")));
+
+            if(segment.equals( segmentItem.get("segment"))){
+                //需要查询的segment值
+                List<Map> dictValueList  = mdmDictService.getDictValueListByDictId(String.valueOf(segmentItem.get("dict_id")));
+
+                List<Map<String,Object>> childrenColumnList = new ArrayList<>();
+                for(Map dictValueMap : dictValueList){
+                    Map<String,Object> childrenColumnMap = new HashMap<>();
+                    childrenColumnMap.put("title",String.valueOf(dictValueMap.get("value_name")));
+                    childrenColumnMap.put("dataIndex",String.valueOf(dictValueMap.get("value_name")));
+                    childrenColumnList.add(childrenColumnMap);
+                }
+                columnMap.put("children",childrenColumnList);
+            }
+            columnList.add(columnMap);
+        }
+
+        return columnList;
     }
 
 

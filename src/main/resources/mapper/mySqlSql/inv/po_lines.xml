@@ -70,5 +70,9 @@
 
 
 
+    <select id="selectBySQL" resultType="Map" parameterType="Map">
+        ${sql}
+    </select>
+
 </mapper>
 
