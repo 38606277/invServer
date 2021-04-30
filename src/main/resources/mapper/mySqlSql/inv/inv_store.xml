@@ -37,16 +37,21 @@
     </select>
 
     <select id="getStoreById" resultType="Map" parameterType="Map">
-        SELECT ibh.*,
-        fo.org_name as `inv_org_name`,
-        fo2.org_name as `target_inv_org_name`,
-        fu.USER_NAME as `operator_name`,
-        fu2.USER_NAME as `target_operator_name`
-        FROM inv_bill_header ibh
-        LEFT JOIN fnd_org fo on ibh.inv_org_id = fo.org_id
-        LEFT JOIN fnd_org fo2 on ibh.target_inv_org_id = fo2.org_id
-        LEFT JOIN fnd_user fu on ibh.operator = fu._id
-        LEFT JOIN fnd_user fu2 on ibh.target_operator = fu2._id
+        SELECT
+        ibh.*,
+        fo.org_name AS `inv_org_name`,
+        fo2.org_name AS `target_inv_org_name`,
+        fu.USER_NAME AS `operator_name`,
+        fu2.USER_NAME AS `target_operator_name`,
+        (CASE WHEN ibh.source_bill ='po' THEN (SELECT header_code FROM po_headers)
+        WHEN ibh.source_bill ='pd' THEN (SELECT pd_header_code FROM pd_order_header)
+        ELSE '' END) AS op_code
+        FROM
+        inv_bill_header ibh
+        LEFT JOIN fnd_org fo ON ibh.inv_org_id = fo.org_id
+        LEFT JOIN fnd_org fo2 ON ibh.target_inv_org_id = fo2.org_id
+        LEFT JOIN fnd_user fu ON ibh.operator = fu._id
+        LEFT JOIN fnd_user fu2 ON ibh.target_operator = fu2._id
         where bill_id=#{bill_id}
     </select>
 

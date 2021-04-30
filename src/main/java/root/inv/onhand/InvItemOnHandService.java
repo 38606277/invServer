@@ -145,6 +145,22 @@ public class InvItemOnHandService extends BaseService {
         return  DbSession.selectList("inv_item_on_hand.getItemOnHandInventoryItemByOrgIdAndCategoryId",map);
     }
 
+
+
+
+    /**
+     *  查询item存量，条件： 仓库id ,itemId
+     * @param orgId 仓库id
+     * @param itemId itemId
+     * @return 结果
+     */
+    public Map<String,Object> getItemOnHandByItemIdAndOrgId(SqlSession sqlSession,String orgId,String itemId){
+        Map<String,Object> map = new HashMap<>();
+        map.put("org_id",orgId);
+        map.put("item_id",itemId);
+        return  sqlSession.selectOne("inv_item_on_hand.getItemOnHandByItemIdAndOrgId",map);
+    }
+
     /**
      * 查询库存类别
      * @param map

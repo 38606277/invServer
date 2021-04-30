@@ -59,7 +59,7 @@ public class PoControl extends RO {
     private ItemService itemService;
 
     @Autowired
-    public MdmDictService mdmDictService;
+    private MdmDictService mdmDictService;
 
 
     //查询所有订单

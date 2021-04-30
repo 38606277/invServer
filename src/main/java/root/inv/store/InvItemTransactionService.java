@@ -162,6 +162,33 @@ public class InvItemTransactionService {
             invItemOnHandService.saveItemOnHand(sqlSession,onHandResult);
         }
 
+        //检查数量是否达到预警值
+        Map<String,Object> map =  invItemOnHandService.getItemOnHandByItemIdAndOrgId(sqlSession,orgId,itemId);
+        if(map != null ){
+           double on_hand_quantity = StringUtil.objToDouble(map.get("on_hand_quantity"));
+           int max = StringUtil.objToInt(map.get("max"));
+           int min = StringUtil.objToInt(map.get("min"));
+           boolean auto = StringUtil.objToInt(map.get("auto")) == 1;
+
+           if(auto && StringUtil.objToInt(map.get("on_hand_quantity")) < min){
+               //小于预警值，发起补单功能，门店补调拨单，仓库补生成单
+               //需要补单的数量
+               double supplementaryQuantity = max - on_hand_quantity;
+                Map<String,Object> supplementaryMap = new HashMap<>();
+//               supplementaryMap.put("inv_org_id",1);//调出仓库
+//               supplementaryMap.put("target_inv_org_id",1);//调入仓库
+//               supplementaryMap.put("operator",1);//调出盘查人
+//               supplementaryMap.put("target_operator",1);//调入盘查人
+               supplementaryMap.put("remark","补单");
+               supplementaryMap.put("bill_status","0");
+               supplementaryMap.put("bill_date",DateUtil.getCurrentTimm());
+               supplementaryMap.put("bill_type","transfer");
+
+
+
+           }
+        }
+
     }
 
     /**

@@ -78,6 +78,14 @@ public class StringUtil {
 		return isBlank(str) || "null".equals(str)|| "NULL".equals(str);
 	}
 
+	public static int objToInt(Object obj){
+		return isEmptyOrNULL(obj)?0:Integer.parseInt(String.valueOf(obj));
+	}
+	public static double objToDouble(Object obj){
+		return isEmptyOrNULL(obj)?0:Double.parseDouble(String.valueOf(obj));
+	}
+
+
 	public static void main(String[] args) {
 		System.out.println(getLetterIntValue("ab"));
 		int size = getLetterIntValue("AA")-getLetterIntValue("A")+1;

@@ -194,7 +194,7 @@ public class StoreControl extends RO {
             invBillLineService.saveOrUpdateBillLinesList(sqlSession,jsonArray);
 
             sqlSession.getConnection().commit();
-            return SuccessMsg("创建成功",mainData.get("bill_id"));
+            return SuccessMsg("保存成功",mainData.get("bill_id"));
         } catch (Exception ex){
             sqlSession.getConnection().rollback();
             ex.printStackTrace();
@@ -206,12 +206,92 @@ public class StoreControl extends RO {
 
 
     /**
-     * 新增事物
+     * 新增
      * @param pJson
      * @return
      */
     @RequestMapping(value = "/createStore", produces = "text/plain; charset=utf-8")
     public String createStore(@RequestBody JSONObject pJson) throws SQLException{
+        int userId = SysContext.getId();
+        SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
+        try {
+
+            sqlSession.getConnection().setAutoCommit(false);
+
+            JSONObject mainData = pJson.getJSONObject("mainData");
+            mainData.put("create_by",userId);
+
+            //保存主数据
+            long billId = storeService.createStore(sqlSession,mainData);
+
+            if(billId < 0){
+                return ErrorMsg("2000","创建失败");
+            }
+
+            String billType = mainData.getString("bill_type");
+            String invOrgId =  mainData.getString("inv_org_id");
+            String targetInvOrgId =  mainData.getString("target_inv_org_id");
+
+            List jsonArray = pJson.getJSONArray("linesData");
+
+            //盘点的行信息可能需要额外查询
+            if("count".equals(billType)){
+                String inventoryType =  mainData.getString("inventory_type");
+                Map<String,Object>   inventoryItemMap = new HashMap<>();
+                inventoryItemMap.put("org_id",invOrgId);
+                if("all".equals(inventoryType)){ // 全库盘查
+                    jsonArray = invItemOnHandService.getItemOnHandInventoryItemByOrgId(inventoryItemMap);
+                }else if("single".equals(inventoryType)){
+                    inventoryItemMap.put("item_category_id",mainData.getString("item_category_id"));
+                    jsonArray = invItemOnHandService.getItemOnHandInventoryItemByOrgIdAndCategoryId(inventoryItemMap);
+                }
+            }
+
+            for(int i = 0; i < jsonArray.size(); i++){
+                JSONObject jsonObject;
+                Object obj = jsonArray.get(i);
+                if(obj instanceof JSONObject){
+                    jsonObject = (JSONObject)jsonArray.get(i);
+                }else {
+                    jsonObject = new JSONObject((Map<String, Object>) jsonArray.get(i));
+                }
+                jsonObject.put("line_number",i);
+                jsonObject.put("create_by",userId);
+                jsonObject.put("header_id",billId);
+                jsonObject.put("create_date", DateUtil.getCurrentTimm());
+
+                jsonObject.put("source_id", mainData.get("source_id"));
+                jsonObject.put("source_system",mainData.get("source_system"));
+                jsonObject.put("source_voucher",mainData.get("source_bill"));
+
+            }
+            boolean isLinesSaveSuccess = invBillLineService.insertBillLinesAll(sqlSession,jsonArray);
+
+            if(!isLinesSaveSuccess){
+                sqlSession.getConnection().commit();
+                return  ErrorMsg("2000","行数据保存失败");
+            }
+
+            sqlSession.getConnection().commit();
+            return SuccessMsg("创建成功",billId);
+        } catch (Exception ex){
+            sqlSession.getConnection().rollback();
+            ex.printStackTrace();
+            return ExceptionMsg(ex.getMessage());
+        }finally {
+            sqlSession.getConnection().setAutoCommit(true);
+        }
+    }
+
+
+
+
+    /**
+     * @param pJson
+     * @return
+     */
+    @RequestMapping(value = "/createStore_old", produces = "text/plain; charset=utf-8")
+    public String createStore_old(@RequestBody JSONObject pJson) throws SQLException{
         int userId = SysContext.getId();
         SqlSession sqlSession =  DbFactory.Open(DbFactory.FORM);
         try {
@@ -472,10 +552,6 @@ public class StoreControl extends RO {
             sqlSession.getConnection().setAutoCommit(true);
         }
     }
-
-
-
-
 
 
 
